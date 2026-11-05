@@ -315,6 +315,13 @@ func TestAuditFixes(t *testing.T) {
 			t.Errorf("compared an incomplete part number: %+v", c)
 		}
 	}
+	// A complete one in the device tree is compared with lockdown's.
+	for region, want := range map[string]Status{"CH/A": Pass, "LL/A": Fail} {
+		raw.PlatformReg = map[string]any{"model-number": []byte("MLTE3\x00"), "region-info": []byte(region + "\x00")}
+		if c := find(t, Analyze(raw, now, "zh-Hans"), "型号一致性"); c.Status != want {
+			t.Errorf("device tree region %s: %+v, want %v", region, c, want)
+		}
+	}
 
 	// The app list unread: no clean bill for jailbreaks.
 	raw = sampleRaw()

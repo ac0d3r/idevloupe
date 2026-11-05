@@ -511,13 +511,7 @@ func (a *App) batteryTab(c *ui.Context, r *inspect.Report) {
 			hc = ch
 		}
 	}
-	health := b.HealthPercent
-	switch {
-	case b.SystemHealth > 0:
-		health = float64(b.SystemHealth)
-	case b.LogHealth > 0:
-		health = float64(b.LogHealth)
-	}
+	health := b.Health()
 	ui.Row(c).Gap(16).AlignItems(ui.Start).Children(func() {
 		card(c).Width(300).Padding(20).Gap(10).Children(func() {
 			muted(c, m.BatteryHealthMax()).FontSize(13)

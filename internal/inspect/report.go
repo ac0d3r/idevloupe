@@ -117,6 +117,19 @@ type Battery struct {
 	LogNote          string // why there is no log value, when there is none
 }
 
+// Health is the health the report goes by: the maximum capacity iOS
+// reports (the gas gauge's, else the analytics log's), else the one
+// computed from the capacities.
+func (b *Battery) Health() float64 {
+	switch {
+	case b.SystemHealth > 0:
+		return float64(b.SystemHealth)
+	case b.LogHealth > 0:
+		return float64(b.LogHealth)
+	}
+	return b.HealthPercent
+}
+
 // Summary is the header of the report.
 type Summary struct {
 	DeviceName  string
