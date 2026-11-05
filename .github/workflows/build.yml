@@ -33,13 +33,16 @@ jobs:
             exit 1
           fi
       - run: make dist
+      # Names without the version, so that the download page links to
+      # releases/latest/download/<name> once for every release.
       - name: Collect packages
         run: |
           mkdir dist
-          cp build/darwin-universal/*.dmg dist/
+          cp build/darwin-universal/*.dmg dist/idevloupe-macos.dmg
           for arch in amd64 arm64; do
             cp "build/windows-$arch/iDevLoupe.exe" "dist/idevloupe-windows-$arch.exe"
-            cp build/linux-$arch/*.deb build/linux-$arch/*.tar.gz dist/
+            cp build/linux-$arch/*.deb "dist/idevloupe-linux-$arch.deb"
+            cp build/linux-$arch/*.tar.gz "dist/idevloupe-linux-$arch.tar.gz"
           done
           (cd dist && shasum -a 256 * > SHA256SUMS)
           ls -l dist

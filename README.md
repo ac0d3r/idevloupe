@@ -30,6 +30,13 @@ Linux 可执行文件、`.deb`、`.tar.gz`、PKGBUILD。配置在 `mygo.json`，
   上传为 artifact；推 `vX.Y.Z` 标签时（须与 `mygo.json` 的 `version` 一致）另发布 GitHub Release，
   附 `.dmg`、Windows `.exe`、`.deb`、`.tar.gz` 与 `SHA256SUMS`。安装包未签名 / 公证。
 
+## 下载页
+
+`docs/` 是一个静态下载页（`index.html` 单文件，中 / 英 / 德，按访客系统推荐安装包），
+在仓库 Settings → Pages 选 `main` 分支的 `/docs` 即可发布。下载链接指向
+`releases/latest/download/<文件名>`，因此 Build 发布的文件名不带版本号。
+截图来自测试中的虚构设备，`make screenshots` 重新生成。
+
 ## 多语言
 
 支持简体中文、English、Deutsch。默认跟随系统语言，侧边栏底部可切换，选择会被记住；
