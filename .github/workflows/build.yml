@@ -1,0 +1,66 @@
+name: Build
+
+# Packages every platform on macOS, the one runner that makes all of them
+# (the .dmg needs hdiutil). Pushes to main keep the packages as artifacts;
+# a tag vX.Y.Z, whose version must be mygo.json's, publishes a release.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GOWORK: "off"
+  CGO_ENABLED: "0"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Tag matches mygo.json
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          want="v$(jq -r .version mygo.json)"
+          if [ "$GITHUB_REF_NAME" != "$want" ]; then
+            echo "::error::tag $GITHUB_REF_NAME, but mygo.json says $want"
+            exit 1
+          fi
+      - run: make dist
+      - name: Collect packages
+        run: |
+          mkdir dist
+          cp build/darwin-universal/*.dmg dist/
+          for arch in amd64 arm64; do
+            cp "build/windows-$arch/iDevLoupe.exe" "dist/idevloupe-windows-$arch.exe"
+            cp build/linux-$arch/*.deb build/linux-$arch/*.tar.gz dist/
+          done
+          (cd dist && shasum -a 256 * > SHA256SUMS)
+          ls -l dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: idevloupe-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: idevloupe-${{ github.sha }}
+          path: dist
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes

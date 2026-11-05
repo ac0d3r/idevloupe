@@ -31,3 +31,10 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Packages (make build / make dist) and the release staging of CI
+build/
+dist/
+
+# macOS
+.DS_Store
