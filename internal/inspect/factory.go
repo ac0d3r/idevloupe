@@ -160,11 +160,7 @@ func PartDate(serial string, now time.Time) (time.Time, bool) {
 	if !ok1 || !ok2 || !ok3 || !ok4 || week < 1 || week > 53 || d < 1 || d > 7 {
 		return time.Time{}, false
 	}
-	year := now.Year() - (now.Year()-y)%10
-	// ISO week 1 is the week with January 4th in it.
-	jan4 := time.Date(year, 1, 4, 0, 0, 0, 0, time.UTC)
-	monday := jan4.AddDate(0, 0, -((int(jan4.Weekday()) + 6) % 7))
-	date := monday.AddDate(0, 0, (week-1)*7+d-1)
+	date := isoDate(now.Year()-(now.Year()-y)%10, week, d)
 	if date.After(now) {
 		return time.Time{}, false
 	}

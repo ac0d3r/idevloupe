@@ -416,5 +416,12 @@
   "fieldCellularAddress": "蜂窝地址",
   "checkAddressesFactory": "网络地址与出厂记录",
   "addressMismatchDetail": "可能更换过主板或无线模块，或地址被改写",
-  "factoryScreenMatchDetail": "屏幕序列号常在维修时被写入新屏，一致不足以说明屏幕未换；请在 设置 > 通用 > 关于本机 > 部件与维修历史 中或通过原彩显示等人工核对"
+  "factoryScreenMatchDetail": "屏幕序列号常在维修时被写入新屏，一致不足以说明屏幕未换；请在 设置 > 通用 > 关于本机 > 部件与维修历史 中或通过原彩显示等人工核对",
+  "checkPartDates": "部件生产日期",
+  "partsNewer": "{count, number, ::group-off} 个部件晚于整机生产",
+  "deviceMadeOn": "整机约 {date} 生产",
+  "partsNewerDetail": "出厂时装的部件不会晚于整机生产，这些部件是后来换上的；是否为原厂件无法从数据判断",
+  "partsNotNewer": "未发现晚于整机生产的部件",
+  "partsNotNewerDetail": "按序列号推算，{count, number, ::group-off} 个部件均早于整机（约 {date}）生产；从旧机拆下的部件无法据此发现",
+  "batteryNewer": "电池序列号推算约 {made} 生产，晚于整机（约 {device}），是后来换上的"
 }

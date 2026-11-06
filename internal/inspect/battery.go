@@ -213,6 +213,11 @@ func (a *analysis) batterySource(b *Battery, overCap bool) {
 	if b.HasLogCycles && b.HasCycleCount && !b.CyclesFromLog && b.LogCycles > b.CycleCount+2 {
 		strong = append(strong, m.BatteryLogCyclesHigher(b.LogDate.Format("2006-01-02"), int(b.LogCycles), int(b.CycleCount)))
 	}
+	// A battery made after the device was fitted later.
+	if newer, _ := a.partsNewer(map[string]string{"battery": b.Serial}); len(newer) > 0 {
+		device, _ := a.deviceMade()
+		strong = append(strong, m.BatteryNewer(newer[0].made.Format("2006-01-02"), device.Format("2006-01-02")))
+	}
 	if mfg != nil && b.HasCycleCount {
 		made := time.Date(mfg.Year, 1, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 0, (mfg.Week-1)*7)
 		if age := now.Sub(made); age > 548*24*time.Hour && b.CycleCount < 50 {

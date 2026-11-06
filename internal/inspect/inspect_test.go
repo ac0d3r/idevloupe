@@ -982,3 +982,61 @@ func TestAddressesAndColors(t *testing.T) {
 		}
 	}
 }
+
+// A part made after the device was fitted later, which needs no factory
+// record: an iPhone 12 (iOS 27, no SysCfg) made in week 43 of 2021 with a
+// battery its serial dates to October 2025. Serials keep the real ones'
+// form, dates included, with made-up tails.
+func TestPartDates(t *testing.T) {
+	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
+	raw := &RawData{
+		Root:       map[string]any{"ProductType": "iPhone13,2", "SerialNumber": "DNPGL1CQAAAA", "MLBSerialNumber": "F3Y143400AAAAAAA"},
+		Domains:    map[string]map[string]any{},
+		BatteryReg: map[string]any{"Serial": "B055422LAAAAAAAAA", "DesignCapacity": uint64(2798), "NominalChargeCapacity": uint64(2790), "CycleCount": uint64(300)},
+		GestaltErr: services.ErrGestaltDeprecated,
+		Parts: map[string]map[string]any{
+			"camera":  {"BackCameraModuleSerialNumString": "F6D14120AAAAAAAAA", "FrontIRStructuredLightProjectorSerialNumString": "F8P13511AAAAAAAAA"},
+			"product": {"coverglass-serial-number": "FXR11350AAAAAAAAA+0B0772", "raw-panel-serial-number": "G9P1236BAAAAAAAAA+A100+FXR11350AAAAAAAAA"},
+		},
+	}
+	checks := func() map[string]Check {
+		got := map[string]Check{}
+		for _, c := range Analyze(raw, now, "zh-Hans").Checks {
+			got[c.Title] = c
+		}
+		return got
+	}
+	got := checks()
+	// Only the battery is newer, weighed as the battery's origin; the other
+	// parts are older than the device.
+	if c := got["电池来源"]; c.Status != Warn || !strings.Contains(c.Detail, "约 2025-10-14 生产，晚于整机（约 2021-10-31）") {
+		t.Errorf("battery origin %+v", c)
+	}
+	if c := got["部件生产日期"]; c.Status != Pass || !strings.Contains(c.Detail, "4 个部件均早于整机（约 2021-10-31）") {
+		t.Errorf("part dates %+v", c)
+	}
+
+	// A new screen: its panel made in 2024.
+	raw.Parts["product"]["raw-panel-serial-number"] = "G9P4101BAAAAAAAAA+A100"
+	if c := checks()["部件生产日期"]; c.Status != Warn || !strings.Contains(c.Detail, "屏幕面板：G9P4101BAAAAAAAAA（约 2024-03-04 生产）") ||
+		!strings.Contains(c.Value, "1 个部件") {
+		t.Errorf("a newer panel %+v", c)
+	}
+	// Within the margin: a part dated a week after the device is not newer.
+	raw.Parts["product"]["raw-panel-serial-number"] = "G9P1446BAAAAAAAAA"
+	if c := checks()["部件生产日期"]; c.Status != Pass {
+		t.Errorf("a part within the margin %+v", c)
+	}
+	// With a factory record, the comparison with it stands for the parts
+	// that are not newer.
+	raw.SysCfg = map[string][]byte{"SrNm": []byte("DNPGL1CQAAAA")}
+	if _, ok := checks()["部件生产日期"]; ok {
+		t.Error("a part date check beside the factory record")
+	}
+	// A random serial and a board serial that tells no date: no device date.
+	raw.SysCfg = nil
+	raw.Root["SerialNumber"], raw.Root["MLBSerialNumber"] = "H4K2L9QXWT", ""
+	if _, ok := checks()["部件生产日期"]; ok {
+		t.Error("a part date check without the device's date")
+	}
+}

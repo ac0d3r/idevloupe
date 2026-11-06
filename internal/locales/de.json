@@ -416,5 +416,12 @@
   "fieldCellularAddress": "Mobilfunkadresse",
   "checkAddressesFactory": "Netzwerkadressen vs. Werksdaten",
   "addressMismatchDetail": "Logikplatine oder Funkmodul wurden möglicherweise ersetzt oder die Adresse überschrieben",
-  "factoryScreenMatchDetail": "Die Seriennummer eines Displays wird bei Reparaturen oft auf das neue geschrieben; Übereinstimmung zeigt nicht, dass das Display nie ersetzt wurde; bitte unter Einstellungen > Allgemein > Info > Teile- und Servicehistorie oder über True Tone selbst prüfen"
+  "factoryScreenMatchDetail": "Die Seriennummer eines Displays wird bei Reparaturen oft auf das neue geschrieben; Übereinstimmung zeigt nicht, dass das Display nie ersetzt wurde; bitte unter Einstellungen > Allgemein > Info > Teile- und Servicehistorie oder über True Tone selbst prüfen",
+  "checkPartDates": "Herstellungsdaten der Bauteile",
+  "partsNewer": "{count, plural, one {# Teil nach dem Gerät hergestellt} other {# Teile nach dem Gerät hergestellt}}",
+  "deviceMadeOn": "Das Gerät wurde etwa {date} hergestellt",
+  "partsNewerDetail": "Ein ab Werk verbautes Teil kann nicht neuer als das Gerät sein, diese wurden also später eingebaut; ob sie original sind, lässt sich aus den Daten nicht sagen",
+  "partsNotNewer": "Keines nach dem Gerät hergestellt",
+  "partsNotNewerDetail": "Laut Seriennummern {count, plural, one {wurde # Teil} other {wurden # Teile}} vor dem Gerät (etwa {date}) hergestellt; ein Teil aus einem älteren Gerät lässt sich so nicht erkennen",
+  "batteryNewer": "laut Seriennummer wurde die Batterie etwa {made} hergestellt, nach dem Gerät (etwa {device}), sie wurde also später eingebaut"
 }

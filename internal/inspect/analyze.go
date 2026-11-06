@@ -26,6 +26,7 @@ func Analyze(raw *RawData, now time.Time, lang string) *Report {
 	a.faceID()
 	a.touchID()
 	a.factory()
+	a.partDates()
 	a.other()
 
 	r := a.r

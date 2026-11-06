@@ -4258,3 +4258,77 @@ func FactoryScreenMatchDetail() string { return In(i18n.Locale()).FactoryScreenM
 func (msgs Messages) FactoryScreenMatchDetail() string {
 	return Catalog.Format(msgs.locale, "factoryScreenMatchDetail", nil)
 }
+
+// CheckPartDates says "Parts' manufacture dates"
+// in the language the app shows.
+func CheckPartDates() string { return In(i18n.Locale()).CheckPartDates() }
+
+// CheckPartDates says "Parts' manufacture dates"
+// in the language of msgs.
+func (msgs Messages) CheckPartDates() string {
+	return Catalog.Format(msgs.locale, "checkPartDates", nil)
+}
+
+// PartsNewer says "{count, plural, one {# part made after the device} other {# parts made after the device}}"
+// in the language the app shows.
+func PartsNewer(count int) string { return In(i18n.Locale()).PartsNewer(count) }
+
+// PartsNewer says "{count, plural, one {# part made after the device} other {# parts made after the device}}"
+// in the language of msgs.
+func (msgs Messages) PartsNewer(count int) string {
+	return Catalog.Format(msgs.locale, "partsNewer", map[string]any{"count": count})
+}
+
+// DeviceMadeOn says "The device was made about {date}"
+// in the language the app shows.
+func DeviceMadeOn(date string) string { return In(i18n.Locale()).DeviceMadeOn(date) }
+
+// DeviceMadeOn says "The device was made about {date}"
+// in the language of msgs.
+func (msgs Messages) DeviceMadeOn(date string) string {
+	return Catalog.Format(msgs.locale, "deviceMadeOn", map[string]any{"date": date})
+}
+
+// PartsNewerDetail says "A part fitted at the factory cannot be newer than the device, so these were fitted later; whether they are genuine ca…"
+// in the language the app shows.
+func PartsNewerDetail() string { return In(i18n.Locale()).PartsNewerDetail() }
+
+// PartsNewerDetail says "A part fitted at the factory cannot be newer than the device, so these were fitted later; whether they are genuine ca…"
+// in the language of msgs.
+func (msgs Messages) PartsNewerDetail() string {
+	return Catalog.Format(msgs.locale, "partsNewerDetail", nil)
+}
+
+// PartsNotNewer says "None made after the device"
+// in the language the app shows.
+func PartsNotNewer() string { return In(i18n.Locale()).PartsNotNewer() }
+
+// PartsNotNewer says "None made after the device"
+// in the language of msgs.
+func (msgs Messages) PartsNotNewer() string {
+	return Catalog.Format(msgs.locale, "partsNotNewer", nil)
+}
+
+// PartsNotNewerDetail says "By their serial numbers, {count, plural, one {# part was} other {# parts were}} made before the device (about {date})…"
+// in the language the app shows.
+func PartsNotNewerDetail(count int, date string) string {
+	return In(i18n.Locale()).PartsNotNewerDetail(count, date)
+}
+
+// PartsNotNewerDetail says "By their serial numbers, {count, plural, one {# part was} other {# parts were}} made before the device (about {date})…"
+// in the language of msgs.
+func (msgs Messages) PartsNotNewerDetail(count int, date string) string {
+	return Catalog.Format(msgs.locale, "partsNotNewerDetail", map[string]any{"count": count, "date": date})
+}
+
+// BatteryNewer says "the battery's serial number dates it to about {made}, after the device (about {device}), so it was fitted later"
+// in the language the app shows.
+func BatteryNewer(made string, device string) string {
+	return In(i18n.Locale()).BatteryNewer(made, device)
+}
+
+// BatteryNewer says "the battery's serial number dates it to about {made}, after the device (about {device}), so it was fitted later"
+// in the language of msgs.
+func (msgs Messages) BatteryNewer(made string, device string) string {
+	return Catalog.Format(msgs.locale, "batteryNewer", map[string]any{"made": made, "device": device})
+}
