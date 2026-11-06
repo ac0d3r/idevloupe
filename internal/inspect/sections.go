@@ -1,6 +1,7 @@
 package inspect
 
 import (
+	"cmp"
 	"fmt"
 	"sort"
 	"strconv"
@@ -14,6 +15,7 @@ import (
 // buildSections lays out the device information.
 func buildSections(m locales.Messages, v view, s Summary) []Section {
 	var secs []Section
+	front, back := v.colors()
 	sec := func(title string, fields ...Field) {
 		var keep []Field
 		for _, f := range fields {
@@ -56,8 +58,9 @@ func buildSections(m locales.Messages, v view, s Summary) []Section {
 		Field{m.FieldBoardModel(), v.str("HardwareModel")},
 		Field{m.FieldChip(), chip},
 		Field{m.FieldCPUArchitecture(), v.str("CPUArchitecture")},
-		Field{m.FieldColor(), v.str("DeviceColor")},
-		Field{m.FieldEnclosureColor(), v.str("DeviceEnclosureColor")},
+		Field{m.FieldColor(), colorText(m, s.ProductType, front, true)},
+		Field{m.FieldEnclosureColor(), colorText(m, s.ProductType, back, false)},
+		Field{m.FieldRegulatoryModel(), cmp.Or(v.platformStr("regulatory-model-number"), v.sysText("RMd#"))},
 		Field{m.CheckStorage(), storage},
 		Field{m.FieldAvailable(), diskFree},
 	)
@@ -72,6 +75,7 @@ func buildSections(m locales.Messages, v view, s Summary) []Section {
 		Field{m.FieldBoardSerial(), v.str("MLBSerialNumber")},
 		Field{m.FieldWiFiAddress(), v.str("WiFiAddress")},
 		Field{m.FieldBluetoothAddress(), v.str("BluetoothAddress")},
+		Field{m.FieldCellularAddress(), v.str("EthernetAddress")},
 	)
 	sec(m.SectionSystem(),
 		Field{m.FieldIOSVersion(), s.IOS},
@@ -131,6 +135,13 @@ func buildRaw(lang string, raw *RawData) []RawGroup {
 	group("IORegistry · "+m.RawBattery(), raw.BatteryReg)
 	group("IORegistry · "+m.RawPlatform(), raw.PlatformReg)
 	group("MobileGestalt", raw.Gestalt)
+	if len(raw.SysCfg) > 0 {
+		vals := make(map[string]any, len(raw.SysCfg))
+		for k, v := range raw.SysCfg {
+			vals[k] = v
+		}
+		group("SysCfg", vals)
+	}
 	group("diagnostics · All", raw.DiagAll)
 	partKeys := make([]string, 0, len(raw.Parts))
 	for k := range raw.Parts {

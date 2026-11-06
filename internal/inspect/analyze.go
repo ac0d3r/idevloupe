@@ -1,6 +1,7 @@
 package inspect
 
 import (
+	"cmp"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -24,6 +25,7 @@ func Analyze(raw *RawData, now time.Time, lang string) *Report {
 	a.battery()
 	a.faceID()
 	a.touchID()
+	a.factory()
 	a.other()
 
 	r := a.r
@@ -105,10 +107,9 @@ func (a *analysis) summary() {
 	if n, ok := v.domainNum("com.apple.disk_usage", "TotalDiskCapacity"); ok && n > 0 {
 		s.Capacity = NominalCapacity(n)
 	}
-	s.Color = v.str("DeviceEnclosureColor")
-	if s.Color == "" {
-		s.Color = v.str("DeviceColor")
-	}
+	front, back := v.colors()
+	s.Color = cmp.Or(back, front)
+	s.ColorName = colorName(a.m, a.productType, back, false)
 	if strings.HasPrefix(s.Color, "#") && len(s.Color) == 7 {
 		s.ColorHex = s.Color
 	}
@@ -270,6 +271,7 @@ func (a *analysis) identity() {
 		{"lockdown", serial},
 		{deviceTree, v.platformStr("IOPlatformSerialNumber", "serial-number")},
 		{"MobileGestalt", v.gestaltStr("SerialNumber")},
+		{"SysCfg", v.sysText("SrNm")},
 	})
 	// A part number is model and region; a source missing either has no
 	// complete value to compare.
@@ -283,13 +285,16 @@ func (a *analysis) identity() {
 		{"lockdown", partNumber(a.modelNumber, a.regionInfo)},
 		{deviceTree, partNumber(v.platformStr("model-number"), v.platformStr("region-info"))},
 		{"MobileGestalt", partNumber(v.gestaltStr("ModelNumber"), v.gestaltStr("RegionInfo"))},
+		{"SysCfg", partNumber(v.sysText("Mod#"), v.sysText("Regn"))},
 	})
 	if mlb := v.str("MLBSerialNumber"); mlb != "" {
 		consistency(m.CheckBoardSerialConsistency(), []src{
 			{"lockdown", mlb},
 			{deviceTree, v.platformStr("mlb-serial-number")},
+			{"SysCfg", v.sysText("MLB#")},
 		})
 	}
+	a.addresses()
 
 	if a.telephony {
 		checkIMEI := func(title, val string) {

@@ -1,6 +1,7 @@
 package inspect
 
 import (
+	"encoding/hex"
 	"errors"
 	"maps"
 	"strings"
@@ -412,7 +413,7 @@ func TestPartsFromRealIPhoneX(t *testing.T) {
 			t.Errorf("%s = %q, want %q", k, got[k], v)
 		}
 	}
-	if !strings.Contains(got["说明"], "不能据此判断") {
+	if !strings.Contains(got["说明"], "与出厂记录") || !strings.Contains(got["说明"], "读不到时") {
 		t.Error("parts section lacks its caveat")
 	}
 }
@@ -750,5 +751,234 @@ func TestOverviewFindMyFromNVRAM(t *testing.T) {
 	}
 	if check.Status != Warn || got == "" || got != check.Value {
 		t.Errorf("overview %q, report %+v", got, check)
+	}
+}
+
+// sysCfg builds a factory configuration of text values.
+func sysCfg(vals map[string]string) map[string][]byte {
+	out := map[string][]byte{}
+	for k, v := range vals {
+		out[k] = []byte(v)
+	}
+	return out
+}
+
+// The factory record against the parts, as on an iPhone 8 whose front
+// camera, panel and glass were replaced and an iPhone X whose record all
+// matches. Serials keep the real ones' form, dates included, with made-up
+// tails.
+func TestFactoryRecord(t *testing.T) {
+	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
+	raw := &RawData{
+		Root: map[string]any{"ProductType": "iPhone10,1", "SerialNumber": "FFNZMYBEAAAA", "ModelNumber": "MQ722", "RegionInfo": "LL/A",
+			"MLBSerialNumber": "FG394410AAAAAAAAA", "DeviceClass": "iPhone"},
+		Domains:    map[string]map[string]any{},
+		BatteryReg: map[string]any{"Serial": "FG99425SAAAAAAAAA", "DesignCapacity": uint64(1810), "NominalChargeCapacity": uint64(1539)},
+		Gestalt:    map[string]any{},
+		Parts: map[string]map[string]any{
+			"camera": {"BackCameraModuleSerialNumString": "GCF94251AAAAAAAAA", "FrontCameraModuleSerialNumString": "F0W91630BBBBBBBBB"},
+			"product": {"raw-panel-serial-number": "FVQ9037BBBBBBBBBB+T326M9J1+C716828C+M8C81LLK",
+				"coverglass-serial-number": "FXN85033BBBBBBBBB+0101414578"},
+			"touchid": {"SerialNumber": []byte{0x02, 0x17, 0x10, 0x6c, 0x60, 0x80, 0x85, 0x29, 0x3b, 0x5a, 0x13, 0x69, 0x06, 0x02, 0x00, 0xd5}},
+		},
+		SysCfg: sysCfg(map[string]string{
+			"SrNm": "FFNZMYBEAAAA", "Mod#": "MQ722", "Regn": "LL/A", "MLB#": "FG394410AAAAAAAAA",
+			"Batt": "FG99425SAAAAAAAAA\x00", "BCMS": "GCF94251AAAAAAAAA", "FCMS": "F0W94170AAAAAAAAA",
+			"LCM#": "DKH94342AAAAAAAAA+S12657P0+R270819A+M9A41UBL", "MtSN": "FXR93575AAAAAAAAA+0102313980",
+		}),
+	}
+	raw.SysCfg["NSrN"] = []byte{0x01, 0, 0, 0, 0x6c, 0x10, 0x17, 0x02, 0x29, 0x85, 0x80, 0x60, 0x69, 0x13, 0x5a, 0x3b, 0xd5, 0x00, 0x02, 0x06}
+	got := map[string]Check{}
+	for _, c := range Analyze(raw, now, "zh-Hans").Checks {
+		got[c.Title] = c
+	}
+	for title, want := range map[string]Status{
+		"电池与出厂记录": Pass, "后置广角摄像头与出厂记录": Pass, "指纹传感器与出厂记录": Pass,
+		"前置摄像头与出厂记录": Warn, "屏幕面板与出厂记录": Warn, "屏幕盖板与出厂记录": Warn,
+		"序列号一致性": Pass, "型号一致性": Pass, "主板序列号一致性": Pass,
+	} {
+		if c, ok := got[title]; !ok || c.Status != want {
+			t.Errorf("%s: %+v, want %v", title, c, want)
+		}
+	}
+	front := got["前置摄像头与出厂记录"]
+	for _, w := range []string{"F0W94170AAAAAAAAA（约 2019-10-13 生产）", "F0W91630BBBBBBBBB（约 2019-04-17 生产）", "可能更换过"} {
+		if !strings.Contains(front.Detail, w) {
+			t.Errorf("front camera detail lacks %q: %s", w, front.Detail)
+		}
+	}
+	// A match says what it does not prove.
+	if d := got["电池与出厂记录"].Detail; !strings.Contains(d, "一致不能证明未更换") {
+		t.Errorf("battery match detail: %s", d)
+	}
+	if d := got["序列号一致性"].Detail; !strings.Contains(d, "SysCfg=FFNZMYBEAAAA") {
+		t.Errorf("serial consistency leaves out the factory record: %s", d)
+	}
+	// The panel compares its own serial, the first of its record.
+	if d := got["屏幕面板与出厂记录"].Detail; strings.Contains(d, "S12657P0") || !strings.Contains(d, "DKH94342AAAAAAAAA") {
+		t.Errorf("panel detail: %s", d)
+	}
+	// A board serial that is not the factory's fails its consistency.
+	raw.Root["MLBSerialNumber"] = "FG3OTHERBOARD0000"
+	for _, c := range Analyze(raw, now, "zh-Hans").Checks {
+		if c.Title == "主板序列号一致性" && c.Status != Fail {
+			t.Errorf("swapped board: %+v", c)
+		}
+	}
+
+	// iPhone X: no panel or Touch ID record, all the others match.
+	x := &RawData{
+		Root:    map[string]any{"ProductType": "iPhone10,3"},
+		Domains: map[string]map[string]any{}, Gestalt: map[string]any{},
+		Parts: map[string]map[string]any{
+			"camera":  {"FrontCameraModuleSerialNumString": "G8R7491GAAAAAAAAA"},
+			"product": {"coverglass-serial-number": "FXV73552AAAAAAAAA+01009136"},
+		},
+		SysCfg: sysCfg(map[string]string{"FCMS": "G8R7491GAAAAAAAAA", "MtSN": "FXV73552AAAAAAAAA+01009136"}),
+	}
+	gotX := map[string]Check{}
+	for _, c := range Analyze(x, now, "en").Checks {
+		gotX[c.Title] = c
+	}
+	// A screen whose serial matches is only worth knowing: the original's
+	// serial is often written onto a new screen, as on this iPhone X.
+	if gotX["Front camera vs. factory record"].Status != Pass || gotX["Cover glass vs. factory record"].Status != Info {
+		t.Errorf("iPhone X: %+v", gotX)
+	}
+	if _, ok := gotX["Display panel vs. factory record"]; ok {
+		t.Error("a panel check without a panel record")
+	}
+	// The battery is recorded but its gauge not read.
+	x.SysCfg["Batt"] = []byte("F8Y75174AAAAAAAAA")
+	for _, c := range Analyze(x, now, "en").Checks {
+		if c.Title == "Battery vs. factory record" && c.Status != Unknown {
+			t.Errorf("battery unread: %+v", c)
+		}
+	}
+}
+
+// Without a record: nothing to say on an iOS that gives no MobileGestalt,
+// Unknown when MobileGestalt answered without it or it did not parse.
+func TestFactoryRecordUnread(t *testing.T) {
+	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
+	for name, tc := range map[string]struct {
+		raw  RawData
+		want bool
+	}{
+		"deprecated": {RawData{GestaltErr: services.ErrGestaltDeprecated}, false},
+		"no record":  {RawData{Gestalt: map[string]any{}}, true},
+		"bad record": {RawData{Gestalt: map[string]any{}, SysCfgErr: errors.New("syscfg: not a syscfg block")}, true},
+		"other":      {RawData{GestaltErr: errors.New("timeout")}, true},
+		"not asked":  {RawData{}, false},
+	} {
+		raw := tc.raw
+		raw.Root, raw.Domains = map[string]any{"ProductType": "iPhone14,2"}, map[string]map[string]any{}
+		found := false
+		for _, c := range Analyze(&raw, now, "en").Checks {
+			if c.Title == "Factory record of parts" {
+				found = c.Status == Unknown
+			}
+		}
+		if found != tc.want {
+			t.Errorf("%s: Unknown check %v, want %v", name, found, tc.want)
+		}
+	}
+}
+
+// Dates as 3uTools gives them for an iPhone 8's parts.
+func TestPartDate(t *testing.T) {
+	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
+	for serial, want := range map[string]string{
+		"F0W94170AU6HJL371": "2019-10-13", "F0W91630FUCHJL32X": "2019-04-17",
+		"FG99425SCDAHXYDA2": "2019-10-18", "GCF94251944HCDC49": "2019-10-18",
+		"DKH943426BXHNK0A7": "2019-10-24", "FVQ9037B1XZHNJLA4": "2019-01-20",
+		"FG394410MMLJ0Y1AD":                "2019-10-28",
+		"0217106c608085293b5a1369060200d5": "", // the Touch ID sensor's hex
+		"F0W95990AAAAAAAAA":                "", // week 59
+		"F0W64570AAAAAAAAA":                "", // 2026 week 45 day 7: after now
+		"SHORT":                            "",
+	} {
+		d, ok := PartDate(serial, now)
+		got := ""
+		if ok {
+			got = d.Format("2006-01-02")
+		}
+		if got != want {
+			t.Errorf("PartDate(%s) = %q, want %q", serial, got, want)
+		}
+	}
+}
+
+// The network addresses and the colors, as the iPhone X and the iPhone 8
+// report them, and the regulatory model from the device tree or the record.
+func TestAddressesAndColors(t *testing.T) {
+	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
+	mac := func(s string) []byte {
+		b, err := hex.DecodeString(strings.ReplaceAll(s, ":", ""))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return append(b, make([]byte, 10)...)
+	}
+	color := func(n byte) []byte { return []byte{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, n, 0, 0, 0} }
+	raw := &RawData{
+		Root: map[string]any{"ProductType": "iPhone10,3", "DeviceColor": "1",
+			"WiFiAddress": "d8:8f:76:00:00:68", "BluetoothAddress": "d8:8f:76:00:00:1e", "EthernetAddress": "d8:8f:76:00:00:49"},
+		Domains:     map[string]map[string]any{},
+		PlatformReg: map[string]any{"regulatory-model-number": []byte("A1865\x00")},
+		SysCfg: map[string][]byte{"WMac": mac("d8:8f:76:00:00:68"), "BMac": mac("d8:8f:76:00:00:1e"), "EMac": mac("d8:8f:76:00:00:49"),
+			"CLCG": color(1), "CLHS": color(1), "RMd#": []byte("A1865")},
+	}
+	r := Analyze(raw, now, "zh-Hans")
+	find := func(r *Report, title string) Check {
+		for _, c := range r.Checks {
+			if c.Title == title {
+				return c
+			}
+		}
+		return Check{}
+	}
+	if c := find(r, "网络地址与出厂记录"); c.Status != Pass || !strings.Contains(c.Detail, "蜂窝地址：d8:8f:76:00:00:49") {
+		t.Errorf("addresses %+v", c)
+	}
+	fields := map[string]string{}
+	for _, sec := range r.Sections {
+		for _, f := range sec.Fields {
+			fields[f.Label] = f.Value
+		}
+	}
+	if fields["正面颜色"] != "黑色（代码 1）" || fields["背面颜色"] != "深空灰色（代码 1）" || fields["监管型号"] != "A1865" || fields["蜂窝地址"] != "d8:8f:76:00:00:49" {
+		t.Errorf("fields %v", fields)
+	}
+	if r.Summary.ColorName != "深空灰色" {
+		t.Errorf("summary color %q", r.Summary.ColorName)
+	}
+
+	// Another Wi-Fi address than the factory's.
+	raw.Root["WiFiAddress"] = "d8:8f:76:00:00:99"
+	if c := find(Analyze(raw, now, "zh-Hans"), "网络地址与出厂记录"); c.Status != Warn || !strings.Contains(c.Detail, "Wi-Fi 地址：出厂 d8:8f:76:00:00:68，当前 d8:8f:76:00:00:99") {
+		t.Errorf("a changed address %+v", c)
+	}
+
+	// iPhone 8: space gray is code 8 there; a code no sample settled stays a code.
+	raw.Root["ProductType"] = "iPhone10,1"
+	delete(raw.Root, "DeviceColor")
+	raw.SysCfg["CLHS"] = color(8)
+	fields = map[string]string{}
+	for _, sec := range Analyze(raw, now, "en").Sections {
+		for _, f := range sec.Fields {
+			fields[f.Label] = f.Value
+		}
+	}
+	if fields["Front color"] != "Black (code 1)" || fields["Back color"] != "Space Gray (code 8)" {
+		t.Errorf("iPhone 8 colors %v", fields)
+	}
+	raw.SysCfg["CLHS"] = color(3)
+	for _, sec := range Analyze(raw, now, "en").Sections {
+		for _, f := range sec.Fields {
+			if f.Label == "Back color" && f.Value != "code 3" {
+				t.Errorf("unsettled code: %q", f.Value)
+			}
+		}
 	}
 }

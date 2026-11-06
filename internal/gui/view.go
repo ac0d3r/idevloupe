@@ -322,6 +322,9 @@ func summaryHeader(c *ui.Context, s inspect.Summary) {
 					ui.Text(c, s.ColorHex).FontSize(12)
 				})
 			}
+			if s.ColorHex == "" {
+				chip(s.ColorName)
+			}
 			chip(s.Region)
 			chip(s.ModelNumber)
 		})

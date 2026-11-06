@@ -627,8 +627,8 @@
   "fieldBoardModel": "Board model",
   "fieldChip": "Chip",
   "fieldCPUArchitecture": "CPU architecture",
-  "fieldColor": "Color",
-  "fieldEnclosureColor": "Enclosure color",
+  "fieldColor": "Front color",
+  "fieldEnclosureColor": "Back color",
   "fieldAvailable": "Available",
   "fieldPartNumber": "Model (part number)",
   "fieldBoardSerial": "Logic board serial",
@@ -646,7 +646,7 @@
   "fieldSIMStatus": "SIM status",
   "sectionParts": "Part serial numbers (current)",
   "fieldNote": "Note",
-  "partsNote": "The serial numbers the parts report now. Their factory record cannot be read over the cable, so they do not tell whether a part was replaced; compare them with a repair record or the parts' labels",
+  "partsNote": "The serial numbers the parts report now. Where the factory configuration could be read, the checks compare them with its record (\"vs. factory record\"); otherwise compare them with repair records or the parts' labels",
   "partBackWide": "Rear wide camera",
   "partBackTele": "Rear telephoto camera",
   "partBackUltraWide": "Rear ultra wide camera",
@@ -994,5 +994,83 @@
         "type": "double"
       }
     }
-  }
+  },
+  "checkPartFactory": "{part} vs. factory record",
+  "@checkPartFactory": {
+    "placeholders": {
+      "part": {
+        "type": "String"
+      }
+    }
+  },
+  "factoryValues": "factory {factory}, now {current}",
+  "@factoryValues": {
+    "placeholders": {
+      "factory": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "serialWithDate": "{serial} (made about {date})",
+  "@serialWithDate": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "factoryMatchDetail": "Repair tools can write the original serial onto a new part, so a match does not prove the part was never replaced",
+  "factoryMismatchDetail": "This is not the part fitted at the factory, so it was probably replaced; whether the replacement is genuine cannot be told from the data",
+  "factoryCurrentUnread": "The factory record has {factory}, but the part's current serial number was not read",
+  "@factoryCurrentUnread": {
+    "placeholders": {
+      "factory": {
+        "type": "String"
+      }
+    }
+  },
+  "checkFactoryRecord": "Factory record of parts",
+  "factoryUnread": "The factory configuration (SysCfg) was not read, so parts cannot be compared with the factory record; check Settings > General > About > Parts and Service History",
+  "partBattery": "Battery",
+  "partDisplayPanel": "Display panel",
+  "factorySame": "factory and now {serial}",
+  "@factorySame": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "colorBlack": "Black",
+  "colorSpaceGray": "Space Gray",
+  "colorNamed": "{name} (code {code})",
+  "@colorNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "colorCode": "code {code}",
+  "@colorCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRegulatoryModel": "Regulatory model",
+  "fieldCellularAddress": "Cellular address",
+  "checkAddressesFactory": "Network addresses vs. factory record",
+  "addressMismatchDetail": "The logic board or the radio may have been replaced, or the address written over",
+  "factoryScreenMatchDetail": "A screen's serial is often written onto a new screen during repair, so a match does not show the screen was never replaced; check Settings > General > About > Parts and Service History, or True Tone, by hand"
 }

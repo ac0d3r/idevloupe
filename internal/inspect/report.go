@@ -136,7 +136,8 @@ type Summary struct {
 	Marketing   string
 	ProductType string
 	Capacity    string
-	Color       string // raw DeviceEnclosureColor / DeviceColor
+	Color       string // the back's color code, else the front's: "1", "#rrggbb"
+	ColorName   string // the back's color named, when a sample settled its code
 	ColorHex    string // "#rrggbb" when the color is given as one
 	IOS         string
 	Region      string

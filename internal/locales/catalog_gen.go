@@ -2251,21 +2251,21 @@ func (msgs Messages) FieldCPUArchitecture() string {
 	return Catalog.Format(msgs.locale, "fieldCPUArchitecture", nil)
 }
 
-// FieldColor says "Color"
+// FieldColor says "Front color"
 // in the language the app shows.
 func FieldColor() string { return In(i18n.Locale()).FieldColor() }
 
-// FieldColor says "Color"
+// FieldColor says "Front color"
 // in the language of msgs.
 func (msgs Messages) FieldColor() string {
 	return Catalog.Format(msgs.locale, "fieldColor", nil)
 }
 
-// FieldEnclosureColor says "Enclosure color"
+// FieldEnclosureColor says "Back color"
 // in the language the app shows.
 func FieldEnclosureColor() string { return In(i18n.Locale()).FieldEnclosureColor() }
 
-// FieldEnclosureColor says "Enclosure color"
+// FieldEnclosureColor says "Back color"
 // in the language of msgs.
 func (msgs Messages) FieldEnclosureColor() string {
 	return Catalog.Format(msgs.locale, "fieldEnclosureColor", nil)
@@ -2441,11 +2441,11 @@ func (msgs Messages) FieldNote() string {
 	return Catalog.Format(msgs.locale, "fieldNote", nil)
 }
 
-// PartsNote says "The serial numbers the parts report now. Their factory record cannot be read over the cable, so they do not tell whet…"
+// PartsNote says "The serial numbers the parts report now. Where the factory configuration could be read, the checks compare them with …"
 // in the language the app shows.
 func PartsNote() string { return In(i18n.Locale()).PartsNote() }
 
-// PartsNote says "The serial numbers the parts report now. Their factory record cannot be read over the cable, so they do not tell whet…"
+// PartsNote says "The serial numbers the parts report now. Where the factory configuration could be read, the checks compare them with …"
 // in the language of msgs.
 func (msgs Messages) PartsNote() string {
 	return Catalog.Format(msgs.locale, "partsNote", nil)
@@ -4051,4 +4051,210 @@ func StorageUsage(used float64, total float64) string {
 // in the language of msgs.
 func (msgs Messages) StorageUsage(used float64, total float64) string {
 	return Catalog.Format(msgs.locale, "storageUsage", map[string]any{"used": used, "total": total})
+}
+
+// CheckPartFactory says "{part} vs. factory record"
+// in the language the app shows.
+func CheckPartFactory(part string) string { return In(i18n.Locale()).CheckPartFactory(part) }
+
+// CheckPartFactory says "{part} vs. factory record"
+// in the language of msgs.
+func (msgs Messages) CheckPartFactory(part string) string {
+	return Catalog.Format(msgs.locale, "checkPartFactory", map[string]any{"part": part})
+}
+
+// FactoryValues says "factory {factory}, now {current}"
+// in the language the app shows.
+func FactoryValues(factory string, current string) string {
+	return In(i18n.Locale()).FactoryValues(factory, current)
+}
+
+// FactoryValues says "factory {factory}, now {current}"
+// in the language of msgs.
+func (msgs Messages) FactoryValues(factory string, current string) string {
+	return Catalog.Format(msgs.locale, "factoryValues", map[string]any{"factory": factory, "current": current})
+}
+
+// SerialWithDate says "{serial} (made about {date})"
+// in the language the app shows.
+func SerialWithDate(serial string, date string) string {
+	return In(i18n.Locale()).SerialWithDate(serial, date)
+}
+
+// SerialWithDate says "{serial} (made about {date})"
+// in the language of msgs.
+func (msgs Messages) SerialWithDate(serial string, date string) string {
+	return Catalog.Format(msgs.locale, "serialWithDate", map[string]any{"serial": serial, "date": date})
+}
+
+// FactoryMatchDetail says "Repair tools can write the original serial onto a new part, so a match does not prove the part was never replaced"
+// in the language the app shows.
+func FactoryMatchDetail() string { return In(i18n.Locale()).FactoryMatchDetail() }
+
+// FactoryMatchDetail says "Repair tools can write the original serial onto a new part, so a match does not prove the part was never replaced"
+// in the language of msgs.
+func (msgs Messages) FactoryMatchDetail() string {
+	return Catalog.Format(msgs.locale, "factoryMatchDetail", nil)
+}
+
+// FactoryMismatchDetail says "This is not the part fitted at the factory, so it was probably replaced; whether the replacement is genuine cannot be…"
+// in the language the app shows.
+func FactoryMismatchDetail() string { return In(i18n.Locale()).FactoryMismatchDetail() }
+
+// FactoryMismatchDetail says "This is not the part fitted at the factory, so it was probably replaced; whether the replacement is genuine cannot be…"
+// in the language of msgs.
+func (msgs Messages) FactoryMismatchDetail() string {
+	return Catalog.Format(msgs.locale, "factoryMismatchDetail", nil)
+}
+
+// FactoryCurrentUnread says "The factory record has {factory}, but the part's current serial number was not read"
+// in the language the app shows.
+func FactoryCurrentUnread(factory string) string {
+	return In(i18n.Locale()).FactoryCurrentUnread(factory)
+}
+
+// FactoryCurrentUnread says "The factory record has {factory}, but the part's current serial number was not read"
+// in the language of msgs.
+func (msgs Messages) FactoryCurrentUnread(factory string) string {
+	return Catalog.Format(msgs.locale, "factoryCurrentUnread", map[string]any{"factory": factory})
+}
+
+// CheckFactoryRecord says "Factory record of parts"
+// in the language the app shows.
+func CheckFactoryRecord() string { return In(i18n.Locale()).CheckFactoryRecord() }
+
+// CheckFactoryRecord says "Factory record of parts"
+// in the language of msgs.
+func (msgs Messages) CheckFactoryRecord() string {
+	return Catalog.Format(msgs.locale, "checkFactoryRecord", nil)
+}
+
+// FactoryUnread says "The factory configuration (SysCfg) was not read, so parts cannot be compared with the factory record; check Settings …"
+// in the language the app shows.
+func FactoryUnread() string { return In(i18n.Locale()).FactoryUnread() }
+
+// FactoryUnread says "The factory configuration (SysCfg) was not read, so parts cannot be compared with the factory record; check Settings …"
+// in the language of msgs.
+func (msgs Messages) FactoryUnread() string {
+	return Catalog.Format(msgs.locale, "factoryUnread", nil)
+}
+
+// PartBattery says "Battery"
+// in the language the app shows.
+func PartBattery() string { return In(i18n.Locale()).PartBattery() }
+
+// PartBattery says "Battery"
+// in the language of msgs.
+func (msgs Messages) PartBattery() string {
+	return Catalog.Format(msgs.locale, "partBattery", nil)
+}
+
+// PartDisplayPanel says "Display panel"
+// in the language the app shows.
+func PartDisplayPanel() string { return In(i18n.Locale()).PartDisplayPanel() }
+
+// PartDisplayPanel says "Display panel"
+// in the language of msgs.
+func (msgs Messages) PartDisplayPanel() string {
+	return Catalog.Format(msgs.locale, "partDisplayPanel", nil)
+}
+
+// FactorySame says "factory and now {serial}"
+// in the language the app shows.
+func FactorySame(serial string) string { return In(i18n.Locale()).FactorySame(serial) }
+
+// FactorySame says "factory and now {serial}"
+// in the language of msgs.
+func (msgs Messages) FactorySame(serial string) string {
+	return Catalog.Format(msgs.locale, "factorySame", map[string]any{"serial": serial})
+}
+
+// ColorBlack says "Black"
+// in the language the app shows.
+func ColorBlack() string { return In(i18n.Locale()).ColorBlack() }
+
+// ColorBlack says "Black"
+// in the language of msgs.
+func (msgs Messages) ColorBlack() string {
+	return Catalog.Format(msgs.locale, "colorBlack", nil)
+}
+
+// ColorSpaceGray says "Space Gray"
+// in the language the app shows.
+func ColorSpaceGray() string { return In(i18n.Locale()).ColorSpaceGray() }
+
+// ColorSpaceGray says "Space Gray"
+// in the language of msgs.
+func (msgs Messages) ColorSpaceGray() string {
+	return Catalog.Format(msgs.locale, "colorSpaceGray", nil)
+}
+
+// ColorNamed says "{name} (code {code})"
+// in the language the app shows.
+func ColorNamed(name string, code string) string { return In(i18n.Locale()).ColorNamed(name, code) }
+
+// ColorNamed says "{name} (code {code})"
+// in the language of msgs.
+func (msgs Messages) ColorNamed(name string, code string) string {
+	return Catalog.Format(msgs.locale, "colorNamed", map[string]any{"name": name, "code": code})
+}
+
+// ColorCode says "code {code}"
+// in the language the app shows.
+func ColorCode(code string) string { return In(i18n.Locale()).ColorCode(code) }
+
+// ColorCode says "code {code}"
+// in the language of msgs.
+func (msgs Messages) ColorCode(code string) string {
+	return Catalog.Format(msgs.locale, "colorCode", map[string]any{"code": code})
+}
+
+// FieldRegulatoryModel says "Regulatory model"
+// in the language the app shows.
+func FieldRegulatoryModel() string { return In(i18n.Locale()).FieldRegulatoryModel() }
+
+// FieldRegulatoryModel says "Regulatory model"
+// in the language of msgs.
+func (msgs Messages) FieldRegulatoryModel() string {
+	return Catalog.Format(msgs.locale, "fieldRegulatoryModel", nil)
+}
+
+// FieldCellularAddress says "Cellular address"
+// in the language the app shows.
+func FieldCellularAddress() string { return In(i18n.Locale()).FieldCellularAddress() }
+
+// FieldCellularAddress says "Cellular address"
+// in the language of msgs.
+func (msgs Messages) FieldCellularAddress() string {
+	return Catalog.Format(msgs.locale, "fieldCellularAddress", nil)
+}
+
+// CheckAddressesFactory says "Network addresses vs. factory record"
+// in the language the app shows.
+func CheckAddressesFactory() string { return In(i18n.Locale()).CheckAddressesFactory() }
+
+// CheckAddressesFactory says "Network addresses vs. factory record"
+// in the language of msgs.
+func (msgs Messages) CheckAddressesFactory() string {
+	return Catalog.Format(msgs.locale, "checkAddressesFactory", nil)
+}
+
+// AddressMismatchDetail says "The logic board or the radio may have been replaced, or the address written over"
+// in the language the app shows.
+func AddressMismatchDetail() string { return In(i18n.Locale()).AddressMismatchDetail() }
+
+// AddressMismatchDetail says "The logic board or the radio may have been replaced, or the address written over"
+// in the language of msgs.
+func (msgs Messages) AddressMismatchDetail() string {
+	return Catalog.Format(msgs.locale, "addressMismatchDetail", nil)
+}
+
+// FactoryScreenMatchDetail says "A screen's serial is often written onto a new screen during repair, so a match does not show the screen was never rep…"
+// in the language the app shows.
+func FactoryScreenMatchDetail() string { return In(i18n.Locale()).FactoryScreenMatchDetail() }
+
+// FactoryScreenMatchDetail says "A screen's serial is often written onto a new screen during repair, so a match does not show the screen was never rep…"
+// in the language of msgs.
+func (msgs Messages) FactoryScreenMatchDetail() string {
+	return Catalog.Format(msgs.locale, "factoryScreenMatchDetail", nil)
 }

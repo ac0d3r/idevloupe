@@ -9,6 +9,7 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 	"github.com/ac0d3r/idevloupe/pkg/lockdown"
 	"github.com/ac0d3r/idevloupe/pkg/services"
+	"github.com/ac0d3r/idevloupe/pkg/syscfg"
 )
 
 // Domains read besides the root domain.
@@ -50,6 +51,9 @@ var gestaltKeys = []string{
 	"DeviceEnclosureColor",
 	"ReleaseType",
 	"ProductionSOC",
+	// The factory configuration, with the serial numbers of the parts
+	// fitted at the factory: parsed into RawData.SysCfg.
+	"SysCfg",
 }
 
 // RawData is everything read from a device, before analysis.
@@ -62,6 +66,10 @@ type RawData struct {
 	PlatformReg map[string]any
 	Gestalt     map[string]any
 	GestaltErr  error
+	// SysCfg is the factory configuration by tag, from MobileGestalt; nil
+	// when it was not read (SysCfgErr says why, if it failed to parse).
+	SysCfg    map[string][]byte
+	SysCfgErr error
 	// DiagAll is the "All" diagnostics: GasGauge, NAND, WiFi, HDMI.
 	DiagAll map[string]any
 	// Parts are the IORegistry entries of parts (cameras, Face ID, display,
@@ -322,6 +330,7 @@ func Collect(open Opener, progress func(Step)) (*RawData, error) {
 		}
 		raw.Parts = readParts(diag)
 		raw.Gestalt, raw.GestaltErr = diag.MobileGestalt(gestaltKeys...)
+		raw.readSysCfg()
 		return nil
 	})
 	if err != nil {
@@ -421,6 +430,17 @@ func (raw *RawData) readBattery(diag *services.DiagnosticsClient) {
 	} else {
 		raw.fail(StepReadBattery, "", err)
 	}
+}
+
+// readSysCfg parses the factory configuration out of the MobileGestalt
+// answer, where it is a block too large to keep as one raw value.
+func (raw *RawData) readSysCfg() {
+	b, ok := raw.Gestalt["SysCfg"].([]byte)
+	if !ok {
+		return
+	}
+	delete(raw.Gestalt, "SysCfg")
+	raw.SysCfg, raw.SysCfgErr = syscfg.Parse(b)
 }
 
 // scrub drops the subscriber values from everything read.
