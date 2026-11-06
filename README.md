@@ -27,8 +27,9 @@ Linux 可执行文件、`.deb`、`.tar.gz`、PKGBUILD。配置在 `mygo.json`，
 - `.github/workflows/ci.yml`（push 到 main 与 PR）：golangci-lint、翻译文件已生成且有效、
   Linux / macOS / Windows 上 vet + 测试、Linux 上 `-race` 测试。
 - `.github/workflows/build.yml`（push 到 main、`v*` 标签、手动触发）：在 macOS 上 `make dist` 打全平台包，
-  上传为 artifact；推 `vX.Y.Z` 标签时（须与 `mygo.json` 的 `version` 一致）另发布 GitHub Release，
-  附 `.dmg`、Windows `.exe`、`.deb`、`.tar.gz` 与 `SHA256SUMS`。安装包未签名 / 公证。
+  上传为 artifact；推 `vX.Y.Z` 标签时另发布 GitHub Release，附 `.dmg`、Windows `.exe`、`.deb`、
+  `.tar.gz` 与 `SHA256SUMS`。版本号取自标签，打包前自动写入 `mygo.json`，无需手动修改。
+  安装包未签名 / 公证。
 
 ## 下载页
 

@@ -2,7 +2,7 @@ name: Build
 
 # Packages every platform on macOS, the one runner that makes all of them
 # (the .dmg needs hdiutil). Pushes to main keep the packages as artifacts;
-# a tag vX.Y.Z, whose version must be mygo.json's, publishes a release.
+# a tag vX.Y.Z publishes a release of version X.Y.Z.
 on:
   push:
     branches: [main]
@@ -24,14 +24,19 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Tag matches mygo.json
+      # The tag is the version: mygo build reads it from mygo.json, whose
+      # version is only that of builds from main.
+      - name: Version from the tag
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          want="v$(jq -r .version mygo.json)"
-          if [ "$GITHUB_REF_NAME" != "$want" ]; then
-            echo "::error::tag $GITHUB_REF_NAME, but mygo.json says $want"
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::tag $GITHUB_REF_NAME is not vX.Y.Z"
             exit 1
           fi
+          jq --arg v "$version" '.version = $v' mygo.json > mygo.json.new
+          mv mygo.json.new mygo.json
+          echo "version $version"
       - run: make dist
       # Names without the version, so that the download page links to
       # releases/latest/download/<name> once for every release.
