@@ -3621,11 +3621,11 @@ func (msgs Messages) CliUDID() string {
 	return Catalog.Format(msgs.locale, "cliUDID", nil)
 }
 
-// CliDump says "query the IORegistry item by item and write the replies to this file (with a summary in .txt), to find parts' informa…"
+// CliDump says "ask for parts' keys (lockdown, MobileGestalt) and query the IORegistry item by item, writing the replies to this file…"
 // in the language the app shows.
 func CliDump() string { return In(i18n.Locale()).CliDump() }
 
-// CliDump says "query the IORegistry item by item and write the replies to this file (with a summary in .txt), to find parts' informa…"
+// CliDump says "ask for parts' keys (lockdown, MobileGestalt) and query the IORegistry item by item, writing the replies to this file…"
 // in the language of msgs.
 func (msgs Messages) CliDump() string {
 	return Catalog.Format(msgs.locale, "cliDump", nil)
@@ -3661,11 +3661,11 @@ func (msgs Messages) CliPairing() string {
 	return Catalog.Format(msgs.locale, "cliPairing", nil)
 }
 
-// CliProbing says "Querying the IORegistry ({count, plural, one {# item} other {# items}})…"
+// CliProbing says "Querying keys and the IORegistry ({count, plural, one {# item} other {# items}})…"
 // in the language the app shows.
 func CliProbing(count int) string { return In(i18n.Locale()).CliProbing(count) }
 
-// CliProbing says "Querying the IORegistry ({count, plural, one {# item} other {# items}})…"
+// CliProbing says "Querying keys and the IORegistry ({count, plural, one {# item} other {# items}})…"
 // in the language of msgs.
 func (msgs Messages) CliProbing(count int) string {
 	return Catalog.Format(msgs.locale, "cliProbing", map[string]any{"count": count})

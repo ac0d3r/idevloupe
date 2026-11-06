@@ -4,6 +4,7 @@
 package probe
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -67,11 +68,78 @@ var Queries = func() []Query {
 		"AppleANS2NVMeController", "AppleANS3NVMeController", "AppleEmbeddedNVMeController",
 		"AppleBasebandPCI", "AppleBaseband", "AppleSmartBattery", "AppleHPMDevice", "AppleTriStar",
 		"AppleSPUHIDDevice", "AppleAOPAudioDevice",
+		"AppleSmartBatteryManager", "AppleARMPMUCharger", "AppleHPMInterface",
 	} {
 		qs = append(qs, Query{Class: c})
 	}
 	return qs
 }()
+
+// Keys are MobileGestalt names that may hold the factory serial numbers
+// of parts, the factory configuration, and records of the battery, its
+// authentication and storage. They are taken from the names a closed tool
+// that compares factory and current part values asks for; which of them a
+// device answers, and with what, is what the probe is for.
+var Keys = []string{
+	// Factory configuration.
+	"SysCfg", "SysCfgData", "SysCfgDict",
+	// Parts' serial numbers.
+	"BatterySerialNumber", "BatterySerialNumberRAW", "BatterySerialNumberMD",
+	"PanelSerialNumber", "RawPanelSerialNumber", "CoverglassSerialNumber",
+	"RearFacingCameraModuleSerialNumber", "FrontFacingCameraModuleSerialNumber", "BackSuperWideCameraSNUM",
+	"InfraredCameraSerialNumber", "ArcModuleSerialNumber", "YonkersSerialNumber", "SavageSerialNumber", "RosalineSerialNumber",
+	"MesaSerialNumber", "JasperSNUM", "LynxSerialNumber", "NovaSerialNum", "LatticeSerialNumber",
+	"AmbientLightSensorSerialNumber", "WirelessBoardSerialNumber", "WirelessBoardSnum", "LunaFlexSerialNumber",
+	"BasebandBoardSnum", "InterfaceModuleSerialNumber",
+	// The battery.
+	"BatterySerialChanged", "BatterySerialChangedHistory", "BatterySerialNumberChanged",
+	"BatteryAuth", "DeviceSupportsBatteryModuleAuthentication", "BatteryCellDisconnectCount",
+	"BatteryShutdownReason", "CycleCountLastQmax", "LifeTimeQmaxUpdateCounter",
+	// Pairing, biometrics, storage, the secure enclave.
+	"FDRSealingStatus", "FDRCalibration", "FDRReportError",
+	"TouchIDHealthy", "MultiSensorOK",
+	"NANDType", "DiskVendor", "DiskType", "NANDWriteCount", "NANDPowerOnTime", "NandControllerUID",
+	"EffectiveProductionStatusSEP", "EffectiveSecurityModeSEP",
+}
+
+// KeyResult is what one source answered for one key.
+type KeyResult struct {
+	Source, Key string
+	Status      string // "ok", "missing", or the error
+	Value       any
+}
+
+// probeKeys asks lockdown for each of Keys, then MobileGestalt for all of
+// them at once. A source that fails as a whole is reported once, for "*".
+func probeKeys(l *lockdown.Client, diag *services.DiagnosticsClient) []KeyResult {
+	var out []KeyResult
+	for _, k := range Keys {
+		v, err := l.GetValue("", k)
+		switch {
+		case err == nil:
+			out = append(out, KeyResult{"lockdown", k, "ok", v})
+		case errors.Is(err, lockdown.ErrMissingValue):
+			out = append(out, KeyResult{"lockdown", k, "missing", nil})
+		default:
+			out = append(out, KeyResult{"lockdown", k, "error: " + err.Error(), nil})
+		}
+		if l.Broken() {
+			break
+		}
+	}
+	mg, err := diag.MobileGestalt(Keys...)
+	if err != nil {
+		return append(out, KeyResult{"MobileGestalt", "*", "error: " + err.Error(), nil})
+	}
+	for _, k := range Keys {
+		if v, ok := mg[k]; ok {
+			out = append(out, KeyResult{"MobileGestalt", k, "ok", v})
+		} else {
+			out = append(out, KeyResult{"MobileGestalt", k, "missing", nil})
+		}
+	}
+	return out
+}
 
 // Result is the answer to one query.
 type Result struct {
@@ -81,16 +149,34 @@ type Result struct {
 	Response map[string]any
 }
 
-// Probe runs every query and writes their whole responses to path as a
-// binary plist, {query: response}.
-func Probe(l *lockdown.Client, path string) ([]Result, error) {
+// Report is what Probe found.
+type Report struct {
+	Keys    []KeyResult
+	Queries []Result
+}
+
+// Probe asks for Keys, then runs every query, and writes the answers to
+// path as a binary plist: {"keys/<source>": {key: value}, query: response}.
+func Probe(l *lockdown.Client, path string) (*Report, error) {
 	diag, err := services.OpenDiagnostics(l)
 	if err != nil {
 		return nil, err
 	}
 	defer diag.Close()
-	var results []Result
+	rep := &Report{Keys: probeKeys(l, diag)}
 	dump := map[string]any{}
+	for _, k := range rep.Keys {
+		if k.Status != "ok" {
+			continue
+		}
+		src, _ := dump["keys/"+k.Source].(map[string]any)
+		if src == nil {
+			src = map[string]any{}
+			dump["keys/"+k.Source] = src
+		}
+		src[k.Key] = k.Value
+	}
+	var results []Result
 	for _, q := range Queries {
 		resp, err := diag.Query(q.request())
 		r := Result{Query: q, Response: resp}
@@ -110,17 +196,18 @@ func Probe(l *lockdown.Client, path string) ([]Result, error) {
 			break // the connection is unusable
 		}
 	}
+	rep.Queries = results
 	data, err := plist.Marshal(dump, plist.BinaryFormat)
 	if err != nil {
-		return results, err
+		return rep, err
 	}
-	return results, os.WriteFile(path, data, 0o644)
+	return rep, os.WriteFile(path, data, 0o644)
 }
 
 // interestingKey matches property names that name serial numbers, the
 // factory configuration (syscfg) and its four-letter keys of parts, and
 // parts of interest.
-var interestingKey = regexp.MustCompile(`(?i)serial|sn$|^sn|syscfg|^(fcms|bcms|mtsn|batt|bmac|wmac|nvsn|nsrn|lcm#|cmms|dclr|clhs|vbst|nvms)$|pearl|camera.*(module|sn)|multitouch|display.*(id|sn)|panel`)
+var interestingKey = regexp.MustCompile(`(?i)serial|sn$|^sn|syscfg|^(fcms|bcms|mtsn|batt|bmac|wmac|nvsn|nsrn|lcm#|cmms|dclr|clhs|vbst|nvms)$|pearl|camera.*(module|sn)|multitouch|display.*(id|sn)|panel|auth|fdr|qmax|changed`)
 
 // Hit is a property found by Find.
 type Hit struct {
@@ -169,11 +256,27 @@ func Find(tree any) []Hit {
 	return hits
 }
 
-// Summary lists each query's outcome, then the serial-like properties the
-// answered ones hold, values cut to width.
-func Summary(results []Result, width int) string {
+// Summary lists what each source answered for the keys, each query's
+// outcome, then the serial-like properties the answered ones hold, values
+// cut to width.
+func Summary(rep *Report, width int) string {
 	var b strings.Builder
-	b.WriteString("== Queries\n")
+	cut := func(v string) string {
+		if rs := []rune(v); len(rs) > width {
+			return string(rs[:width]) + "…"
+		}
+		return v
+	}
+	b.WriteString("== Keys\n")
+	for _, k := range rep.Keys {
+		v := ""
+		if k.Status == "ok" {
+			v = " = " + cut(inspect.FormatValue(k.Value))
+		}
+		fmt.Fprintf(&b, "%-14s %-42s %s%s\n", k.Source, k.Key, k.Status, v)
+	}
+	results := rep.Queries
+	b.WriteString("\n== Queries\n")
 	for _, r := range results {
 		fmt.Fprintf(&b, "%-45s %-20s %d properties\n", r.Query, r.Status, r.Props)
 	}
@@ -181,11 +284,7 @@ func Summary(results []Result, width int) string {
 	for _, r := range results {
 		reg, _ := plistx.Path(r.Response, "Diagnostics", "IORegistry")
 		for _, h := range Find(reg) {
-			v := h.Value
-			if rs := []rune(v); len(rs) > width {
-				v = string(rs[:width]) + "…"
-			}
-			fmt.Fprintf(&b, "[%s] %s = %s\n", r.Query, h.Path, v)
+			fmt.Fprintf(&b, "[%s] %s = %s\n", r.Query, h.Path, cut(h.Value))
 		}
 	}
 	return b.String()

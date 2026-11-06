@@ -921,7 +921,7 @@
   "cliReport": "print the inspection report in the terminal",
   "cliJSON": "print the inspection report as JSON, with every raw value",
   "cliUDID": "the UDID of the device",
-  "cliDump": "query the IORegistry item by item and write the replies to this file (with a summary in .txt), to find parts' information",
+  "cliDump": "ask for parts' keys (lockdown, MobileGestalt) and query the IORegistry item by item, writing the replies to this file (with a summary in .txt), to find parts' information",
   "cliLang": "the report's language: en, zh-Hans or de (default: the system's)",
   "cliError": "Error: {error}",
   "@cliError": {
@@ -932,7 +932,7 @@
     }
   },
   "cliPairing": "The device does not trust this computer yet; asking to pair…",
-  "cliProbing": "Querying the IORegistry ({count, plural, one {# item} other {# items}})…",
+  "cliProbing": "Querying keys and the IORegistry ({count, plural, one {# item} other {# items}})…",
   "@cliProbing": {
     "placeholders": {
       "count": {

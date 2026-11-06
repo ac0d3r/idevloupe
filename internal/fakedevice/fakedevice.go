@@ -58,6 +58,9 @@ type Device struct {
 	// Hidden are root keys left out of the whole-domain answer, as
 	// lockdownd does for some.
 	Hidden map[string]any
+	// Gestalt answers MobileGestalt queries, as iOS before 17.4 does; nil
+	// answers that they are deprecated.
+	Gestalt map[string]any
 
 	mu         sync.Mutex
 	record     []byte // pair record data saved in usbmuxd
@@ -381,7 +384,17 @@ func (d *Device) serveService(svc string, c net.Conn) {
 			case "All":
 				_ = plistx.WriteFramed(c, map[string]any{"Status": "Success", "Diagnostics": map[string]any{"GasGauge": d.GasGauge, "NAND": map[string]any{"Status": "Success"}}})
 			case "MobileGestalt":
-				_ = plistx.WriteFramed(c, map[string]any{"Status": "Success", "Diagnostics": map[string]any{"MobileGestalt": map[string]any{"Status": "MobileGestaltDeprecated"}}})
+				mg := map[string]any{"Status": "MobileGestaltDeprecated"}
+				if d.Gestalt != nil {
+					mg = map[string]any{"Status": "MobileGestaltSuccess"}
+					keys, _ := req["MobileGestaltKeys"].([]any)
+					for _, k := range keys {
+						if name, _ := k.(string); d.Gestalt[name] != nil {
+							mg[name] = d.Gestalt[name]
+						}
+					}
+				}
+				_ = plistx.WriteFramed(c, map[string]any{"Status": "Success", "Diagnostics": map[string]any{"MobileGestalt": mg}})
 			case "Goodbye":
 				_ = plistx.WriteFramed(c, map[string]any{"Status": "Success"})
 				return

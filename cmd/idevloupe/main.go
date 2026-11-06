@@ -5,7 +5,7 @@
 //	idevloupe -list      list connected devices
 //	idevloupe -report    print the inspection report of the first device (or -udid)
 //	idevloupe -json      the same, as JSON with every raw value
-//	idevloupe -dump-ioreg f.plist   probe the IORegistry, with a summary in f.plist.txt
+//	idevloupe -dump-ioreg f.plist   probe parts' keys and the IORegistry, with a summary in f.plist.txt
 //	-lang en|zh-Hans|de  the language of the report (default: the system's)
 package main
 
@@ -151,8 +151,8 @@ func cli(lang, udid string, asJSON bool) error {
 	return nil
 }
 
-// dumpIORegistry runs the IORegistry probe, writing the responses to path
-// and a summary of them to path.txt.
+// dumpIORegistry runs the probe of keys and the IORegistry, writing the
+// responses to path and a summary of them to path.txt.
 func dumpIORegistry(lang, udid, path string) error {
 	m := locales.In(lang)
 	_, l, err := openDevice(lang, udid)
@@ -160,12 +160,12 @@ func dumpIORegistry(lang, udid, path string) error {
 		return err
 	}
 	defer l.Close()
-	fmt.Fprintln(os.Stderr, m.CliProbing(len(probe.Queries)))
-	results, err := probe.Probe(l, path)
+	fmt.Fprintln(os.Stderr, m.CliProbing(len(probe.Keys)*2+len(probe.Queries)))
+	rep, err := probe.Probe(l, path)
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(path+".txt", []byte(probe.Summary(results, 300)), 0o644); err != nil {
+	if err := os.WriteFile(path+".txt", []byte(probe.Summary(rep, 300)), 0o644); err != nil {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, m.CliWrote(path))

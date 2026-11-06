@@ -238,14 +238,14 @@ func TestProbeIORegistry(t *testing.T) {
 	}
 	defer l.Close()
 	path := filepath.Join(t.TempDir(), "ioreg.plist")
-	results, err := probe.Probe(l, path)
+	rep, err := probe.Probe(l, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(results) != len(probe.Queries) {
-		t.Fatalf("%d results for %d queries", len(results), len(probe.Queries))
+	if len(rep.Queries) != len(probe.Queries) {
+		t.Fatalf("%d results for %d queries", len(rep.Queries), len(probe.Queries))
 	}
-	sum := probe.Summary(results, 100)
+	sum := probe.Summary(rep, 100)
 	for _, want := range []string{
 		"plane=IODeviceTree", "Success", // a query that answered
 		"Failure", // ones the device does not know
