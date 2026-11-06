@@ -3,7 +3,7 @@ package inspect
 import (
 	"strings"
 
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 // view gives typed access to the raw data.

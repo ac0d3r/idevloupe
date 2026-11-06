@@ -22,7 +22,7 @@ import (
 
 	"howett.net/plist"
 
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 // Device is the fake phone's data.

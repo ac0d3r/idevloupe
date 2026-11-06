@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/locales"
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 // buildSections lays out the device information.

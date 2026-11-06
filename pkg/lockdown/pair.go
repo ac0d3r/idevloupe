@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // Pairing is one attempt to pair, kept across the calls of Pair made while

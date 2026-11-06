@@ -8,8 +8,8 @@ import (
 	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/ui"
 
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
 // languages are the languages the window offers, each named in itself.

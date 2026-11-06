@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"idevloupe/internal/device"
-	"idevloupe/internal/fakedevice"
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/probe"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/fakedevice"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/internal/probe"
+	"github.com/ac0d3r/idevloupe/pkg/device"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 func fake(t *testing.T, paired bool) *fakedevice.Device {

@@ -1,8 +1,11 @@
-// Package services implements the few lockdown services the inspection
-// reads: diagnostics_relay (IORegistry, MobileGestalt), installation_proxy
-// (installed apps) and MCInstall (profiles, cloud configuration).
+// Package services reads lockdown services of a device: diagnostics_relay
+// (IORegistry, the "All" diagnostics, MobileGestalt), installation_proxy
+// (installed apps), MCInstall (profiles, cloud configuration), and over AFC
+// the analytics logs that crashreportcopymobile serves. ServiceAvailable
+// tells whether a service is registered at all.
 //
-// All of them exchange 4-byte length-prefixed plists.
+// The plist services exchange 4-byte length-prefixed plists; AFC has its
+// own framing (afc.go).
 package services
 
 import (
@@ -11,9 +14,9 @@ import (
 	"net"
 	"time"
 
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/plistx"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // Service names.

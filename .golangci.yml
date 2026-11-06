@@ -41,4 +41,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - idevloupe
+        - github.com/ac0d3r/idevloupe

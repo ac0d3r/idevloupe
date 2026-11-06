@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 // battery reads the battery, adds what the analytics log knows of it,

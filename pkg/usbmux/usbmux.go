@@ -20,14 +20,13 @@ import (
 
 	"howett.net/plist"
 
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 const (
 	headerSize     = 16
 	versionPlist   = 1
 	messagePlist   = 8
-	clientName     = "idevloupe"
 	libUSBMuxVer   = 3
 	dialTimeout    = 5 * time.Second
 	requestTimeout = 15 * time.Second
@@ -112,13 +111,23 @@ func Dial() (*Conn, error) {
 	return &Conn{c: c}, nil
 }
 
+// ProgName and BundleID name the program to usbmuxd, which logs them, and
+// lockdown sends ProgName as its label. Set them before the first
+// connection. An empty BundleID is not sent.
+var (
+	ProgName = "usbmux"
+	BundleID = ""
+)
+
 // Close closes the connection.
 func (m *Conn) Close() error { return m.c.Close() }
 
 func (m *Conn) send(msg map[string]any) error {
-	msg["ClientVersionString"] = clientName + "-1.0"
-	msg["ProgName"] = clientName
-	msg["BundleID"] = "com.imipy.idevloupe"
+	msg["ClientVersionString"] = ProgName + "-1.0"
+	msg["ProgName"] = ProgName
+	if BundleID != "" {
+		msg["BundleID"] = BundleID
+	}
 	msg["kLibUSBMuxVersion"] = libUSBMuxVer
 	body, err := plist.Marshal(msg, plist.XMLFormat)
 	if err != nil {

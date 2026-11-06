@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/locales"
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 // Analyze turns raw data into a report in the language lang, a tag of

@@ -12,10 +12,10 @@ import (
 
 	"howett.net/plist"
 
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/plistx"
-	"idevloupe/internal/services"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/services"
 )
 
 // Query is one IORegistry lookup of diagnostics_relay.

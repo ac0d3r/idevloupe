@@ -1,4 +1,4 @@
-module idevloupe
+module github.com/ac0d3r/idevloupe
 
 go 1.27.3
 

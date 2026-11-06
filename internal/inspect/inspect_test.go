@@ -8,7 +8,7 @@ import (
 	"time"
 	"unicode"
 
-	"idevloupe/internal/services"
+	"github.com/ac0d3r/idevloupe/pkg/services"
 )
 
 var now = time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // TestScreenshots renders the download page's screenshots, of the

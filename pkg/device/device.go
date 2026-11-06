@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // ErrNotTrusted means the device has no valid pair record with this host;

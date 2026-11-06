@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
 // Model is what an identifier such as "iPhone16,1" is.

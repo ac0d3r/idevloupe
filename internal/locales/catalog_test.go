@@ -20,7 +20,7 @@ import (
 func sources(t *testing.T) map[string][]byte {
 	t.Helper()
 	out := map[string][]byte{}
-	for _, dir := range []string{"../../cmd", "../../internal"} {
+	for _, dir := range []string{"../../cmd", "../../internal", "../../pkg"} {
 		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() || !strings.HasSuffix(path, ".go") ||
 				strings.HasSuffix(path, "_test.go") || strings.HasSuffix(path, "_gen.go") {

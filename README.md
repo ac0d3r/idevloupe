@@ -55,14 +55,20 @@ Linux 可执行文件、`.deb`、`.tar.gz`、PKGBUILD。配置在 `mygo.json`，
 
 ## 结构
 
+`pkg/` 是与设备通信的库，不依赖应用本身，可单独使用（`github.com/ac0d3r/idevloupe/pkg/...`）；
+`internal/` 是应用：检测规则、界面与文字。
+
 | 包 | 作用 |
 |---|---|
-| `internal/usbmux` | usbmuxd 协议：设备列表、热插拔、配对记录、端口连接 |
-| `internal/lockdown` | lockdownd：GetValue、StartSession（TLS）、StartService、配对（证书生成） |
-| `internal/services` | diagnostics_relay（IORegistry/All/MobileGestalt）、installation_proxy、MCInstall、afc2 探测、AFC 与系统分析日志（crashreportmover / crashreportcopymobile） |
+| `pkg/plistx` | plist 帧读写与松散类型取值 |
+| `pkg/usbmux` | usbmuxd 协议：设备列表、热插拔、配对记录、端口连接 |
+| `pkg/lockdown` | lockdownd：GetValue、StartSession（TLS）、StartService、配对（证书生成） |
+| `pkg/services` | diagnostics_relay（IORegistry/All/MobileGestalt）、installation_proxy、MCInstall、服务探测、AFC 与系统分析日志（crashreportmover / crashreportcopymobile） |
+| `pkg/device` | 打开受信任的会话、配对、读取基本信息 |
 | `internal/inspect` | 采集 → 分析 → 报告（纯函数，可用录制数据测试） |
 | `internal/gui` | MyGo 界面 |
 | `internal/locales` | 三种语言的文字（JSON）与生成的 Go 函数 |
+| `internal/probe` | 逐项查询 IORegistry（`-dump-ioreg`），用于寻找新的部件字段 |
 | `internal/fakedevice` | 测试用的假 usbmuxd + 假 iPhone |
 
 协议实现参考 go-ios（MIT）、ipsw `pkg/usb`（MIT）与 libimobiledevice，只取 lockdown 通道需要的部分，

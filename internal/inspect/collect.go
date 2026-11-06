@@ -6,9 +6,9 @@ import (
 	"net"
 	"regexp"
 
-	"idevloupe/internal/locales"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/services"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/services"
 )
 
 // Domains read besides the root domain.

@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
 // Status is the outcome of a check.

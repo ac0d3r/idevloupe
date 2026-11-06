@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"idevloupe/internal/locales"
-	"idevloupe/internal/plistx"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
 // faceID checks Face ID's self test, as the Pearl driver reports it. Its

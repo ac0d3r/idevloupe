@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
 // Text renders the report as plain text, in its language, for copying and

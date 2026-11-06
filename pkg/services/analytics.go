@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
 )
 
 // Crash report services. The mover moves logs, the analytics logs among

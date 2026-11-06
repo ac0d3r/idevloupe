@@ -9,7 +9,7 @@ import (
 	"net"
 	"testing"
 
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // The device verifies that the host certificate chains to the root it was

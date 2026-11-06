@@ -12,10 +12,10 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/services"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/services"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 func sampleRaw() *inspect.RawData {

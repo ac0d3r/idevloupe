@@ -14,11 +14,11 @@ import (
 	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 
-	"idevloupe/internal/device"
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/locales"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/device"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 type phase int
