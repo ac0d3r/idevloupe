@@ -35,11 +35,11 @@ type Messages struct{ locale string }
 // source language.
 func In(locale string) Messages { return Messages{locale} }
 
-// AppTagline says "iPhone inspection"
+// AppTagline says "iPhone management"
 // in the language the app shows.
 func AppTagline() string { return In(i18n.Locale()).AppTagline() }
 
-// AppTagline says "iPhone inspection"
+// AppTagline says "iPhone management"
 // in the language of msgs.
 func (msgs Messages) AppTagline() string {
 	return Catalog.Format(msgs.locale, "appTagline", nil)

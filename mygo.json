@@ -11,7 +11,7 @@
   },
   "linux": {
     "webview": false,
-    "comment": "iPhone inspection tool",
+    "comment": "iPhone management tool",
     "depends": [
       "usbmuxd"
     ]

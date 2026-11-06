@@ -1,4 +1,5 @@
-// Command idevloupe inspects iPhones connected by USB.
+// Command idevloupe manages iPhones connected by USB from the desktop; for
+// now it inspects them.
 //
 //	idevloupe            open the desktop window
 //	idevloupe -list      list connected devices

@@ -1,6 +1,7 @@
-# iDevLoupe · iPhone 验机
+# iDevLoupe
 
-纯 Go（`CGO_ENABLED=0`）的 iPhone 验机桌面程序，界面使用 [MyGo](https://github.com/egoist/mygo) Native UI。
+纯 Go（`CGO_ENABLED=0`）的 iPhone 设备管理桌面工具，界面使用 [MyGo](https://github.com/egoist/mygo) Native UI。
+目前提供验机；备份解析、照片管理等功能计划中。
 
 ```sh
 make run      # 打开窗口
