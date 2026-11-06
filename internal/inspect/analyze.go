@@ -342,8 +342,24 @@ func (a *analysis) activation() {
 
 // findMy checks Activation Lock.
 func (a *analysis) findMy() {
-	m, v := a.m, a.v
+	m := a.m
 	sec := m.CategorySecurity()
+	fmOn, fmOK, fmDetail := a.findMyState()
+	if fmOK {
+		if fmOn {
+			a.add(sec, m.CheckFindMy(), m.FindMyOn(), Warn, joinWith(m.JoinSentences, fmDetail, m.FindMyOnDetail()))
+		} else {
+			a.add(sec, m.CheckFindMy(), m.ValueOff(), Pass, fmDetail)
+		}
+	} else {
+		a.add(sec, m.CheckFindMy(), "", Unknown, m.FindMyUnknown())
+	}
+}
+
+// findMyState reads whether Find My is on, from its lockdown domain or
+// else NVRAM, and where NVRAM was the source, says so in detail.
+func (a *analysis) findMyState() (on, ok bool, detail string) {
+	m, v := a.m, a.v
 	fmOn, fmOK := v.domainBool("com.apple.fmip", "IsAssociated")
 	fmDetail := ""
 	if !fmOK {
@@ -359,15 +375,7 @@ func (a *analysis) findMy() {
 			}
 		}
 	}
-	if fmOK {
-		if fmOn {
-			a.add(sec, m.CheckFindMy(), m.FindMyOn(), Warn, joinWith(m.JoinSentences, fmDetail, m.FindMyOnDetail()))
-		} else {
-			a.add(sec, m.CheckFindMy(), m.ValueOff(), Pass, fmDetail)
-		}
-	} else {
-		a.add(sec, m.CheckFindMy(), "", Unknown, m.FindMyUnknown())
-	}
+	return fmOn, fmOK, fmDetail
 }
 
 // supervision checks whether the unit is supervised.

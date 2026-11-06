@@ -95,8 +95,10 @@ func (a *App) View(c *ui.Context) {
 		c.Toast(a.toast)
 		a.toast = ""
 	}
-	// Reports follow the language: one made in another is made again.
+	// Overviews and reports follow the language: one made in another is
+	// made again.
 	for _, d := range a.devices {
+		d.overviewIn(c.Locale())
 		d.reportIn(c.Locale())
 	}
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
@@ -179,10 +181,15 @@ func (a *App) deviceItem(c *ui.Context, d *devState, selected bool) {
 		a.selected = d.dev.UDID
 	}
 	var dot ui.Color
-	switch d.phase {
-	case phaseDone:
+	switch {
+	case d.report != nil && (d.phase == phaseDone || d.phase == phaseReady):
 		_, st := d.report.Verdict()
 		dot = statusColor(t, st)
+	case d.phase == phaseReady:
+		dot = t.Accent
+	}
+	switch d.phase {
+	case phaseDone, phaseReady:
 	case phaseError:
 		dot = t.Danger
 	case phasePairing:
@@ -217,6 +224,8 @@ func (a *App) mainPane(c *ui.Context) {
 		step = d.step(lang)
 	}
 	switch d.phase {
+	case phaseReady:
+		a.overviewView(c, d)
 	case phaseDone:
 		a.reportView(c, d)
 	case phasePairing:
@@ -239,7 +248,13 @@ func (a *App) mainPane(c *ui.Context) {
 				ui.Text(c, inspect.ErrorText(lang, d.err)).TextColor(c.Theme().TextMuted).TextAlign(ui.Center).Selectable().MaxWidth(520).Wrap()
 			}
 			if ui.PrimaryButton(c, m.Retry()).Margin(6, 0, 0, 0).Clicked() {
-				a.start(d)
+				// An inspection that failed is tried again; a connection,
+				// made again.
+				if d.info != nil {
+					a.inspectDevice(d)
+				} else {
+					a.start(d)
+				}
 			}
 		})
 	default:
@@ -280,48 +295,133 @@ func (a *App) emptyState(c *ui.Context) {
 	})
 }
 
+// summaryHeader names the unit: its model, then the identity buyers copy
+// (capacity, iOS and serial number), its color, region and part number.
+func summaryHeader(c *ui.Context, s inspect.Summary) {
+	t := c.Theme()
+	m := locales.In(c.Locale())
+	ui.Column(c).Grow(1).MinWidth(0).Gap(8).Children(func() {
+		ui.Text(c, s.Marketing).FontSize(24).Bold().SingleLine()
+		ui.Row(c).Gap(6).Wrap().Children(func() {
+			chip := func(v string) ui.Element {
+				if v == "" {
+					return ui.Element{}
+				}
+				return ui.Text(c, v).FontSize(12).Padding(3, 9).Radius(999).Background(t.Text.Alpha(0.06)).SingleLine()
+			}
+			chip(s.Capacity)
+			if s.IOS != "" {
+				chip("iOS " + s.IOS)
+			}
+			if s.Serial != "" {
+				chip(m.ChipSerial(s.Serial)).Selectable()
+			}
+			if s.ColorHex != "" {
+				ui.Row(c).Gap(5).Padding(3, 9).Radius(999).Background(t.Text.Alpha(0.06)).Children(func() {
+					ui.Box(c).Size(10, 10).Radius(5).Background(ui.Hex(s.ColorHex)).Border(1, t.Border)
+					ui.Text(c, s.ColorHex).FontSize(12)
+				})
+			}
+			chip(s.Region)
+			chip(s.ModelNumber)
+		})
+	})
+}
+
+// overviewView shows what the device says about itself, judging nothing:
+// the inspection runs when asked for.
+func (a *App) overviewView(c *ui.Context, d *devState) {
+	o := d.overviewIn(c.Locale())
+	t := c.Theme()
+	m := locales.In(o.Lang)
+	ui.Column(c).Fill().Children(func() {
+		ui.Column(c).Padding(22, 28, 18, 28).Gap(10).Children(func() {
+			ui.Row(c).Gap(16).AlignItems(ui.Start).Children(func() {
+				summaryHeader(c, o.Summary)
+				ui.Row(c).Gap(8).Children(func() {
+					if d.report != nil {
+						if ui.Button(c, "").Children(func() {
+							ui.Icon(c, icCheck)
+							ui.Text(c, m.ActionViewReport()).SingleLine()
+						}).Clicked() {
+							d.phase = phaseDone
+						}
+					}
+					if ui.PrimaryButton(c, "").Children(func() {
+						ui.Icon(c, icLoupe)
+						ui.Text(c, m.ActionInspect()).SingleLine()
+					}).Clicked() {
+						a.inspectDevice(d)
+					}
+				})
+			})
+			muted(c, m.OverviewHint()).Wrap()
+		})
+		ui.Divider(c)
+		ui.Scroll(c).Grow(1).Padding(20, 28, 28, 28).Gap(16).Children(func() {
+			if len(o.Fields) > 0 {
+				card(c.Key("fields")).Padding(16, 18).Children(func() {
+					ui.Grid(c).ColumnTracks(ui.Fixed(130), ui.Fr(1), ui.Fixed(130), ui.Fr(1)).GapX(12).GapY(10).Selectable().Children(func() {
+						for _, f := range o.Fields {
+							ui.Text(c, f.Label).FontSize(13).TextColor(t.TextMuted).Wrap()
+							ui.Text(c, f.Value).FontSize(13).Wrap()
+						}
+					})
+				})
+			}
+			if total := o.StorageTotal; total > 0 {
+				card(c.Key("storage")).Padding(16, 18).Gap(10).Children(func() {
+					used := total - o.StorageFree
+					ui.Row(c).Children(func() {
+						ui.Text(c, m.CheckStorage()).FontSize(13).Bold()
+						ui.Spacer(c)
+						if o.StorageFree > 0 {
+							muted(c, m.StorageUsage(float64(used)/1e9, float64(total)/1e9))
+						} else {
+							muted(c, m.ValueGB(float64(total)/1e9))
+						}
+					})
+					if o.StorageFree > 0 {
+						ui.Box(c).Height(8).Radius(4).Background(t.Text.Alpha(0.08)).Children(func() {
+							ui.Box(c).Height(8).Radius(4).WidthPercent(float32(used) * 100 / float32(total)).Background(t.Accent)
+						})
+					}
+				})
+			}
+			open := a.detailsOpen
+			card(c.Key("details")).Padding(6, 12).Children(func() {
+				if ui.Collapsible(c, m.OverviewDetails(), &open, func() {
+					ui.Column(c).Padding(4, 4, 10, 4).Children(func() {
+						sectionsGrid(c, o.Sections)
+					})
+				}).Changed() {
+					a.detailsOpen = open
+				}
+			})
+		})
+	})
+}
+
 func (a *App) reportView(c *ui.Context, d *devState) {
 	r := d.reportIn(c.Locale())
-	t := c.Theme()
 	m := locales.In(r.Lang)
 	ui.Column(c).Fill().Children(func() {
 		// Header
 		ui.Column(c).Padding(22, 28, 0, 28).Gap(16).Children(func() {
 			ui.Row(c).Gap(16).AlignItems(ui.Start).Children(func() {
-				ui.Column(c).Grow(1).MinWidth(0).Gap(8).Children(func() {
-					ui.Text(c, r.Summary.Marketing).FontSize(24).Bold().SingleLine()
-					ui.Row(c).Gap(6).Wrap().Children(func() {
-						chip := func(s string) ui.Element {
-							if s == "" {
-								return ui.Element{}
-							}
-							return ui.Text(c, s).FontSize(12).Padding(3, 9).Radius(999).Background(t.Text.Alpha(0.06)).SingleLine()
-						}
-						// The identity of the unit first: capacity, iOS and
-						// serial number, which buyers copy.
-						chip(r.Summary.Capacity)
-						if r.Summary.IOS != "" {
-							chip("iOS " + r.Summary.IOS)
-						}
-						if r.Summary.Serial != "" {
-							chip(m.ChipSerial(r.Summary.Serial)).Selectable()
-						}
-						if r.Summary.ColorHex != "" {
-							ui.Row(c).Gap(5).Padding(3, 9).Radius(999).Background(t.Text.Alpha(0.06)).Children(func() {
-								ui.Box(c).Size(10, 10).Radius(5).Background(ui.Hex(r.Summary.ColorHex)).Border(1, t.Border)
-								ui.Text(c, r.Summary.ColorHex).FontSize(12)
-							})
-						}
-						chip(r.Summary.Region)
-						chip(r.Summary.ModelNumber)
-					})
-				})
+				summaryHeader(c, r.Summary)
 				ui.Row(c).Gap(8).Children(func() {
+					if ui.Button(c, "").Children(func() {
+						ui.Icon(c, icPhone)
+						ui.Text(c, m.ActionOverview()).SingleLine()
+					}).Clicked() {
+						d.phase = phaseReady
+					}
 					if ui.Button(c, "").Tooltip(m.ActionInspectAgain()).Children(func() {
 						ui.Icon(c, icRefresh)
 						ui.Text(c, m.ActionInspectAgain()).SingleLine()
 					}).Clicked() {
-						a.start(d)
+						a.inspectDevice(d)
 					}
 					if ui.Button(c, "").Children(func() {
 						ui.Icon(c, icCopy)
@@ -348,7 +448,7 @@ func (a *App) reportView(c *ui.Context, d *devState) {
 			case 1:
 				a.batteryTab(c, r)
 			case 2:
-				a.infoTab(c, r)
+				sectionsGrid(c, r.Sections)
 			case 3:
 				a.rawTab(c, r)
 			}
@@ -585,10 +685,11 @@ func (a *App) batteryTab(c *ui.Context, r *inspect.Report) {
 	}
 }
 
-func (a *App) infoTab(c *ui.Context, r *inspect.Report) {
+// sectionsGrid lays out the device information, two sections a row.
+func sectionsGrid(c *ui.Context, secs []inspect.Section) {
 	t := c.Theme()
 	ui.Grid(c).Columns(2).Gap(16).AlignItems(ui.Start).Children(func() {
-		for _, sec := range r.Sections {
+		for _, sec := range secs {
 			card(c.Key(sec.Title)).Padding(14, 16).Gap(10).Children(func() {
 				ui.Text(c, sec.Title).FontSize(13).Bold()
 				ui.Grid(c).ColumnTracks(ui.Fixed(150), ui.Fr(1)).GapX(12).GapY(8).Selectable().Children(func() {

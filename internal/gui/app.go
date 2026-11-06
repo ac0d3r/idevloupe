@@ -26,8 +26,9 @@ type phase int
 const (
 	phaseConnecting phase = iota
 	phasePairing
+	phaseReady // the overview is shown
 	phaseInspecting
-	phaseDone
+	phaseDone // the report is shown
 	phaseError
 )
 
@@ -40,8 +41,12 @@ type devState struct {
 	// step says what the inspection is doing, in a language.
 	step func(lang string) string
 	err  error
-	// raw is what the inspection read; report is made from it in the
+	// info is what was read on connecting; overview is made from it in the
 	// window's language, and made again when that changes.
+	info     *inspect.RawData
+	infoTime time.Time
+	overview *inspect.Overview
+	// raw is what the inspection read, the report likewise made from it.
 	raw    *inspect.RawData
 	time   time.Time
 	report *inspect.Report
@@ -73,6 +78,25 @@ func (d *devState) reportIn(lang string) *inspect.Report {
 	return d.report
 }
 
+// overviewIn returns the overview in lang, made from what was read on
+// connecting, or else from the inspection's data.
+func (d *devState) overviewIn(lang string) *inspect.Overview {
+	raw, at := d.info, d.infoTime
+	if d.raw != nil {
+		raw, at = d.raw, d.time
+	}
+	if raw == nil {
+		return nil
+	}
+	if d.overview == nil || d.overview.Lang != lang {
+		d.overview = inspect.Describe(raw, at, lang)
+		if d.overview.Summary.DeviceName != "" {
+			d.basic.DeviceName = d.overview.Summary.DeviceName
+		}
+	}
+	return d.overview
+}
+
 func (d *devState) title(lang string) string {
 	if d.basic.DeviceName != "" {
 		return d.basic.DeviceName
@@ -81,9 +105,9 @@ func (d *devState) title(lang string) string {
 }
 
 func (d *devState) subtitle(lang string) string {
-	if r := d.reportIn(lang); r != nil {
+	if o := d.overviewIn(lang); o != nil {
 		var parts []string
-		for _, p := range []string{r.Summary.Marketing, r.Summary.Capacity} {
+		for _, p := range []string{o.Summary.Marketing, o.Summary.Capacity} {
 			if p != "" {
 				parts = append(parts, p)
 			}
@@ -110,6 +134,8 @@ type App struct {
 	toast    string
 
 	rawOpen map[string]bool
+	// detailsOpen is whether the overview's device details are shown.
+	detailsOpen bool
 
 	// setLocale changes the app's language; tests replace it.
 	setLocale func(tag string)
@@ -226,22 +252,32 @@ func (a *App) handle(ev usbmux.Event) {
 	a.start(d)
 }
 
-// start runs an inspection of d in the background.
+// start connects to d in the background, pairing if need be, and reads
+// what its overview shows.
 func (a *App) start(d *devState) {
+	d.info, d.overview, d.raw, d.report = nil, nil, nil, nil
+	d.phase, d.step, d.err = phaseConnecting, stepOf(locales.Messages.StepConnecting), nil
+	ctx, set := a.run(d)
+	go a.connect(ctx, set, d, d.dev)
+}
+
+// inspectDevice runs an inspection of d in the background.
+func (a *App) inspectDevice(d *devState) {
+	d.phase, d.step, d.err = phaseInspecting, stepOf(locales.Messages.StepInspecting), nil
+	_, set := a.run(d)
+	go a.inspect(set, d, d.dev)
+}
+
+// run cancels what runs for d and returns the context of the work that
+// replaces it, and its setter, which changes d on the main thread while
+// the work is current.
+func (a *App) run(d *devState) (context.Context, func(fn func())) {
 	if d.cancel != nil {
 		d.cancel()
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	d.cancel = cancel
-	d.phase, d.step, d.err = phaseConnecting, stepOf(locales.Messages.StepConnecting), nil
-	go a.inspect(ctx, d, d.dev)
-}
-
-// inspect runs on its own goroutine: it reads nothing of d, which the
-// main thread owns, and changes it through set. dev is d's device as the
-// inspection began.
-func (a *App) inspect(ctx context.Context, d *devState, dev usbmux.Device) {
-	set := func(fn func()) {
+	return ctx, func(fn func()) {
 		if ctx.Err() != nil {
 			return
 		}
@@ -251,6 +287,12 @@ func (a *App) inspect(ctx context.Context, d *devState, dev usbmux.Device) {
 			}
 		})
 	}
+}
+
+// connect runs on its own goroutine: it reads nothing of d, which the
+// main thread owns, and changes it through set. dev is d's device as the
+// work began.
+func (a *App) connect(ctx context.Context, set func(func()), d *devState, dev usbmux.Device) {
 	fail := func(err error) {
 		set(func() { d.phase, d.err = phaseError, err })
 	}
@@ -296,17 +338,36 @@ func (a *App) inspect(ctx context.Context, d *devState, dev usbmux.Device) {
 		// Paired: open the session on the next turn of the loop.
 	}
 
-	set(func() { d.phase, d.step = phaseInspecting, stepOf(locales.Messages.StepInspecting) })
-	raw, err := inspect.Collect(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }), func(step inspect.Step) {
-		set(func() { d.step = func(lang string) string { return step.Text(lang, "") } })
-	})
+	set(func() { d.phase, d.step = phaseConnecting, stepOf(locales.Messages.StepDeviceInfo) })
+	info, err := inspect.CollectInfo(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }))
 	if err != nil {
 		fail(err)
 		return
 	}
 	now := time.Now()
 	set(func() {
-		d.raw, d.time, d.report = raw, now, nil
+		d.info, d.infoTime, d.overview = info, now, nil
+		d.phase = phaseReady
+	})
+}
+
+// inspect runs on its own goroutine, as connect does.
+func (a *App) inspect(set func(func()), d *devState, dev usbmux.Device) {
+	l, err := device.Open(dev)
+	if err != nil {
+		set(func() { d.phase, d.err = phaseError, err })
+		return
+	}
+	raw, err := inspect.Collect(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }), func(step inspect.Step) {
+		set(func() { d.step = func(lang string) string { return step.Text(lang, "") } })
+	})
+	if err != nil {
+		set(func() { d.phase, d.err = phaseError, err })
+		return
+	}
+	now := time.Now()
+	set(func() {
+		d.raw, d.time, d.report, d.overview = raw, now, nil, nil
 		d.phase = phaseDone
 	})
 }

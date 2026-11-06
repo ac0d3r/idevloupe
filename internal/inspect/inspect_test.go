@@ -724,3 +724,31 @@ func TestLanguages(t *testing.T) {
 		t.Errorf("English health value %q", got)
 	}
 }
+
+// The overview and the report read Find My the same way, NVRAM included
+// when the fmip domain is missing.
+func TestOverviewFindMyFromNVRAM(t *testing.T) {
+	raw := &RawData{
+		Root: map[string]any{"ProductType": "iPhone14,2", "NonVolatileRAM": map[string]any{
+			"fm-activation-locked": []byte("YES"), "fm-account-masked": []byte("a•••@icloud.com"),
+		}},
+		Domains: map[string]map[string]any{},
+	}
+	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
+	o := Describe(raw, now, "en")
+	got := ""
+	for _, f := range o.Fields {
+		if f.Label == "Find My iPhone" {
+			got = f.Value
+		}
+	}
+	var check Check
+	for _, c := range Analyze(raw, now, "en").Checks {
+		if c.Title == "Find My iPhone" {
+			check = c
+		}
+	}
+	if check.Status != Warn || got == "" || got != check.Value {
+		t.Errorf("overview %q, report %+v", got, check)
+	}
+}

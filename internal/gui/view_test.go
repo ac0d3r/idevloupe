@@ -212,7 +212,7 @@ func testApp() *App {
 func TestViews(t *testing.T) {
 	a := testApp()
 	tt := shot(t, a, "empty", false)
-	if !tt.HasText("连接 iPhone 开始验机") {
+	if !tt.HasText("连接你的 iPhone") {
 		t.Errorf("empty state texts %q", tt.Texts())
 	}
 
@@ -237,6 +237,42 @@ func TestViews(t *testing.T) {
 	}
 	a.selected = "x2"
 	shot(t, a, "pairing", false)
+}
+
+// On connecting, the window shows what the device says about itself and
+// judges nothing until asked to inspect it.
+func TestOverview(t *testing.T) {
+	a := testApp()
+	d := &devState{dev: usbmux.Device{DeviceID: 1, UDID: "u", ConnectionType: "USB"}, phase: phaseReady, info: sampleRaw(), infoTime: testTime}
+	a.devices, a.selected = []*devState{d}, "u"
+	a.detailsOpen = true
+	tt := shot(t, a, "overview", false)
+	texts := strings.Join(tt.Texts(), "\n")
+	for _, w := range []string{"iPhone 13 Pro", "验机", "已激活", "查找我的 iPhone", "已开启（激活锁）", "H4K2L9QXWT", "电池健康", "84%", "612 次", "已用 156.0 GB，共 256.0 GB", "设备详情", "硬件"} {
+		if !strings.Contains(texts, w) {
+			t.Errorf("overview lacks %q in\n%s", w, texts)
+		}
+	}
+	for _, w := range []string{"通过", "警告", "需要关注", "验机报告"} {
+		if strings.Contains(texts, w) {
+			t.Errorf("overview judges: %q", w)
+		}
+	}
+	shot(t, a, "overview-dark", true)
+	for _, lang := range []string{"en", "de"} {
+		shotIn(t, a, "overview-"+lang, false, lang)
+	}
+	// Inspecting starts from the button. The device is not real: what the
+	// worker finds is dropped.
+	t.Setenv("USBMUXD_SOCKET_ADDRESS", "tcp://127.0.0.1:1")
+	a.update = func(func()) {}
+	tt = shot(t, a, "overview", false)
+	if err := tt.Click("验机"); err != nil {
+		t.Fatal(err)
+	}
+	if d.phase != phaseInspecting || d.info == nil {
+		t.Errorf("phase %v, info %v after clicking Inspect", d.phase, d.info != nil)
+	}
 }
 
 // The window says everything in its language, the report included, made

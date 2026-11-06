@@ -86,8 +86,8 @@ type RawData struct {
 	Errors []*StepError
 }
 
-func (r *RawData) fail(step Step, target string, err error) {
-	r.Errors = append(r.Errors, &StepError{Step: step, Target: target, Err: err})
+func (raw *RawData) fail(step Step, target string, err error) {
+	raw.Errors = append(raw.Errors, &StepError{Step: step, Target: target, Err: err})
 }
 
 // Step is a step of the collection, which Collect reports as it begins
@@ -260,6 +260,32 @@ func (s *session) close() {
 	}
 }
 
+// CollectInfo reads what the overview shows: lockdown's values and the
+// battery gauge. It is quick and judges nothing; Collect reads the rest an
+// inspection needs.
+func CollectInfo(open Opener) (*RawData, error) {
+	ss := &session{open: open}
+	defer ss.close()
+	raw := &RawData{Domains: map[string]map[string]any{}}
+	if err := raw.readLockdown(ss); err != nil {
+		return nil, err
+	}
+	err := ss.do(func(l *lockdown.Client) error {
+		diag, err := services.OpenDiagnostics(l)
+		if err != nil {
+			return err
+		}
+		defer diag.Close()
+		raw.readBattery(diag)
+		return nil
+	})
+	if err != nil {
+		raw.fail(StepStartDiagnostics, "", err)
+	}
+	raw.scrub()
+	return raw, nil
+}
+
 // Collect reads a device through trusted lockdown sessions that open
 // makes: the first is used for every step, and replaced when a step leaves
 // it unusable. It reads as much as it can and records what failed; it fails
@@ -276,61 +302,18 @@ func Collect(open Opener, progress func(Step)) (*RawData, error) {
 	raw := &RawData{Domains: map[string]map[string]any{}}
 
 	say(StepDeviceInfo)
-	err := ss.do(func(l *lockdown.Client) error {
-		raw.UDID = l.Device().UDID
-		root, err := l.GetDomain("")
-		if err != nil {
-			return err
-		}
-		raw.Root = root
-		return nil
-	})
-	if err != nil {
-		return nil, &StepError{Step: StepDeviceInfo, Err: err}
-	}
-	for _, k := range rootKeys {
-		if _, ok := raw.Root[k]; ok {
-			continue
-		}
-		_ = ss.do(func(l *lockdown.Client) error {
-			v, err := l.GetValue("", k)
-			if err == nil {
-				raw.Root[k] = v
-			}
-			if errors.Is(err, lockdown.ErrMissingValue) {
-				return nil
-			}
-			return err
-		})
-	}
-
-	for _, d := range Domains {
-		err := ss.do(func(l *lockdown.Client) error {
-			m, err := l.GetDomain(d)
-			if err == nil {
-				raw.Domains[d] = m
-			}
-			return err
-		})
-		if err != nil && !errors.Is(err, lockdown.ErrMissingValue) {
-			raw.fail(StepReadDomain, d, err)
-		}
+	if err := raw.readLockdown(ss); err != nil {
+		return nil, err
 	}
 
 	say(StepDiagnostics)
-	err = ss.do(func(l *lockdown.Client) error {
+	err := ss.do(func(l *lockdown.Client) error {
 		diag, err := services.OpenDiagnostics(l)
 		if err != nil {
 			return err
 		}
 		defer diag.Close()
-		if reg, err := diag.IORegistry("", "", "IOPMPowerSource"); err == nil {
-			raw.BatteryReg = reg
-		} else if reg, err2 := diag.IORegistry("", "AppleSmartBattery", ""); err2 == nil {
-			raw.BatteryReg = reg
-		} else {
-			raw.fail(StepReadBattery, "", err)
-		}
+		raw.readBattery(diag)
 		if reg, err := diag.IORegistry("", "", "IOPlatformExpertDevice"); err == nil {
 			raw.PlatformReg = reg
 		}
@@ -380,12 +363,73 @@ func Collect(open Opener, progress func(Step)) (*RawData, error) {
 	if raw.MCErr != nil {
 		raw.fail(StepReadProfiles, "", raw.MCErr)
 	}
+	raw.scrub()
+	return raw, nil
+}
+
+// readLockdown reads the root domain, the root keys it left out, and the
+// other domains. It fails only when the root domain cannot be read.
+func (raw *RawData) readLockdown(ss *session) error {
+	err := ss.do(func(l *lockdown.Client) error {
+		raw.UDID = l.Device().UDID
+		root, err := l.GetDomain("")
+		if err != nil {
+			return err
+		}
+		raw.Root = root
+		return nil
+	})
+	if err != nil {
+		return &StepError{Step: StepDeviceInfo, Err: err}
+	}
+	for _, k := range rootKeys {
+		if _, ok := raw.Root[k]; ok {
+			continue
+		}
+		_ = ss.do(func(l *lockdown.Client) error {
+			v, err := l.GetValue("", k)
+			if err == nil {
+				raw.Root[k] = v
+			}
+			if errors.Is(err, lockdown.ErrMissingValue) {
+				return nil
+			}
+			return err
+		})
+	}
+	for _, d := range Domains {
+		err := ss.do(func(l *lockdown.Client) error {
+			m, err := l.GetDomain(d)
+			if err == nil {
+				raw.Domains[d] = m
+			}
+			return err
+		})
+		if err != nil && !errors.Is(err, lockdown.ErrMissingValue) {
+			raw.fail(StepReadDomain, d, err)
+		}
+	}
+	return nil
+}
+
+// readBattery reads the battery's IORegistry entry.
+func (raw *RawData) readBattery(diag *services.DiagnosticsClient) {
+	if reg, err := diag.IORegistry("", "", "IOPMPowerSource"); err == nil {
+		raw.BatteryReg = reg
+	} else if reg, err2 := diag.IORegistry("", "AppleSmartBattery", ""); err2 == nil {
+		raw.BatteryReg = reg
+	} else {
+		raw.fail(StepReadBattery, "", err)
+	}
+}
+
+// scrub drops the subscriber values from everything read.
+func (raw *RawData) scrub() {
 	scrubSubscriber(raw.Root)
 	for _, m := range raw.Domains {
 		scrubSubscriber(m)
 	}
 	scrubSubscriber(raw.Gestalt)
-	return raw, nil
 }
 
 // subscriberKeyRe matches the values that identify the SIM card's owner

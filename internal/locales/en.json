@@ -807,11 +807,11 @@
   "pairingHint": "Unlock the iPhone and choose “Trust” when it asks “Trust This Computer?”",
   "errorTitle": "Inspection not finished",
   "retry": "Retry",
-  "emptyTitle": "Connect an iPhone to inspect it",
-  "emptySubtitle": "Reads the hardware, system and security information the device reports, and gives a verdict on each item",
+  "emptyTitle": "Connect an iPhone",
+  "emptySubtitle": "Shows the information the device reports once it is connected; Inspect checks its hardware, system and security item by item",
   "emptyStepConnect": "Connect it to the computer with a cable",
   "emptyStepTrust": "Unlock it and tap “Trust”",
-  "emptyStepDone": "The inspection runs by itself",
+  "emptyStepDone": "Review its information, then inspect it",
   "chipSerial": "Serial {serial}",
   "@chipSerial": {
     "placeholders": {
@@ -977,5 +977,22 @@
   "regionTU": "Turkey",
   "regionPL": "Poland",
   "regionKN": "Norway",
-  "regionKS": "Finland / Sweden"
+  "regionKS": "Finland / Sweden",
+  "fieldManufactured": "Manufactured",
+  "actionInspect": "Inspect",
+  "actionViewReport": "View report",
+  "actionOverview": "Overview",
+  "overviewDetails": "Device details",
+  "overviewHint": "Inspecting also reads the diagnostics, battery logs, apps and profiles, and gives a verdict on each item",
+  "storageUsage": "{used, number, ::.0} GB used of {total, number, ::.0} GB",
+  "@storageUsage": {
+    "placeholders": {
+      "used": {
+        "type": "double"
+      },
+      "total": {
+        "type": "double"
+      }
+    }
+  }
 }

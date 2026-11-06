@@ -3167,21 +3167,21 @@ func (msgs Messages) Retry() string {
 	return Catalog.Format(msgs.locale, "retry", nil)
 }
 
-// EmptyTitle says "Connect an iPhone to inspect it"
+// EmptyTitle says "Connect an iPhone"
 // in the language the app shows.
 func EmptyTitle() string { return In(i18n.Locale()).EmptyTitle() }
 
-// EmptyTitle says "Connect an iPhone to inspect it"
+// EmptyTitle says "Connect an iPhone"
 // in the language of msgs.
 func (msgs Messages) EmptyTitle() string {
 	return Catalog.Format(msgs.locale, "emptyTitle", nil)
 }
 
-// EmptySubtitle says "Reads the hardware, system and security information the device reports, and gives a verdict on each item"
+// EmptySubtitle says "Shows the information the device reports once it is connected; Inspect checks its hardware, system and security item …"
 // in the language the app shows.
 func EmptySubtitle() string { return In(i18n.Locale()).EmptySubtitle() }
 
-// EmptySubtitle says "Reads the hardware, system and security information the device reports, and gives a verdict on each item"
+// EmptySubtitle says "Shows the information the device reports once it is connected; Inspect checks its hardware, system and security item …"
 // in the language of msgs.
 func (msgs Messages) EmptySubtitle() string {
 	return Catalog.Format(msgs.locale, "emptySubtitle", nil)
@@ -3207,11 +3207,11 @@ func (msgs Messages) EmptyStepTrust() string {
 	return Catalog.Format(msgs.locale, "emptyStepTrust", nil)
 }
 
-// EmptyStepDone says "The inspection runs by itself"
+// EmptyStepDone says "Review its information, then inspect it"
 // in the language the app shows.
 func EmptyStepDone() string { return In(i18n.Locale()).EmptyStepDone() }
 
-// EmptyStepDone says "The inspection runs by itself"
+// EmptyStepDone says "Review its information, then inspect it"
 // in the language of msgs.
 func (msgs Messages) EmptyStepDone() string {
 	return Catalog.Format(msgs.locale, "emptyStepDone", nil)
@@ -3979,4 +3979,76 @@ func RegionKS() string { return In(i18n.Locale()).RegionKS() }
 // in the language of msgs.
 func (msgs Messages) RegionKS() string {
 	return Catalog.Format(msgs.locale, "regionKS", nil)
+}
+
+// FieldManufactured says "Manufactured"
+// in the language the app shows.
+func FieldManufactured() string { return In(i18n.Locale()).FieldManufactured() }
+
+// FieldManufactured says "Manufactured"
+// in the language of msgs.
+func (msgs Messages) FieldManufactured() string {
+	return Catalog.Format(msgs.locale, "fieldManufactured", nil)
+}
+
+// ActionInspect says "Inspect"
+// in the language the app shows.
+func ActionInspect() string { return In(i18n.Locale()).ActionInspect() }
+
+// ActionInspect says "Inspect"
+// in the language of msgs.
+func (msgs Messages) ActionInspect() string {
+	return Catalog.Format(msgs.locale, "actionInspect", nil)
+}
+
+// ActionViewReport says "View report"
+// in the language the app shows.
+func ActionViewReport() string { return In(i18n.Locale()).ActionViewReport() }
+
+// ActionViewReport says "View report"
+// in the language of msgs.
+func (msgs Messages) ActionViewReport() string {
+	return Catalog.Format(msgs.locale, "actionViewReport", nil)
+}
+
+// ActionOverview says "Overview"
+// in the language the app shows.
+func ActionOverview() string { return In(i18n.Locale()).ActionOverview() }
+
+// ActionOverview says "Overview"
+// in the language of msgs.
+func (msgs Messages) ActionOverview() string {
+	return Catalog.Format(msgs.locale, "actionOverview", nil)
+}
+
+// OverviewDetails says "Device details"
+// in the language the app shows.
+func OverviewDetails() string { return In(i18n.Locale()).OverviewDetails() }
+
+// OverviewDetails says "Device details"
+// in the language of msgs.
+func (msgs Messages) OverviewDetails() string {
+	return Catalog.Format(msgs.locale, "overviewDetails", nil)
+}
+
+// OverviewHint says "Inspecting also reads the diagnostics, battery logs, apps and profiles, and gives a verdict on each item"
+// in the language the app shows.
+func OverviewHint() string { return In(i18n.Locale()).OverviewHint() }
+
+// OverviewHint says "Inspecting also reads the diagnostics, battery logs, apps and profiles, and gives a verdict on each item"
+// in the language of msgs.
+func (msgs Messages) OverviewHint() string {
+	return Catalog.Format(msgs.locale, "overviewHint", nil)
+}
+
+// StorageUsage says "{used, number, ::.0} GB used of {total, number, ::.0} GB"
+// in the language the app shows.
+func StorageUsage(used float64, total float64) string {
+	return In(i18n.Locale()).StorageUsage(used, total)
+}
+
+// StorageUsage says "{used, number, ::.0} GB used of {total, number, ::.0} GB"
+// in the language of msgs.
+func (msgs Messages) StorageUsage(used float64, total float64) string {
+	return Catalog.Format(msgs.locale, "storageUsage", map[string]any{"used": used, "total": total})
 }

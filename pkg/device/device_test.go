@@ -98,6 +98,31 @@ func TestPairAndInspect(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open after pairing: %v", err)
 	}
+	// The overview reads lockdown and the battery gauge, and nothing that
+	// only an inspection needs.
+	info, err := inspect.CollectInfo(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Root["SerialNumber"] != "K7Q2M4XW9T" || info.Root["ReleaseType"] != "Internal" || info.BatteryReg == nil {
+		t.Errorf("info: root %v battery %v", info.Root, info.BatteryReg)
+	}
+	if info.Apps != nil || info.Parts != nil || info.MC != nil || info.Analytics != nil || len(info.Errors) != 0 {
+		t.Errorf("info read more than the overview: %+v", info)
+	}
+	o := inspect.Describe(info, time.Now(), "en")
+	fields := map[string]string{}
+	for _, f := range o.Fields {
+		fields[f.Label] = f.Value
+	}
+	if fields["Battery health"] != "96%" || fields["Find My iPhone"] != "Off" || fields["Activation"] != "Activated" || o.StorageTotal != 512e9 {
+		t.Errorf("overview fields %v storage %d", fields, o.StorageTotal)
+	}
+
+	l, err = device.Open(dev)
+	if err != nil {
+		t.Fatal(err)
+	}
 	raw, err := inspect.Collect(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }), nil)
 	if err != nil {
 		t.Fatal(err)

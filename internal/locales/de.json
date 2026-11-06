@@ -309,11 +309,11 @@
   "pairingHint": "Entsperre das iPhone und wähle „Vertrauen“, wenn „Diesem Computer vertrauen?“ erscheint",
   "errorTitle": "Prüfung nicht abgeschlossen",
   "retry": "Erneut versuchen",
-  "emptyTitle": "iPhone anschließen, um es zu prüfen",
-  "emptySubtitle": "Liest die Hardware-, System- und Sicherheitsinformationen, die das Gerät meldet, und bewertet jeden Punkt",
+  "emptyTitle": "iPhone anschließen",
+  "emptySubtitle": "Zeigt nach dem Verbinden die Informationen, die das Gerät meldet; „Prüfen“ bewertet Hardware, System und Sicherheit Punkt für Punkt",
   "emptyStepConnect": "Per Kabel mit dem Computer verbinden",
   "emptyStepTrust": "Entsperren und auf „Vertrauen“ tippen",
-  "emptyStepDone": "Die Prüfung läuft automatisch",
+  "emptyStepDone": "Informationen ansehen, dann prüfen",
   "chipSerial": "Seriennr. {serial}",
   "actionInspectAgain": "Erneut prüfen",
   "actionCopy": "Kopieren",
@@ -389,5 +389,12 @@
   "regionTU": "Türkei",
   "regionPL": "Polen",
   "regionKN": "Norwegen",
-  "regionKS": "Finnland / Schweden"
+  "regionKS": "Finnland / Schweden",
+  "fieldManufactured": "Hergestellt",
+  "actionInspect": "Prüfen",
+  "actionViewReport": "Bericht anzeigen",
+  "actionOverview": "Übersicht",
+  "overviewDetails": "Gerätedetails",
+  "overviewHint": "Die Prüfung liest zusätzlich Diagnosedaten, Batterieprotokolle, Apps und Profile und bewertet jeden Punkt",
+  "storageUsage": "{used, number, ::.0} GB von {total, number, ::.0} GB belegt"
 }

@@ -309,11 +309,11 @@
   "pairingHint": "解锁 iPhone 后，在弹出的「要信任此电脑吗？」中选择「信任」",
   "errorTitle": "检测未完成",
   "retry": "重试",
-  "emptyTitle": "连接 iPhone 开始验机",
-  "emptySubtitle": "读取设备自身报告的硬件、系统与安全信息，逐项给出检测结论",
+  "emptyTitle": "连接你的 iPhone",
+  "emptySubtitle": "连接后显示设备自身报告的信息；点击「验机」逐项检测硬件、系统与安全状态",
   "emptyStepConnect": "用数据线连接电脑",
   "emptyStepTrust": "解锁并点击「信任」",
-  "emptyStepDone": "自动完成检测",
+  "emptyStepDone": "查看信息后点击「验机」",
   "chipSerial": "序列号 {serial}",
   "actionInspectAgain": "重新检测",
   "actionCopy": "复制",
@@ -389,5 +389,12 @@
   "regionTU": "土耳其",
   "regionPL": "波兰",
   "regionKN": "挪威",
-  "regionKS": "芬兰 / 瑞典"
+  "regionKS": "芬兰 / 瑞典",
+  "fieldManufactured": "生产日期",
+  "actionInspect": "验机",
+  "actionViewReport": "查看报告",
+  "actionOverview": "设备概览",
+  "overviewDetails": "设备详情",
+  "overviewHint": "验机还会读取诊断数据、电池日志、应用与描述文件，并逐项给出结论",
+  "storageUsage": "已用 {used, number, ::.0} GB，共 {total, number, ::.0} GB"
 }
