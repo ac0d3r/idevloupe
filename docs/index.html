@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iDevLoupe · iPhone 设备管理工具</title>
+<meta name="description" content="iDevLoupe：在电脑上管理 iPhone 的设备管理工具。目前提供验机：读取 iPhone 自身报告的硬件、系统与安全信息，整理成逐项参考报告。">
+<link rel="icon" href="icon.png">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f7f6fb;
+  --text: #17151f;
+  --muted: #625e70;
+  --border: #e6e3ef;
+  --accent: #7c3aed;
+  --accent-2: #a855f7;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(124, 58, 237, 0.09);
+  --card: #ffffff;
+  --shadow: 0 1px 2px rgba(20, 10, 40, 0.05), 0 8px 24px rgba(20, 10, 40, 0.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111017;
+    --bg-soft: #17151f;
+    --text: #efedf5;
+    --muted: #a6a1b5;
+    --border: #2b2836;
+    --accent: #a678f5;
+    --accent-2: #c08cff;
+    --accent-text: #160b29;
+    --accent-soft: rgba(166, 120, 245, 0.13);
+    --card: #1a1823;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+header .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); font-size: 17px; }
+.brand:hover { text-decoration: none; }
+.brand img { width: 30px; height: 30px; }
+nav { display: flex; gap: 18px; margin-left: auto; align-items: center; }
+nav a { color: var(--muted); font-size: 14px; }
+nav a:hover { color: var(--text); text-decoration: none; }
+select { font: inherit; font-size: 13px; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; }
+
+.hero { padding-top: 72px; padding-bottom: 40px; text-align: center; }
+.hero img.logo { width: 96px; height: 96px; }
+h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; margin: 14px 0 10px; letter-spacing: -0.02em; }
+.lead { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0 auto 28px; }
+.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 15px; border: 1px solid var(--border); color: var(--text); background: var(--card); }
+.btn:hover { text-decoration: none; border-color: var(--accent); }
+.btn.primary { background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: var(--accent-text); border: 0; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn svg { width: 18px; height: 18px; }
+.note { color: var(--muted); font-size: 13px; margin-top: 12px; }
+.eyebrow { display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 4px 12px; border-radius: 999px; margin-top: 18px; }
+
+.shot { margin: 44px auto 0; max-width: 1000px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--card); }
+.shot img { display: block; width: 100%; height: auto; }
+
+section { padding: 64px 0; }
+section.soft { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+h2 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin: 0 0 32px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.card p { margin: 0; color: var(--muted); font-size: 14px; }
+.ico { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); margin-bottom: 12px; }
+.ico svg { width: 20px; height: 20px; }
+
+.dl .card { display: flex; flex-direction: column; gap: 12px; }
+.dl .card.recommended { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.dl .head { display: flex; align-items: center; gap: 10px; }
+.dl .head h3 { margin: 0; font-size: 18px; }
+.badge { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px; display: none; }
+.recommended .badge { display: inline-block; }
+.files { display: flex; flex-direction: column; gap: 8px; }
+.files a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; }
+.files a:hover { border-color: var(--accent); text-decoration: none; }
+.files a span:last-child { color: var(--muted); font-size: 12px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+.req { font-size: 13px; color: var(--muted); margin: 0; }
+.req b { color: var(--text); font-weight: 600; }
+.more { margin-top: 20px; font-size: 14px; color: var(--muted); }
+
+ol.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); counter-reset: s; }
+ol.steps li { counter-increment: s; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 20px 64px; position: relative; color: var(--muted); font-size: 14px; }
+ol.steps li::before { content: counter(s); position: absolute; left: 20px; top: 18px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--accent-text); background: linear-gradient(135deg, var(--accent-2), var(--accent)); }
+ol.steps li b { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
+
+.faq details { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; }
+.faq summary { cursor: pointer; font-weight: 600; }
+.faq details p { color: var(--muted); font-size: 14px; margin: 10px 0 0; }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+
+footer { padding: 32px 0 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  nav a.hide-sm { display: none; }
+  .hero { padding-top: 48px; }
+  section { padding: 48px 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="icon.png" alt="">iDevLoupe</a>
+    <nav>
+      <a class="hide-sm" href="#features" data-t="navFeatures">功能</a>
+      <a class="hide-sm" href="#download" data-t="navDownload">下载</a>
+      <a href="https://github.com/ac0d3r/idevloupe">GitHub</a>
+      <select id="lang" aria-label="Language">
+        <option value="zh">简体中文</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero wrap">
+    <img class="logo" src="icon.png" alt="iDevLoupe">
+    <div><span class="eyebrow" data-t="heroBadge">开源 · MIT</span></div>
+    <h1 data-t="heroTitle">iPhone 设备管理工具</h1>
+    <p class="lead" data-t="heroLead">用 Go 与 MyGo 写成的原生桌面应用，没有 WebView。目前提供验机：用数据线连上 iPhone，读取它自己报告的硬件、系统与安全信息，只凭证据逐项给出结论。备份解析、照片管理等功能计划中。</p>
+    <div class="cta">
+      <a class="btn primary" id="primary" href="#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        <span id="primaryLabel" data-t="downloadFree">免费下载</span>
+      </a>
+      <a class="btn" href="https://github.com/ac0d3r/idevloupe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg><span data-t="viewSource">查看源码</span></a>
+    </div>
+    <p class="note" data-t="heroNote">免费，MIT 开源 · macOS、Windows 与 Linux · 在本机运行，不上传数据</p>
+    <div class="shot"><img id="shotHome" src="screenshot-home-zh.png" width="2360" height="1560" alt="iDevLoupe 的设备首页" data-t-alt="homeAlt"></div>
+  </div>
+
+  <section id="features" class="soft">
+    <div class="wrap">
+      <h2 data-t="featuresTitle">功能</h2>
+      <p class="sub" data-t="featuresSub">该查的都查，查不到的直说。每项附上依据，读不到的标为「未知」。</p>
+      <div class="grid">
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+          <h3 data-t="f1t">是它说的那台吗</h3><p data-t="f1d">型号、销售地区、机器类型，序列号与 IMEI 格式，不同来源的序列号与型号是否一致。</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+          <h3 data-t="f2t">还有谁能锁住它</h3><p data-t="f2d">查找我的 iPhone（激活锁）、监管模式、设备注册与 MDM、描述文件、激活状态。</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M6 10v4"/><path d="M10 10v4"/></svg></div>
+          <h3 data-t="f3t">电池，实话实说</h3><p data-t="f3d">健康度、循环次数、内阻指标；循环次数低于历史记录或电芯晚于整机生产时，提示更换过。</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg></div>
+          <h3 data-t="f4t">部件，对照出厂</h3><p data-t="f4d">部件序列号与出厂记录逐一对比，部件生产日期是否晚于整机，面容 ID 自检与 Touch ID 传感器状态。</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></div>
+          <h3 data-t="f5t">系统没被动过吗</h3><p data-t="f5d">常见越狱应用与 afc2 服务、启动参数、工程机芯片、内部版 / 测试版系统、基带与 SIM 状态。</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <h3 data-t="f6t">只留在你的电脑上</h3><p data-t="f6d">不联网、不上传，手机号与 SIM 卡号不进入报告。报告可复制或导出为文本 / JSON。</p></div>
+      </div>
+      <div class="shot"><img id="shot" src="screenshot-zh.png" width="2360" height="1560" alt="iDevLoupe 的验机报告界面" data-t-alt="shotAlt"></div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap dl">
+      <h2 data-t="downloadTitle">下载</h2>
+      <p class="sub" data-t="downloadSub">最新版本，来自 GitHub Releases。</p>
+      <div class="grid">
+        <div class="card" data-os="mac">
+          <div class="head"><h3>macOS</h3><span class="badge" data-t="recommended">推荐</span></div>
+          <div class="files">
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-macos.dmg"><span data-t="macUniversal">Apple 芯片与 Intel</span><span>.dmg</span></a>
+          </div>
+          <p class="req" data-t="macReq"><b>macOS</b> 自带 usbmuxd，无需额外安装。</p>
+        </div>
+        <div class="card" data-os="win">
+          <div class="head"><h3>Windows</h3><span class="badge" data-t="recommended">推荐</span></div>
+          <div class="files">
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-windows-amd64.exe"><span>x64</span><span>.exe</span></a>
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-windows-arm64.exe"><span>ARM64</span><span>.exe</span></a>
+          </div>
+          <p class="req" data-t="winReq">需先安装 <b>Apple 设备</b>（Microsoft Store）或 <b>iTunes</b>，以提供 iPhone 驱动。</p>
+        </div>
+        <div class="card" data-os="linux">
+          <div class="head"><h3>Linux</h3><span class="badge" data-t="recommended">推荐</span></div>
+          <div class="files">
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-linux-amd64.deb"><span>x86_64 · Debian / Ubuntu</span><span>.deb</span></a>
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-linux-amd64.tar.gz"><span>x86_64</span><span>.tar.gz</span></a>
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-linux-arm64.deb"><span>ARM64 · Debian / Ubuntu</span><span>.deb</span></a>
+            <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-linux-arm64.tar.gz"><span>ARM64</span><span>.tar.gz</span></a>
+          </div>
+          <p class="req" data-t="linuxReq">需要 <b>usbmuxd</b>：<code>sudo apt install usbmuxd</code>（.deb 会自动安装）。</p>
+        </div>
+      </div>
+      <p class="more"><span data-t="moreText">校验文件与历史版本：</span> <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/SHA256SUMS">SHA256SUMS</a> · <a href="https://github.com/ac0d3r/idevloupe/releases" data-t="allReleases">全部版本</a></p>
+    </div>
+  </section>
+
+  <section class="soft">
+    <div class="wrap">
+      <h2 data-t="howTitle">怎么用</h2>
+      <p class="sub" data-t="howSub">无需登录，无需在手机上装任何东西。</p>
+      <ol class="steps">
+        <li><b data-t="s1t">用数据线连接电脑</b><span data-t="s1d">打开 iDevLoupe，用 USB 线连接 iPhone，设备会自动出现在左侧。</span></li>
+        <li><b data-t="s2t">解锁并点「信任」</b><span data-t="s2d">首次连接时，在 iPhone 上选择「信任此电脑」并输入锁屏密码。</span></li>
+        <li><b data-t="s3t">查看报告</b><span data-t="s3d">需要关注的项排在最前面。报告末尾的「需人工核对」清单请在手机上逐项确认。</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="faq">
+    <div class="wrap">
+      <h2 data-t="faqTitle">常见问题</h2>
+      <p class="sub"></p>
+      <details><summary data-t="q1">macOS 提示「无法验证开发者」？</summary><p data-t="a1">安装包尚未经过 Apple 签名与公证。在「应用程序」中右键点 iDevLoupe，选「打开」，再在弹窗中点「打开」即可；之后正常双击启动。</p></details>
+      <details><summary data-t="q2">Windows 弹出 SmartScreen 警告？</summary><p data-t="a2">程序尚未签名。点「更多信息」→「仍要运行」。如果提示找不到设备，请确认已安装「Apple 设备」或 iTunes。</p></details>
+      <details><summary data-t="q3">能判断屏幕、电池是否原装吗？</summary><p data-t="a3">不能确定。部件与出厂记录不符、或生产日期晚于整机时，报告会标出更换；但 iOS 自己对部件是否原装的判断无法通过数据线读取，请到「设置 > 通用 > 关于本机 > 部件与维修历史」查看。</p></details>
+      <details><summary data-t="q4">会上传我的数据吗？</summary><p data-t="a4">不会。所有检测在你的电脑上完成，程序不联网。手机号、ICCID、IMSI 读到后立即丢弃，不会出现在报告里。</p></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 ac0d3r · <a href="https://github.com/ac0d3r/idevloupe/blob/main/LICENSE" data-t="license">MIT 许可证</a></span>
+    <span><a href="https://github.com/egoist/mygo">Made with MyGo</a> · <a href="https://github.com/ac0d3r/idevloupe" data-t="sourceCode">源代码</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var T = {
+    en: {
+      heroBadge: "Open source · MIT",
+      viewSource: "View source",
+      license: "MIT License",
+      title: "iDevLoupe · iPhone management",
+      navFeatures: "Features", navDownload: "Download",
+      heroTitle: "iPhone management on your desktop",
+      heroLead: "A native desktop iPhone manager written in Go with MyGo, no WebView. Today it inspects: connect an iPhone by cable, and it reads the hardware, system and security information the phone reports about itself and judges it item by item, on evidence alone. Backup parsing, photo management and more are planned.",
+      downloadFree: "Free download",
+      heroNote: "Free, MIT licensed · macOS, Windows and Linux · Runs on your computer; nothing is uploaded",
+      homeAlt: "The device home of iDevLoupe", shotAlt: "The inspection report of iDevLoupe",
+      featuresTitle: "Features", featuresSub: "What a buyer should check, and plain about what it cannot. Each item shows what it rests on; what cannot be read is marked Unknown.",
+      f1t: "Is it what it says", f1d: "Model, sales region, unit type, the format of the serial number and IMEI, and whether the sources agree on serial and model.",
+      f2t: "Who else can lock it", f2d: "Find My iPhone (Activation Lock), supervision, device enrollment and MDM, configuration profiles, activation.",
+      f3t: "The battery, honestly", f3d: "Health, cycle count and a resistance metric; a cycle count below one logged before, or a cell made after the device, is flagged as a replacement.",
+      f4t: "Parts, as they left the factory", f4d: "The parts' serial numbers against the factory record, whether a part was made after the device, Face ID's self test and the Touch ID sensor.",
+      f5t: "A system left alone", f5d: "Common jailbreak apps and the afc2 service, boot arguments, engineering chips, internal or beta builds, baseband and SIM.",
+      f6t: "Kept on your computer", f6d: "No network, no upload; the phone number and SIM numbers never reach the report. Copy it or export it as text or JSON.",
+      downloadTitle: "Download", downloadSub: "The latest release, from GitHub Releases.", recommended: "For you",
+      macUniversal: "Apple silicon and Intel",
+      macReq: "<b>macOS</b> comes with usbmuxd; nothing else to install.",
+      winReq: "Install <b>Apple Devices</b> (Microsoft Store) or <b>iTunes</b> first, for the iPhone driver.",
+      linuxReq: "Needs <b>usbmuxd</b>: <code>sudo apt install usbmuxd</code> (the .deb installs it).",
+      moreText: "Checksums and earlier versions:", allReleases: "All releases",
+      howTitle: "How to use it", howSub: "No account, nothing to install on the phone.",
+      s1t: "Connect it with a cable", s1d: "Open iDevLoupe and connect the iPhone by USB; it shows up on the left.",
+      s2t: "Unlock it and tap “Trust”", s2d: "The first time, choose “Trust This Computer” on the iPhone and enter its passcode.",
+      s3t: "Read the report", s3d: "The items that need attention come first. Go through the report's “Check by hand” list on the phone.",
+      faqTitle: "FAQ",
+      q1: "macOS says the developer cannot be verified?", a1: "The app is not signed or notarized by Apple yet. In Applications, right-click iDevLoupe, choose Open, then Open again; after that it starts normally.",
+      q2: "Windows shows a SmartScreen warning?", a2: "The app is not signed yet. Click More info → Run anyway. If no device shows up, make sure Apple Devices or iTunes is installed.",
+      q3: "Can it tell whether the screen or battery is genuine?", a3: "Not for certain. A part unlike the factory record, or made after the device, is flagged as replaced; but iOS's own verdict on its parts cannot be read over the cable: see Settings > General > About > Parts and Service History.",
+      q4: "Does it upload my data?", a4: "No. Everything runs on your computer, and the app does not go online. The phone number, ICCID and IMSI are dropped as soon as they are read and never appear in a report.",
+      sourceCode: "Source code"
+    },
+    de: {
+      heroBadge: "Open Source · MIT",
+      viewSource: "Quellcode ansehen",
+      license: "MIT-Lizenz",
+      title: "iDevLoupe · iPhone-Verwaltung",
+      navFeatures: "Funktionen", navDownload: "Download",
+      heroTitle: "iPhone-Verwaltung am Desktop",
+      heroLead: "Eine native iPhone-Verwaltung für den Desktop, geschrieben in Go mit MyGo, ohne WebView. Derzeit prüft sie: iPhone per Kabel anschließen, und sie liest die Hardware-, System- und Sicherheitsinformationen, die das Telefon über sich meldet, und urteilt Punkt für Punkt, nur mit Belegen. Backup-Auswertung, Fotoverwaltung und mehr sind geplant.",
+      downloadFree: "Kostenlos laden",
+      heroNote: "Kostenlos, MIT-lizenziert · macOS, Windows und Linux · Läuft auf deinem Computer; nichts wird hochgeladen",
+      homeAlt: "Die Geräteübersicht von iDevLoupe", shotAlt: "Der Prüfbericht von iDevLoupe",
+      featuresTitle: "Funktionen", featuresSub: "Was ein Käufer prüfen sollte, und offen darüber, was nicht geht. Jeder Punkt zeigt, worauf er beruht; was sich nicht lesen lässt, heißt „Unbekannt“.",
+      f1t: "Ist es, was es vorgibt", f1d: "Modell, Verkaufsregion, Gerätetyp, Format von Seriennummer und IMEI, und ob die Quellen bei Seriennummer und Modell übereinstimmen.",
+      f2t: "Wer es sonst sperren kann", f2d: "„Mein iPhone suchen“ (Aktivierungssperre), Betreuung, Geräteregistrierung und MDM, Konfigurationsprofile, Aktivierung.",
+      f3t: "Die Batterie, ehrlich", f3d: "Zustand, Ladezyklen und ein Innenwiderstandswert; weniger Zyklen als früher protokolliert oder eine Zelle, die nach dem Gerät gefertigt wurde, gelten als Tausch.",
+      f4t: "Bauteile, wie ab Werk", f4d: "Seriennummern der Bauteile im Abgleich mit dem Werksdatensatz, ob ein Bauteil nach dem Gerät gefertigt wurde, Selbsttest von Face ID und Touch ID-Sensor.",
+      f5t: "Ein unverändertes System", f5d: "Gängige Jailbreak-Apps und der afc2-Dienst, Boot-Argumente, Entwicklungschips, interne oder Beta-Systeme, Basisband und SIM.",
+      f6t: "Bleibt auf deinem Computer", f6d: "Kein Netz, kein Upload; Telefonnummer und SIM-Nummern landen nie im Bericht. Kopieren oder als Text / JSON exportieren.",
+      downloadTitle: "Download", downloadSub: "Die neueste Version, aus GitHub Releases.", recommended: "Für dich",
+      macUniversal: "Apple Silicon und Intel",
+      macReq: "<b>macOS</b> bringt usbmuxd mit; sonst ist nichts zu installieren.",
+      winReq: "Zuerst <b>Apple-Geräte</b> (Microsoft Store) oder <b>iTunes</b> installieren, für den iPhone-Treiber.",
+      linuxReq: "Benötigt <b>usbmuxd</b>: <code>sudo apt install usbmuxd</code> (das .deb installiert es mit).",
+      moreText: "Prüfsummen und ältere Versionen:", allReleases: "Alle Versionen",
+      howTitle: "So geht’s", howSub: "Kein Konto, nichts auf dem iPhone zu installieren.",
+      s1t: "Per Kabel verbinden", s1d: "iDevLoupe öffnen und das iPhone per USB anschließen; es erscheint links.",
+      s2t: "Entsperren und „Vertrauen“ tippen", s2d: "Beim ersten Mal auf dem iPhone „Diesem Computer vertrauen“ wählen und den Code eingeben.",
+      s3t: "Bericht lesen", s3d: "Die Punkte, die Aufmerksamkeit brauchen, stehen oben. Die Liste „Manuell prüfen“ im Bericht am Gerät durchgehen.",
+      faqTitle: "Häufige Fragen",
+      q1: "macOS meldet, der Entwickler könne nicht überprüft werden?", a1: "Die App ist noch nicht von Apple signiert oder beglaubigt. Im Ordner „Programme“ mit der rechten Maustaste auf iDevLoupe klicken, „Öffnen“ wählen und erneut „Öffnen“; danach startet sie normal.",
+      q2: "Windows zeigt eine SmartScreen-Warnung?", a2: "Die App ist noch nicht signiert. „Weitere Informationen“ → „Trotzdem ausführen“. Erscheint kein Gerät, prüfen, ob Apple-Geräte oder iTunes installiert ist.",
+      q3: "Erkennt es, ob Display oder Batterie original sind?", a3: "Nicht sicher. Ein Bauteil, das vom Werksdatensatz abweicht oder nach dem Gerät gefertigt wurde, wird als getauscht markiert; das Urteil von iOS über seine Bauteile lässt sich über das Kabel aber nicht lesen: siehe Einstellungen > Allgemein > Info > Teile- und Reparaturverlauf.",
+      q4: "Werden meine Daten hochgeladen?", a4: "Nein. Alles läuft auf deinem Computer, und die App geht nicht online. Telefonnummer, ICCID und IMSI werden sofort nach dem Lesen verworfen und stehen nie im Bericht.",
+      sourceCode: "Quellcode"
+    }
+  };
+  var zh = {};
+  document.querySelectorAll("[data-t]").forEach(function (el) { zh[el.dataset.t] = el.innerHTML; });
+  document.querySelectorAll("[data-t-alt]").forEach(function (el) { zh[el.dataset.tAlt] = el.alt; });
+  zh.title = document.title;
+  T.zh = zh;
+
+  function apply(lang) {
+    var t = T[lang] || T.zh;
+    document.documentElement.lang = lang === "zh" ? "zh-Hans" : lang;
+    document.title = t.title;
+    document.querySelectorAll("[data-t]").forEach(function (el) {
+      if (t[el.dataset.t] !== undefined) el.innerHTML = t[el.dataset.t];
+    });
+    document.querySelectorAll("[data-t-alt]").forEach(function (el) { el.alt = t[el.dataset.tAlt]; });
+    var suffix = lang === "zh" ? "zh" : "en";
+    document.getElementById("shotHome").src = "screenshot-home-" + suffix + ".png";
+    document.getElementById("shot").src = "screenshot-" + suffix + ".png";
+    document.getElementById("lang").value = lang;
+    markPlatform();
+  }
+
+  // The visitor's system: its card is marked, and the main button
+  // downloads its package.
+  function markPlatform() {
+    var ua = navigator.userAgent;
+    var os = /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? "mac" : /Windows/.test(ua) ? "win" : /Linux/.test(ua) && !/Android/.test(ua) ? "linux" : "";
+    var card = os && document.querySelector('[data-os="' + os + '"]');
+    if (!card) return;
+    card.classList.add("recommended");
+    var first = card.querySelector(".files a");
+    var btn = document.getElementById("primary");
+    btn.href = first.href;
+    var label = document.getElementById("primaryLabel");
+    label.textContent = label.textContent.replace(/ · .*$/, "") + " · " + card.querySelector("h3").textContent;
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem("lang"); } catch (e) {}
+  var nav = (navigator.language || "").toLowerCase();
+  var lang = saved || (nav.indexOf("zh") === 0 ? "zh" : nav.indexOf("de") === 0 ? "de" : nav ? "en" : "zh");
+  apply(lang);
+  document.getElementById("lang").addEventListener("change", function (e) {
+    try { localStorage.setItem("lang", e.target.value); } catch (err) {}
+    apply(e.target.value);
+  });
+})();
+</script>
+</body>
+</html>

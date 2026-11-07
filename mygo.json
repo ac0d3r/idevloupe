@@ -1,0 +1,23 @@
+{
+  "name": "iDevLoupe",
+  "slug": "idevloupe",
+  "identifier": "com.imipy.idevloupe",
+  "version": "0.1.0",
+  "copyright": "© 2026 ac0d3r",
+  "main": "./cmd/idevloupe",
+  "out": "build",
+  "windows": {
+    "displayName": "iDevLoupe"
+  },
+  "linux": {
+    "webview": false,
+    "comment": "iPhone management tool",
+    "depends": [
+      "usbmuxd"
+    ]
+  },
+  "i18n": {
+    "dir": "internal/locales",
+    "source": "en"
+  }
+}

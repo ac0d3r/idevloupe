@@ -1,0 +1,1155 @@
+{
+  "@@locale": "en",
+  "appTagline": "iPhone management",
+  "deviceFallbackName": "iOS device",
+  "statusPass": "Pass",
+  "statusInfo": "Info",
+  "statusWarn": "Warning",
+  "statusFail": "Fail",
+  "statusUnknown": "Unknown",
+  "verdictFail": "Problems found, check carefully",
+  "verdictWarn": "Some items need attention",
+  "verdictUnknown": "No problems found; some items could not be read",
+  "verdictPass": "No problems found",
+  "joinSentences": "{first}. {next}",
+  "@joinSentences": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "joinList": "{first}, {next}",
+  "@joinList": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "joinEnumeration": "{first}, {next}",
+  "@joinEnumeration": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "joinClauses": "{first}; {next}",
+  "@joinClauses": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "withNote": "{text} ({note})",
+  "@withNote": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "labelValue": "{label}: {value}",
+  "@labelValue": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryBasic": "Basics",
+  "categoryIdentity": "Identifiers",
+  "categorySecurity": "Security",
+  "categoryCellular": "Cellular",
+  "categoryBattery": "Battery",
+  "categoryParts": "Parts",
+  "categoryOther": "Other",
+  "valueYes": "Yes",
+  "valueNo": "No",
+  "valueOn": "On",
+  "valueOff": "Off",
+  "valueNone": "None",
+  "valueNotFound": "None found",
+  "valueNotFoundIncomplete": "None found (check incomplete)",
+  "valueNotRead": "Not read",
+  "valueNotReported": "not reported",
+  "valueConsistent": "Consistent",
+  "valueInconsistent": "Inconsistent",
+  "valuePassed": "Passed",
+  "valuePercent": "{percent, number, ::group-off}%",
+  "@valuePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "valueMAh": "{mah, number, ::group-off} mAh",
+  "@valueMAh": {
+    "placeholders": {
+      "mah": {
+        "type": "int"
+      }
+    }
+  },
+  "valueGB": "{gb, number, ::.00} GB",
+  "@valueGB": {
+    "placeholders": {
+      "gb": {
+        "type": "double"
+      }
+    }
+  },
+  "valueMV": "{mv, number, ::group-off} mV",
+  "@valueMV": {
+    "placeholders": {
+      "mv": {
+        "type": "int"
+      }
+    }
+  },
+  "valueMA": "{ma, number, ::group-off} mA",
+  "@valueMA": {
+    "placeholders": {
+      "ma": {
+        "type": "int"
+      }
+    }
+  },
+  "valueCelsius": "{celsius, number, ::.0} °C",
+  "@valueCelsius": {
+    "placeholders": {
+      "celsius": {
+        "type": "double"
+      }
+    }
+  },
+  "valueCycles": "{count, number}",
+  "@valueCycles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "valueWithCode": "{name} ({code})",
+  "@valueWithCode": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "keyNotRead": "{key} was not read",
+  "@keyNotRead": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "checkModel": "Model",
+  "modelNotInTable": "The model identifier is not in the built-in table; the name is the device's own",
+  "modelSE1": "iPhone SE (1st generation)",
+  "modelSE2": "iPhone SE (2nd generation)",
+  "modelSE3": "iPhone SE (3rd generation)",
+  "checkUnitType": "Unit type",
+  "unitUnknown": "Unknown",
+  "unitRetail": "Retail unit",
+  "unitRetailDetail": "M: a unit sold at retail",
+  "unitRefurbished": "Apple Certified Refurbished",
+  "unitRefurbishedDetail": "F: a unit Apple refurbished (Certified Refurbished)",
+  "unitReplacement": "Apple replacement unit",
+  "unitReplacementDetail": "N: a whole unit Apple handed out as a service replacement",
+  "unitEngraved": "Personalized (engraved)",
+  "unitEngravedDetail": "P: a retail unit engraved to order on Apple's website",
+  "unitDemo": "Demo unit",
+  "unitDemoDetail": "3: a demo unit from a store's display",
+  "unitOther": "Unknown type",
+  "unitOtherDetail": "The model number starts with “{prefix}”, not a usual retail prefix",
+  "@unitOtherDetail": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "checkRegion": "Sales region",
+  "regionNotInTable": "The region code is not in the built-in table",
+  "checkRegionConsistency": "Region consistency",
+  "regionChinaBrick": "RegionInfo={region}, ChinaBrick={chinaBrick}",
+  "@regionChinaBrick": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "chinaBrick": {
+        "type": "String"
+      }
+    }
+  },
+  "regionChinaBrickMismatch": "RegionInfo={region} but ChinaBrick={chinaBrick}: the region may have been rewritten",
+  "@regionChinaBrickMismatch": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "chinaBrick": {
+        "type": "String"
+      }
+    }
+  },
+  "checkProductionChip": "Production chip",
+  "productionChipYes": "Production",
+  "productionChipNo": "Not production (engineering / prototype unit)",
+  "productionChipNoDetail": "ProductionSOC = false: the chip is dev-fused, as on engineering units",
+  "checkInternal": "Internal device",
+  "internalApple": "Apple internal device",
+  "checkSystemVersion": "System version",
+  "betaBuildDetail": "The build number ends in a lowercase letter: a beta release",
+  "checkReleaseType": "Release type",
+  "releaseInternalDetail": "ReleaseType = {type}: an Apple internal build, as on engineering units",
+  "@releaseInternalDetail": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseBetaDetail": "ReleaseType = Beta: a beta release",
+  "releaseOtherDetail": "ReleaseType = {type}; retail builds have none",
+  "@releaseOtherDetail": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "checkStorage": "Storage",
+  "storageValue": "{nominal} ({gb, number, ::.0} GB)",
+  "@storageValue": {
+    "placeholders": {
+      "nominal": {
+        "type": "String"
+      },
+      "gb": {
+        "type": "double"
+      }
+    }
+  },
+  "checkSerial": "Serial number",
+  "serialLegacy12": "12-character serial (old format); made in {date}",
+  "@serialLegacy12": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "serialLegacy12Bad": "A 12-character serial that does not decode by Apple's scheme; check it on Apple's website",
+  "serialRandom": "Randomized serial (2021 on), without a date of manufacture",
+  "serialLegacy11": "11-character serial (old format)",
+  "serialOddLength": "A serial of {length, number, ::group-off} characters is not a usual Apple format",
+  "@serialOddLength": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "serialWeek": "week {week, number, ::group-off} of {year, number, ::group-off}",
+  "@serialWeek": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "serialWeekAmbiguous": "week {week, number, ::group-off} of {year, number, ::group-off} (the year may be off by a decade)",
+  "@serialWeekAmbiguous": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "sourceDeviceTree": "device tree",
+  "sourcesDisagree": "The sources disagree: a value may have been rewritten",
+  "imeiMissing": "The device has cellular but reports no IMEI; its baseband may be faulty",
+  "imeiLength": "An IMEI has 15 digits, this one {length, number, ::group-off}",
+  "@imeiLength": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "imeiLuhnFailed": "The IMEI's check digit is wrong (Luhn check failed)",
+  "imeiLuhnPassed": "Luhn check passed",
+  "checkActivation": "Activation",
+  "activationActivated": "Activated",
+  "activationUnactivated": "Not activated",
+  "activationUnactivatedDetail": "Not activated yet (new, or just erased)",
+  "activationFactory": "Factory activated",
+  "activationFactoryDetail": "FactoryActivated: a factory or test activation, not a user's",
+  "activationOtherDetail": "An unusual activation state",
+  "checkFindMy": "Activation Lock",
+  "findMyAccount": "account {account}",
+  "@findMyAccount": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "findMyOn": "On",
+  "findMyOnDetail": "Before the sale the seller must sign out of their Apple Account and turn off Find My, or the phone cannot be activated after an erase",
+  "findMyUnknown": "The device does not report it; check in Settings > [your name] > Find My",
+  "checkSupervision": "Supervision",
+  "supervised": "Supervised",
+  "supervisedDetail": "The device is supervised, as company and school devices are",
+  "notSupervised": "Not supervised",
+  "checkMDM": "Remote management (MDM)",
+  "profilesUnread": "The configuration profiles could not be read",
+  "mdmEnrolled": "In Automated Device Enrollment (DEP / ABM)",
+  "mdmEnrolledDetail": "An organization enrolled the device through Apple Business Manager: after an erase, activation forces it into their management",
+  "mdmProfile": "Management profile installed: {name}",
+  "@mdmProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mdmProfileDetail": "An MDM profile is installed: the device is managed remotely, and its manager can see and restrict it",
+  "checkProfiles": "Configuration profiles",
+  "profileCount": "{count, plural, one {# profile} other {# profiles}}",
+  "@profileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checkJailbreak": "Jailbreak",
+  "jailbreakApp": "Jailbreak / system modification tool: {name}",
+  "@jailbreakApp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jailbreakFound": "Signs of a jailbreak",
+  "jailbreakAFC2": "The afc2 service is present (only a jailbreak registers it)",
+  "jailbreakApps": "Installed: {apps}",
+  "@jailbreakApps": {
+    "placeholders": {
+      "apps": {
+        "type": "String"
+      }
+    }
+  },
+  "jailbreakNone": "No jailbreak apps and no afc2 service (a jailbreak that leaves no trace cannot be ruled out)",
+  "jailbreakUnread": "Could not read the app list or check the afc2 service",
+  "jailbreakNoApps": "No afc2 service, but the app list could not be read to look for jailbreak apps",
+  "jailbreakNoAFC2": "No jailbreak apps in the app list, but the afc2 service could not be checked",
+  "checkDeveloperMode": "Developer Mode",
+  "developerModeDetail": "Settings > Privacy & Security > Developer Mode is on",
+  "checkBrickState": "Lock state",
+  "brickStateDetail": "BrickState = true: the device is locked and not activated",
+  "checkBootArgs": "Boot arguments",
+  "bootArgsDetail": "boot-args are set in NVRAM, which are empty on retail units: the device may have been jailbroken, downgraded or debugged",
+  "checkBaseband": "Baseband",
+  "basebandNotReady": "BasebandStatus = {status}: the baseband's information is not fully ready",
+  "@basebandNotReady": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "basebandMissing": "A cellular device that reports no baseband version: its baseband may be faulty or missing, or the logic board was repaired",
+  "checkSIM": "SIM card",
+  "simReady": "Ready",
+  "simNotInserted": "No SIM",
+  "simPINLocked": "SIM PIN locked",
+  "checkBatteryHealth": "Battery health",
+  "batteryUnread": "Could not read the battery",
+  "healthFromCapacity": "Computed from the full charge capacity of {max, number, ::group-off} mAh and the design capacity of {design, number, ::group-off} mAh; may differ slightly from Settings",
+  "@healthFromCapacity": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "design": {
+        "type": "int"
+      }
+    }
+  },
+  "healthComputed": "computed from the capacity, about {percent, number, ::.0}% ({max, number, ::group-off} / {design, number, ::group-off} mAh)",
+  "@healthComputed": {
+    "placeholders": {
+      "percent": {
+        "type": "double"
+      },
+      "max": {
+        "type": "int"
+      },
+      "design": {
+        "type": "int"
+      }
+    }
+  },
+  "healthFromGauge": "The maximum capacity the battery's gas gauge reports",
+  "healthFromLog": "The maximum capacity in the system's analytics log, as Settings > Battery Health shows it (logged {date})",
+  "@healthFromLog": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "healthLogOld": "That record is {days, plural, one {# day} other {# days}} old and may not be current",
+  "@healthLogOld": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "capacityNotRead": "The battery's capacity was not read",
+  "healthBelow80": "Below 80%: replacing the battery is advised",
+  "checkBatteryConsistency": "Battery data consistency",
+  "batteryCyclesDisagree": "The IORegistry counts {ioreg, number, ::group-off} cycles, the diagnostics' gas gauge {gauge, number, ::group-off}: the sources disagree",
+  "@batteryCyclesDisagree": {
+    "placeholders": {
+      "ioreg": {
+        "type": "int"
+      },
+      "gauge": {
+        "type": "int"
+      }
+    }
+  },
+  "checkCycles": "Charge cycles",
+  "cyclesPastRated": "Past the {rated, number, ::group-off} full charge cycles Apple rates the battery to keep 80% of its capacity through",
+  "@cyclesPastRated": {
+    "placeholders": {
+      "rated": {
+        "type": "int"
+      }
+    }
+  },
+  "cyclesFromLog": "Not read from the gas gauge; from the system's analytics log ({date})",
+  "@cyclesFromLog": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "checkBatteryOrigin": "Battery origin",
+  "batteryLogCyclesHigher": "The analytics log of {date} counted {logged, number, ::group-off} cycles, the battery now has {now, number, ::group-off}: it was replaced since",
+  "@batteryLogCyclesHigher": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "logged": {
+        "type": "int"
+      },
+      "now": {
+        "type": "int"
+      }
+    }
+  },
+  "batteryReplaced": "Likely replaced",
+  "batteryOriginUnread": "The battery's capacity and cycle count were not read",
+  "batteryNoSigns": "No signs found",
+  "batteryNoSignsDetail": "No record of a replacement found: no cycle count lower than an earlier log, no cell made after the device. Whether the battery is genuine is shown in Settings > Battery and Parts and Service History",
+  "noAnalytics": "The device holds no analytics logs (Settings > Privacy & Security > Analytics & Improvements > Share iPhone Analytics is off, or the device was erased or restored lately; logs appear about a day after it is turned on)",
+  "noBatteryInAnalytics": "The analytics logs hold no battery records",
+  "checkFaceID": "Face ID self test",
+  "faceIDFDRFailed": "Factory data check failed",
+  "faceIDFDRFailedDetail": "FDRValidated = false: the Face ID module does not match the factory pairing data and may have been replaced or repaired (read from the field's meaning; no sample confirms it yet)",
+  "faceIDFDRPassed": "FDRValidated = true (matches the factory pairing data)",
+  "faceIDFailed": "Code {code, number, ::group-off}, test it",
+  "@faceIDFailed": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "faceIDFailedDetail": "{key} = {code, number, ::group-off} (0 on working units). Apple does not document the code, so it is no verdict on Face ID; enroll a face in Settings > Face ID & Passcode to test it",
+  "@faceIDFailedDetail": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "faceIDUnread": "This model has Face ID, but its self test could not be read; enroll a face to test it",
+  "checkTouchID": "Touch ID",
+  "touchIDCalibrationFDR": "Calibration from the factory pairing data (MesaCalBlobSource = FDR)",
+  "touchIDSelfTestPassed": "Self test passed",
+  "touchIDSelfTestFailed": "Self test failed ({result})",
+  "@touchIDSelfTestFailed": {
+    "placeholders": {
+      "result": {
+        "type": "String"
+      }
+    }
+  },
+  "touchIDSelfTestFailedDetail": "MesaSelfTest = {result} (OK on a working unit; no failing sample yet). Common when the Home button or its cable is damaged or was replaced; enroll a fingerprint to test it",
+  "@touchIDSelfTestFailedDetail": {
+    "placeholders": {
+      "result": {
+        "type": "String"
+      }
+    }
+  },
+  "touchIDOnline": "Sensor online",
+  "touchIDOnlineDetail": "The sensor is connected and reports its serial number, and its calibration comes from the factory pairing data (MesaCalBlobSource = FDR), as on units whose self test passed; this iOS version gives no self test result, so enroll a fingerprint to test it",
+  "touchIDNoSerial": "The sensor reports no serial number",
+  "touchIDCalibrationOther": "Its calibration does not come from the factory pairing data ({source})",
+  "@touchIDCalibrationOther": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "touchIDFound": "Sensor found",
+  "touchIDUnsure": "Its state cannot be confirmed; enroll a fingerprint to test it",
+  "touchIDMissing": "No fingerprint sensor found",
+  "touchIDMissingDetail": "This model has Touch ID, but the system finds no fingerprint sensor: common when the Home button or its cable is damaged, disconnected or replaced",
+  "partsUnread": "The parts could not be read; enroll a fingerprint to test it",
+  "checkSetup": "Setup Assistant",
+  "setupUnfinished": "Not finished",
+  "setupUnfinishedDetail": "The device is still in activation or the Setup Assistant",
+  "bioFaceOrTouch": "Face ID / Touch ID",
+  "bioFace": "Face ID",
+  "bioTouch": "Touch ID",
+  "manualPartsHistory": "Settings > General > About > Parts and Service History: iOS's own verdict on whether the display, battery, {bio} and cameras are genuine, which this tool cannot read over the cable; be sure to look at it (iOS 15.2 and later, some models)",
+  "@manualPartsHistory": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "manualBatteryHealth": "Settings > Battery > Battery Health: compare it with this report; “Service” there means the battery has aged even when its maximum capacity is above 80% (iOS says so when its resistance is high)",
+  "manualTrueTone": "Was the display replaced? Long-press the brightness slider in Control Center: iPhone 8 / X and later have a True Tone switch; without it the display was likely replaced (not readable over the cable)",
+  "manualCoverage": "Check the model, color, warranty and activation date by the serial number at checkcoverage.apple.com",
+  "manualCarrierLock": "Settings > General > About > Carrier Lock: it should say “No SIM restrictions”",
+  "manualFunctions": "Whether {bio}, True Tone, the cameras, speakers, microphones, buttons and vibration work",
+  "@manualFunctions": {
+    "placeholders": {
+      "bio": {
+        "type": "String"
+      }
+    }
+  },
+  "manualExterior": "Exterior: frame, screen scratches, screws, gaps and liquid indicators",
+  "sectionHardware": "Hardware",
+  "fieldDeviceName": "Device name",
+  "fieldModel": "Model",
+  "fieldModelIdentifier": "Model identifier",
+  "fieldBoardModel": "Board model",
+  "fieldChip": "Chip",
+  "fieldCPUArchitecture": "CPU architecture",
+  "fieldColor": "Front color",
+  "fieldEnclosureColor": "Back color",
+  "fieldAvailable": "Available",
+  "fieldPartNumber": "Model (part number)",
+  "fieldBoardSerial": "Logic board serial",
+  "fieldWiFiAddress": "Wi-Fi address",
+  "fieldBluetoothAddress": "Bluetooth address",
+  "sectionSystem": "System",
+  "fieldIOSVersion": "iOS version",
+  "fieldBasebandVersion": "Baseband version",
+  "fieldIBootVersion": "iBoot version",
+  "fieldPasscode": "Passcode",
+  "fieldEncryptedBackups": "Encrypted backups",
+  "fieldLanguage": "Language",
+  "fieldLocale": "Region",
+  "fieldTimeZone": "Time zone",
+  "fieldSIMStatus": "SIM status",
+  "sectionParts": "Part serial numbers (current)",
+  "fieldNote": "Note",
+  "partsNote": "The serial numbers the parts report now. Where the factory configuration could be read, the checks compare them with its record (\"vs. factory record\"); otherwise compare them with repair records or the parts' labels",
+  "partBackWide": "Rear wide camera",
+  "partBackTele": "Rear telephoto camera",
+  "partBackUltraWide": "Rear ultra wide camera",
+  "partFront": "Front camera",
+  "partFaceIDCamera": "Face ID infrared camera",
+  "partFaceIDProjector": "Face ID dot projector",
+  "partCoverGlass": "Cover glass",
+  "partPanel": "Display panel record",
+  "partAmbientLight": "Ambient light sensor",
+  "partBackGlass": "Back glass (compass)",
+  "partTouch": "Touch module ID",
+  "partFingerprint": "Fingerprint sensor",
+  "partStorage": "Storage chip",
+  "rawPlatform": "platform",
+  "rawBattery": "battery",
+  "rawPart": "part · {name}",
+  "@rawPart": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rawAnalyticsBattery": "Analytics log · battery",
+  "rawAnalyticsSearch": "Analytics log · search",
+  "rawFile": "(file)",
+  "rawDate": "(date)",
+  "rawResult": "(result)",
+  "rawRead": "read",
+  "rawDirectory": "directory {dir}",
+  "@rawDirectory": {
+    "placeholders": {
+      "dir": {
+        "type": "String"
+      }
+    }
+  },
+  "rawDirectoryEntries": "{count, plural, one {# entry} other {# entries}}: {names}",
+  "@rawDirectoryEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "rawMCCloud": "MCInstall · cloud configuration",
+  "rawMCProfiles": "MCInstall · profiles",
+  "stepConnecting": "Connecting to the device",
+  "stepInspecting": "Inspecting",
+  "stepDeviceInfo": "Reading the device information",
+  "stepDiagnostics": "Reading the battery and hardware diagnostics",
+  "stepAnalytics": "Reading battery records from the analytics logs",
+  "stepApps": "Checking the installed apps",
+  "stepJailbreak": "Checking for jailbreak services",
+  "stepProfiles": "Checking profiles and device management",
+  "stepReadDomain": "Reading {domain}",
+  "@stepReadDomain": {
+    "placeholders": {
+      "domain": {
+        "type": "String"
+      }
+    }
+  },
+  "stepReadBattery": "Reading the battery",
+  "stepStartDiagnostics": "Starting the diagnostics service",
+  "stepReadApps": "Reading the app list",
+  "stepReadProfiles": "Reading the profiles",
+  "stepReconnect": "Opening a new session",
+  "stepFailed": "{step} failed: {error}",
+  "@stepFailed": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoUsbmuxd": "Cannot reach usbmuxd: install iTunes or Apple Devices (Windows), or start usbmuxd (Linux)",
+  "errorPairingPending": "Tap “Trust” on the iPhone and enter its passcode",
+  "errorPasswordLocked": "Unlock the iPhone's screen first to pair it",
+  "errorUserDenied": "“Don't Trust” was chosen on the iPhone",
+  "errorNoDevice": "No device found; connect an iPhone with a cable",
+  "reportTitle": "iPhone Inspection Report · iDevLoupe",
+  "reportTime": "Inspected: {time}",
+  "@reportTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSerial": "Serial number: {serial}   iOS {ios}",
+  "@reportSerial": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      },
+      "ios": {
+        "type": "String"
+      }
+    }
+  },
+  "reportVerdict": "Verdict: {verdict} ({counts})",
+  "@reportVerdict": {
+    "placeholders": {
+      "verdict": {
+        "type": "String"
+      },
+      "counts": {
+        "type": "String"
+      }
+    }
+  },
+  "reportIssues": "Main issues: {issues}",
+  "@reportIssues": {
+    "placeholders": {
+      "issues": {
+        "type": "String"
+      }
+    }
+  },
+  "reportHeading": "[{title}]",
+  "@reportHeading": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionBatteryDetails": "Battery details",
+  "fieldDesignCapacity": "Design capacity",
+  "fieldFullChargeCapacity": "Full charge capacity",
+  "fieldChargeLevel": "Charge level",
+  "fieldResistance": "Resistance metric",
+  "resistanceValue": "{value, number, ::group-off} (BatteryHealthMetric; higher means more resistance)",
+  "@resistanceValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "fieldVoltage": "Voltage",
+  "fieldBatterySerial": "Battery serial number",
+  "sectionManual": "Check by hand",
+  "sectionUnread": "Could not be read",
+  "sidebarDevices": "Connected devices",
+  "sidebarNoDevice": "No device found",
+  "sidebarNoDeviceHint": "Connect an iPhone with a cable and it shows up here",
+  "sidebarNoUsbmuxd": "Cannot reach usbmuxd",
+  "sidebarPrivacy": "Everything runs on this computer; nothing is uploaded",
+  "pairingTitle": "Waiting for trust",
+  "pairingHint": "Unlock the iPhone and choose “Trust” when it asks “Trust This Computer?”",
+  "errorTitle": "Inspection not finished",
+  "retry": "Retry",
+  "emptyTitle": "Connect an iPhone",
+  "emptySubtitle": "Shows the information the device reports once it is connected; Inspect checks its hardware, system and security item by item",
+  "emptyStepConnect": "Connect it to the computer with a cable",
+  "emptyStepTrust": "Unlock it and tap “Trust”",
+  "emptyStepDone": "Review its information, then inspect it",
+  "actionInspectAgain": "Inspect again",
+  "actionCopy": "Copy",
+  "actionExport": "Export report",
+  "statusCount": "{status} {count, number, ::group-off}",
+  "@statusCount": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "issuesTotal": "{count, number, ::group-off} in all",
+  "@issuesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "manualHint": "Software cannot judge these reliably; check them on the phone",
+  "errorsTitle": "Items that could not be read",
+  "statTemperature": "Temperature",
+  "statCurrent": "Current",
+  "statCharging": "Charging",
+  "chargingNot": "Not charging",
+  "chargingNow": "Charging",
+  "chargingPluggedIn": "Plugged in",
+  "statLogHealth": "Max capacity (analytics log)",
+  "statLogCycles": "Cycles (analytics log)",
+  "statLogDate": "Analytics log date",
+  "batteryFootnote": "Live values come from the battery's gas gauge (IORegistry AppleSmartBattery); the “analytics log” values from the analytics iOS records daily, which Settings > Battery Health uses. Whether the battery is genuine, check in Settings > Battery and in Parts and Service History.",
+  "batteryLogNote": "Analytics log: {note}",
+  "@batteryLogNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "toastCopied": "Report copied to the clipboard",
+  "toastCopyFailed": "Copy failed: {error}",
+  "@toastCopyFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "toastExported": "Exported to {path}",
+  "@toastExported": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "toastExportFailed": "Export failed: {error}",
+  "@toastExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFileName": "inspection-report",
+  "exportTitle": "Export inspection report",
+  "exportFilterText": "Text report",
+  "exportFilterJSON": "JSON (with raw data)",
+  "cliList": "list the connected devices",
+  "cliReport": "print the inspection report in the terminal",
+  "cliJSON": "print the inspection report as JSON, with every raw value",
+  "cliUDID": "the UDID of the device",
+  "cliDump": "ask for parts' keys (lockdown, MobileGestalt) and query the IORegistry item by item, writing the replies to this file (with a summary in .txt), to find parts' information",
+  "cliLang": "the report's language: en, zh-Hans or de (default: the system's)",
+  "cliError": "Error: {error}",
+  "@cliError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cliPairing": "The device does not trust this computer yet; asking to pair…",
+  "cliProbing": "Querying keys and the IORegistry ({count, plural, one {# item} other {# items}})…",
+  "@cliProbing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cliWrote": "Wrote {path} and {path}.txt",
+  "@cliWrote": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "regionCH": "Mainland China",
+  "regionZP": "Hong Kong / Macao",
+  "regionTA": "Taiwan",
+  "regionLL": "United States",
+  "regionJ": "Japan",
+  "regionKH": "South Korea",
+  "regionZA": "Singapore",
+  "regionB": "United Kingdom / Ireland",
+  "regionC": "Canada",
+  "regionX": "Australia / New Zealand",
+  "regionFD": "Austria / Switzerland / Liechtenstein",
+  "regionZD": "Europe (Germany / France / Netherlands / Belgium etc.)",
+  "regionT": "Italy",
+  "regionY": "Spain",
+  "regionRU": "Russia",
+  "regionHN": "India",
+  "regionTH": "Thailand",
+  "regionMY": "Malaysia",
+  "regionPP": "Philippines",
+  "regionID": "Indonesia",
+  "regionVN": "Vietnam",
+  "regionAE": "UAE / Saudi Arabia",
+  "regionAB": "Middle East (UAE / Saudi Arabia etc.)",
+  "regionBR": "Brazil",
+  "regionLZ": "Latin America (Chile / Peru etc.)",
+  "regionE": "Mexico",
+  "regionTU": "Turkey",
+  "regionPL": "Poland",
+  "regionKN": "Norway",
+  "regionKS": "Finland / Sweden",
+  "fieldManufactured": "Manufactured",
+  "actionInspect": "Inspect",
+  "actionViewReport": "View report",
+  "actionOverview": "Overview",
+  "overviewHint": "Inspecting also reads the diagnostics, battery logs, apps and profiles, and gives a verdict on each item",
+  "checkPartFactory": "{part} vs. factory record",
+  "@checkPartFactory": {
+    "placeholders": {
+      "part": {
+        "type": "String"
+      }
+    }
+  },
+  "factoryValues": "factory {factory}, now {current}",
+  "@factoryValues": {
+    "placeholders": {
+      "factory": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "serialWithDate": "{serial} (made about {date})",
+  "@serialWithDate": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "factoryMatchDetail": "Repair tools can write the original serial onto a new part, so a match does not prove the part was never replaced",
+  "factoryMismatchDetail": "This is not the part fitted at the factory, so it was probably replaced; whether the replacement is genuine cannot be told from the data",
+  "factoryCurrentUnread": "The factory record has {factory}, but the part's current serial number was not read",
+  "@factoryCurrentUnread": {
+    "placeholders": {
+      "factory": {
+        "type": "String"
+      }
+    }
+  },
+  "checkFactoryRecord": "Factory record of parts",
+  "factoryUnread": "The factory configuration (SysCfg) was not read, so parts cannot be compared with the factory record; check Settings > General > About > Parts and Service History",
+  "partBattery": "Battery",
+  "partDisplayPanel": "Display panel",
+  "factorySame": "factory and now {serial}",
+  "@factorySame": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "colorBlack": "Black",
+  "colorSpaceGray": "Space Gray",
+  "colorNamed": "{name} (code {code})",
+  "@colorNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "colorCode": "code {code}",
+  "@colorCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRegulatoryModel": "Regulatory model",
+  "fieldCellularAddress": "Cellular address",
+  "addressMismatchDetail": "The logic board or the radio may have been replaced, or the address written over",
+  "factoryScreenMatchDetail": "A screen's serial is often written onto a new screen during repair, so a match does not show the screen was never replaced; check Settings > General > About > Parts and Service History, or True Tone, by hand",
+  "checkPartDates": "Parts' manufacture dates",
+  "partsNewer": "{count, plural, one {# part made after the device} other {# parts made after the device}}",
+  "@partsNewer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deviceMadeOn": "The device was made about {date}",
+  "@deviceMadeOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "partsNewerDetail": "A part fitted at the factory cannot be newer than the device, so these were fitted later; whether they are genuine cannot be told from the data",
+  "partsNotNewer": "None made after the device",
+  "partsNotNewerDetail": "By their serial numbers, {count, plural, one {# part was} other {# parts were}} made before the device (about {date}); a part taken from an older device cannot be found this way",
+  "@partsNotNewerDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "batteryNewer": "the battery's serial number dates it to about {made}, after the device (about {device}), so it was fitted later",
+  "@batteryNewer": {
+    "placeholders": {
+      "made": {
+        "type": "String"
+      },
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldProcessor": "Processor",
+  "fieldScreen": "Screen",
+  "fieldReleaseDate": "Released",
+  "fieldBatteryMaker": "Battery maker",
+  "chargingWatts": "{state} · {watts, number, ::.0} W",
+  "@chargingWatts": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "watts": {
+        "type": "double"
+      }
+    }
+  },
+  "valueWatts": "{watts, number, ::.0} W",
+  "@valueWatts": {
+    "placeholders": {
+      "watts": {
+        "type": "double"
+      }
+    }
+  },
+  "inspectCardTitle": "Inspection",
+  "actionDetails": "Device details",
+  "actionClose": "Close",
+  "batteryCardNoHealth": "Health not reported",
+  "cliTableUnread": "Could not read the device table {path}: {error}",
+  "@cliTableUnread": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "actionCheckWarranty": "Check online",
+  "fieldWarranty": "Warranty",
+  "toastWarrantySerialCopied": "Serial number copied. Paste it on Apple's page to see the warranty.",
+  "fieldCPUCores": "CPU cores",
+  "fieldCallCapability": "Calls",
+  "fieldBasebandStatus": "Baseband status",
+  "fieldBasebandSerial": "Baseband serial number",
+  "fieldSIMTray": "SIM tray",
+  "actionBatteryDetails": "Details",
+  "batteryDetailsTitle": "Battery details",
+  "fieldCurrentCapacity": "Current capacity",
+  "fieldBootVoltage": "Boot voltage",
+  "fieldAtWarnLevel": "At warning level",
+  "fieldAtCriticalLevel": "At critical level",
+  "fieldHealthRating": "Rating",
+  "ratingGood": "Good",
+  "ratingWorn": "Worn",
+  "valueVolts": "{volts, number, ::.00} V",
+  "@valueVolts": {
+    "placeholders": {
+      "volts": {
+        "type": "double"
+      }
+    }
+  },
+  "actionStorageDetails": "Details",
+  "storageDetailsTitle": "Storage details",
+  "storageVendor": "Vendor",
+  "storageCellType": "Storage type",
+  "storageModel": "Storage model",
+  "storageChip": "Controller chip",
+  "storageFirmware": "Firmware version",
+  "storageNANDName": "NAND flash name",
+  "storageMSPVersion": "MSP version",
+  "storageEncryption": "Encryption",
+  "storageSystem": "System",
+  "storageApps": "Apps",
+  "storagePhotos": "Photos",
+  "storageOther": "Other",
+  "storageFree": "Free",
+  "storageAppsAfterInspect": "App usage is shown after an inspection; until then it counts as Other.",
+  "storageInfoTitle": "Storage chip",
+  "storageLimitsTitle": "Transfer limits",
+  "valueMB": "{mb, number, ::.00} MB",
+  "@valueMB": {
+    "placeholders": {
+      "mb": {
+        "type": "double"
+      }
+    }
+  },
+  "batteryCardTitle": "Battery",
+  "storageUsed": "Used",
+  "valueWithPercent": "{value} ({percent, number, ::group-off}%)",
+  "@valueWithPercent": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "iCloudContacts": "Contacts",
+  "iCloudCalendars": "Calendars",
+  "iCloudSafari": "Safari",
+  "iCloudNotes": "Notes",
+  "iCloudBackup": "iCloud Backup",
+  "iCloudLastBackup": "Last backup",
+  "iCloudDetailsTitle": "iCloud details",
+  "iCloudLabel": "iCloud",
+  "iCloudSyncTitle": "Synced with iCloud",
+  "iCloudSyncNote": "Reminders, Photos and other apps are not reported over USB.",
+  "valueUnread": "Not reported",
+  "actionICloudDetails": "Details",
+  "actionHideIdentifiers": "Hide serial numbers",
+  "reportFactsTitle": "Device information",
+  "reportColumnItem": "Check",
+  "reportColumnFactory": "Factory value",
+  "reportColumnRead": "Read value",
+  "reportColumnResult": "Result"
+}

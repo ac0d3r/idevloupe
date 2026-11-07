@@ -1,0 +1,79 @@
+name: Build
+
+# Packages every platform on macOS, the one runner that makes all of them
+# (the .dmg needs hdiutil). Pushes to main keep the packages as artifacts;
+# a tag vX.Y.Z publishes a release of version X.Y.Z.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    # Docs alone change no package. Tags are not filtered by paths, so a
+    # release always builds.
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GOWORK: "off"
+  CGO_ENABLED: "0"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      # The tag is the version: mygo build reads it from mygo.json, whose
+      # version is only that of builds from main.
+      - name: Version from the tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::tag $GITHUB_REF_NAME is not vX.Y.Z"
+            exit 1
+          fi
+          jq --arg v "$version" '.version = $v' mygo.json > mygo.json.new
+          mv mygo.json.new mygo.json
+          echo "version $version"
+      - run: make dist
+      # Names without the version, so that the download page links to
+      # releases/latest/download/<name> once for every release.
+      - name: Collect packages
+        run: |
+          mkdir dist
+          cp build/darwin-universal/*.dmg dist/idevloupe-macos.dmg
+          for arch in amd64 arm64; do
+            cp "build/windows-$arch/iDevLoupe.exe" "dist/idevloupe-windows-$arch.exe"
+            cp build/linux-$arch/*.deb "dist/idevloupe-linux-$arch.deb"
+            cp build/linux-$arch/*.tar.gz "dist/idevloupe-linux-$arch.tar.gz"
+          done
+          (cd dist && shasum -a 256 * > SHA256SUMS)
+          ls -l dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: idevloupe-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: idevloupe-${{ github.sha }}
+          path: dist
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
