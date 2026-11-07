@@ -178,6 +178,9 @@ type App struct {
 	Name     string
 	Version  string
 	Type     string // "User", "System", "Internal", ...
+	// DiskUsage is the bytes the app takes, its bundle and its data
+	// (StaticDiskUsage + DynamicDiskUsage); 0 when iOS does not say.
+	DiskUsage int64
 }
 
 // ListApps lists installed applications of every type.
@@ -195,6 +198,7 @@ func ListApps(l *lockdown.Client) ([]App, error) {
 			"ReturnAttributes": []string{
 				"CFBundleIdentifier", "CFBundleDisplayName", "CFBundleName",
 				"CFBundleShortVersionString", "ApplicationType",
+				"StaticDiskUsage", "DynamicDiskUsage",
 			},
 		},
 	})
@@ -224,6 +228,9 @@ func ListApps(l *lockdown.Client) ([]App, error) {
 			}
 			a.Version, _ = m["CFBundleShortVersionString"].(string)
 			a.Type, _ = m["ApplicationType"].(string)
+			static, _ := plistx.Int(m["StaticDiskUsage"])
+			dynamic, _ := plistx.Int(m["DynamicDiskUsage"])
+			a.DiskUsage = static + dynamic
 			apps = append(apps, a)
 		}
 		if s, _ := resp["Status"].(string); s == "Complete" {

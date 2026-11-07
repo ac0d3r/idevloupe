@@ -6,6 +6,7 @@
 package inspect
 
 import (
+	"slices"
 	"sort"
 	"time"
 
@@ -62,6 +63,30 @@ type Check struct {
 	Value    string
 	Status   Status
 	Detail   string
+	// Factory and Read, for a check that compares the unit with its
+	// factory record, are the value recorded and the value read now.
+	Factory, Read Reading
+	// Short is the title where columns name the comparison, as the part
+	// alone for "Front camera vs factory record"; "" when it is Title.
+	Short string
+}
+
+// Name is the check's name in a table whose columns say what it compares.
+func (c Check) Name() string {
+	if c.Short != "" {
+		return c.Short
+	}
+	return c.Title
+}
+
+// Reading is one value a comparison check sets side by side.
+type Reading struct {
+	Value string
+	// Date is when the part was made, as its serial tells; "" if it does not.
+	Date string
+	// ID is whether the value names the unit, as its serial or a network
+	// address does, to be hidden from a shared screenshot.
+	ID bool
 }
 
 // Field is a labeled value of the device information.
@@ -72,30 +97,42 @@ type Field struct {
 
 // Section is a group of fields.
 type Section struct {
-	Title  string
+	Title string
+	// Note, if any, says how to read the fields.
+	Note   string
 	Fields []Field
 }
 
 // Battery is the battery's state as the gas gauge reports it.
 type Battery struct {
-	Present         bool
-	DesignCapacity  int64   // mAh
-	MaxCapacity     int64   // mAh, full charge capacity now
-	HealthPercent   float64 // MaxCapacity / DesignCapacity
-	SystemHealth    int64   // the percent iOS shows, when reported; 0 if not
-	CycleCount      int64
-	CurrentPercent  int64
-	TemperatureC    float64
-	VoltageMV       int64
-	AmperageMA      int64
-	IsCharging      bool
-	ExternalPower   bool
-	Serial          string
-	HasCycleCount   bool
-	HasTemperature  bool
-	HasDesign       bool
-	HasMax          bool
-	HasCurrentLevel bool
+	Present        bool
+	DesignCapacity int64   // mAh
+	MaxCapacity    int64   // mAh, full charge capacity now
+	HealthPercent  float64 // MaxCapacity / DesignCapacity
+	SystemHealth   int64   // the percent iOS shows, when reported; 0 if not
+	CycleCount     int64
+	CurrentPercent int64
+	TemperatureC   float64
+	VoltageMV      int64
+	AmperageMA     int64
+	IsCharging     bool
+	ExternalPower  bool
+	Serial         string
+	Maker          string    // the battery's maker by its serial, from the device table
+	Made           time.Time // when the cell was made, by its serial; zero if it does not tell
+	// CurrentMAh is the charge held now (AppleRawCurrentCapacity).
+	CurrentMAh    int64
+	HasCurrentMAh bool
+	// BootVoltageMV is the voltage when the device last started; 0 if unread.
+	BootVoltageMV int64
+	// AtWarnLevel and AtCriticalLevel are the gauge's low-charge flags.
+	AtWarnLevel, AtCriticalLevel   bool
+	HasWarnLevel, HasCriticalLevel bool
+	HasCycleCount                  bool
+	HasTemperature                 bool
+	HasDesign                      bool
+	HasMax                         bool
+	HasCurrentLevel                bool
 	// GaugeCycleCount is the "All" diagnostics' gas gauge cycle count, a
 	// second source to compare with.
 	GaugeCycleCount int64
@@ -192,6 +229,46 @@ type RawGroup struct {
 	Items  []Field
 }
 
+// idKeys are the lockdown values that name the unit.
+var idKeys = map[string]bool{
+	"SerialNumber": true, "MLBSerialNumber": true, "UniqueChipID": true, "UniqueDeviceID": true,
+	"InternationalMobileEquipmentIdentity": true, "InternationalMobileEquipmentIdentity2": true,
+	"WiFiAddress": true, "BluetoothAddress": true, "EthernetAddress": true,
+}
+
+// Identifiers are the values that name the unit: its serials, IMEIs,
+// ECID, UDID and network addresses, as lockdown and the factory record
+// give them. A shared screenshot hides them.
+func (r *Report) Identifiers() []string {
+	var out []string
+	add := func(v string) {
+		if v != "" && !slices.Contains(out, v) {
+			out = append(out, v)
+		}
+	}
+	add(r.UDID)
+	add(r.Summary.Serial)
+	add(r.Summary.IMEI)
+	for _, g := range r.Raw {
+		if g.Source != "lockdown" {
+			continue
+		}
+		for _, f := range g.Items {
+			if idKeys[f.Label] {
+				add(f.Value)
+			}
+		}
+	}
+	for _, c := range r.Checks {
+		for _, rd := range []Reading{c.Factory, c.Read} {
+			if rd.ID {
+				add(rd.Value)
+			}
+		}
+	}
+	return out
+}
+
 // Counts tallies the report's checks.
 func (r *Report) Counts() Counts {
 	var c Counts
@@ -222,6 +299,46 @@ var categoryOrder = []func(locales.Messages) string{
 	locales.Messages.CategoryIdentity,
 	locales.Messages.CategoryCellular,
 	locales.Messages.CategoryBattery,
+}
+
+// CategoryStatus is a category of the report and its worst status.
+type CategoryStatus struct {
+	Name   string
+	Status Status
+}
+
+// severity orders the statuses from the best: what could not be read is
+// worse than worth knowing, better than a warning.
+var severity = map[Status]int{Pass: 0, Info: 1, Unknown: 2, Warn: 3, Fail: 4}
+
+// Categories names the report's categories in lang, in categoryOrder.
+func Categories(lang string) []string {
+	m := locales.In(lang)
+	out := make([]string, len(categoryOrder))
+	for i, name := range categoryOrder {
+		out[i] = name(m)
+	}
+	return out
+}
+
+// CategoryStatuses returns each category of Categories with the worst
+// status of its checks; a category without checks is Unknown.
+func (r *Report) CategoryStatuses() []CategoryStatus {
+	worst := map[string]Status{}
+	for _, c := range r.Checks {
+		if w, ok := worst[c.Category]; !ok || severity[c.Status] > severity[w] {
+			worst[c.Category] = c.Status
+		}
+	}
+	var out []CategoryStatus
+	for _, name := range Categories(r.Lang) {
+		st, ok := worst[name]
+		if !ok {
+			st = Unknown
+		}
+		out = append(out, CategoryStatus{name, st})
+	}
+	return out
 }
 
 // Issues returns the failed and warned checks, worst first: failures before

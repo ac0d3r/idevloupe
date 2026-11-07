@@ -129,13 +129,20 @@ type App struct {
 
 	devices  []*devState
 	selected string // UDID
-	tab      int
 	muxErr   error
 	toast    string
 
-	rawOpen map[string]bool
+	// hideIDs is whether the report hides the serials and addresses that
+	// name the unit, for a screenshot to share.
+	hideIDs bool
 	// detailsOpen is whether the overview's device details are shown.
 	detailsOpen bool
+	// batteryOpen is whether the overview's battery details are shown.
+	batteryOpen bool
+	// storageOpen is whether the overview's storage details are shown.
+	storageOpen bool
+	// icloudOpen is whether the overview's iCloud details are shown.
+	icloudOpen bool
 
 	// setLocale changes the app's language; tests replace it.
 	setLocale func(tag string)
@@ -143,7 +150,7 @@ type App struct {
 
 // New makes the state; Start begins watching for devices.
 func New() *App {
-	a := &App{rawOpen: map[string]bool{}, setLocale: mygo.App.SetLocale}
+	a := &App{setLocale: mygo.App.SetLocale}
 	a.update = func(fn func()) {
 		if a.win != nil {
 			a.win.Update(fn)

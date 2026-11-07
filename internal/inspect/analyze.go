@@ -30,10 +30,7 @@ func Analyze(raw *RawData, now time.Time, lang string) *Report {
 	a.other()
 
 	r := a.r
-	r.Sections = buildSections(a.m, a.v, r.Summary)
-	if sec, ok := partsSection(a.m, raw, r.Battery, a.productType); ok {
-		r.Sections = append(r.Sections, sec)
-	}
+	r.Sections = buildSections(a, r.Battery)
 	r.Raw = buildRaw(lang, raw)
 	r.Manual = manualChecks(a.m, a.productType)
 	return r
@@ -70,9 +67,10 @@ func newAnalysis(raw *RawData, now time.Time, lang string) *analysis {
 	a.model, a.known = LookupModel(a.productType, lang)
 	a.modelNumber = v.str("ModelNumber")
 	a.regionInfo = v.str("RegionInfo")
+	// A unit that does not say has telephony when it reports an IMEI.
 	telephony, ok := v.boolean("TelephonyCapability")
 	if !ok {
-		telephony = v.str("InternationalMobileEquipmentIdentity") != "" || v.str("DeviceClass") == "iPhone"
+		telephony = v.str("InternationalMobileEquipmentIdentity") != ""
 	}
 	a.telephony = telephony
 	return a
@@ -110,9 +108,10 @@ func (a *analysis) summary() {
 	}
 	front, back := v.colors()
 	s.Color = cmp.Or(back, front)
-	s.ColorName = colorName(a.m, a.productType, back, false)
 	if strings.HasPrefix(s.Color, "#") && len(s.Color) == 7 {
 		s.ColorHex = s.Color
+	} else {
+		s.ColorName = colorName(a.m, a.lang, a.productType, back, false)
 	}
 	if name, ok := RegionName(a.regionInfo, a.lang); ok {
 		s.Region = name
@@ -197,7 +196,7 @@ func (a *analysis) basics() {
 	case "Beta":
 		a.add(basic, m.CheckReleaseType(), rt, Info, m.ReleaseBetaDetail())
 	default:
-		a.add(basic, m.CheckReleaseType(), rt, Warn, m.ReleaseOtherDetail(rt))
+		a.add(basic, m.CheckReleaseType(), rt, Info, m.ReleaseOtherDetail(rt))
 	}
 
 	if n, ok := v.domainNum("com.apple.disk_usage", "TotalDiskCapacity"); ok && n > 0 {
@@ -240,7 +239,9 @@ func (a *analysis) identity() {
 	// and MobileGestalt both read the factory syscfg, the device tree holds
 	// what iBoot passed to the kernel.
 	type src struct{ name, val string }
-	consistency := func(title string, sources []src) {
+	// consistency compares the sources, nil when fewer than two say; id:
+	// the values name the unit.
+	consistency := func(title string, id bool, sources []src) *Check {
 		var have []src
 		for _, s := range sources {
 			if s.val != "" {
@@ -248,7 +249,7 @@ func (a *analysis) identity() {
 			}
 		}
 		if len(have) < 2 {
-			return
+			return nil
 		}
 		same := true
 		for _, s := range have[1:] {
@@ -261,19 +262,41 @@ func (a *analysis) identity() {
 			parts = append(parts, s.name+"="+s.val)
 		}
 		values := joinWith(m.JoinList, parts...)
-		if same {
-			a.add(ident, title, m.ValueConsistent(), Pass, values)
-		} else {
-			a.add(ident, title, m.ValueInconsistent(), Fail, m.JoinSentences(values, m.SourcesDisagree()))
+		ch := Check{Category: ident, Title: title, Value: m.ValueConsistent(), Status: Pass, Detail: values}
+		if !same {
+			ch.Value, ch.Status, ch.Detail = m.ValueInconsistent(), Fail, m.JoinSentences(values, m.SourcesDisagree())
+		}
+		// What lockdown says, against the factory record when read: with no
+		// record the row still shows the value, not only that it agrees.
+		if have[0].name == "lockdown" {
+			ch.Read = Reading{Value: have[0].val, ID: id}
+			if factory := sources[len(sources)-1]; factory.name == "SysCfg" && factory.val != "" {
+				ch.Factory = Reading{Value: factory.val, ID: id}
+			}
+		}
+		return &ch
+	}
+	add := func(ch *Check) {
+		if ch != nil {
+			a.r.Checks = append(a.r.Checks, *ch)
 		}
 	}
 	deviceTree := m.SourceDeviceTree()
-	consistency(m.CheckSerialConsistency(), []src{
+	// The serial's sources agreeing is part of the serial's own check: one
+	// row, the factory record's serial beside lockdown's.
+	if ch := consistency(m.CheckSerial(), true, []src{
 		{"lockdown", serial},
 		{deviceTree, v.platformStr("IOPlatformSerialNumber", "serial-number")},
 		{"MobileGestalt", v.gestaltStr("SerialNumber")},
 		{"SysCfg", v.sysText("SrNm")},
-	})
+	}); ch != nil {
+		sc := &a.r.Checks[len(a.r.Checks)-1] // the serial's, added above
+		sc.Factory, sc.Read = ch.Factory, Reading{Value: serial, ID: true}
+		sc.Detail = joinWith(m.JoinSentences, sc.Detail, ch.Detail)
+		if severity[ch.Status] > severity[sc.Status] {
+			sc.Value, sc.Status = ch.Value, ch.Status
+		}
+	}
 	// A part number is model and region; a source missing either has no
 	// complete value to compare.
 	partNumber := func(number, region string) string {
@@ -282,18 +305,18 @@ func (a *analysis) identity() {
 		}
 		return number + region
 	}
-	consistency(m.CheckModelConsistency(), []src{
+	add(consistency(m.FieldPartNumber(), false, []src{
 		{"lockdown", partNumber(a.modelNumber, a.regionInfo)},
 		{deviceTree, partNumber(v.platformStr("model-number"), v.platformStr("region-info"))},
 		{"MobileGestalt", partNumber(v.gestaltStr("ModelNumber"), v.gestaltStr("RegionInfo"))},
 		{"SysCfg", partNumber(v.sysText("Mod#"), v.sysText("Regn"))},
-	})
+	}))
 	if mlb := v.str("MLBSerialNumber"); mlb != "" {
-		consistency(m.CheckBoardSerialConsistency(), []src{
+		add(consistency(m.FieldBoardSerial(), true, []src{
 			{"lockdown", mlb},
 			{deviceTree, v.platformStr("mlb-serial-number")},
 			{"SysCfg", v.sysText("MLB#")},
-		})
+		}))
 	}
 	a.addresses()
 
@@ -437,9 +460,9 @@ func (a *analysis) management() {
 	for _, p := range mc.Profiles {
 		pe := ProfileEntry{Identifier: p.Identifier, Name: p.DisplayName, Organization: p.Organization, MDM: p.IsMDM}
 		r.Profiles = append(r.Profiles, pe)
-		// MDM enrollment profiles are installed so that the user
-		// cannot remove them; IsMDMProfile is not always reported.
-		if p.IsMDM || p.RemovalDisallowed {
+		// Only a profile that says it is MDM's is taken for it; one the
+		// user may not remove is listed with the others.
+		if p.IsMDM {
 			mdm = append(mdm, pe)
 		}
 	}

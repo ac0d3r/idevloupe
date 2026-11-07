@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ac0d3r/idevloupe/internal/devtable"
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
@@ -31,6 +32,10 @@ func (v view) colors() (front, back string) {
 	return front, back
 }
 
+// Table is 3uTools' device table when one was found (devtable.Find), set
+// once at startup; nil, it adds nothing.
+var Table *devtable.Table
+
 // Color codes are numbers whose meaning differs between models: the same
 // space gray is 1 on an iPhone X and 8 on an iPhone 8. Only codes a sample
 // settled are named, from what 3uTools names those units; the others show
@@ -47,11 +52,19 @@ var (
 	}
 )
 
-// colorName names a color code, "" when no sample settled it. A code given
-// as "#rrggbb" is its own name.
-func colorName(m locales.Messages, productType, code string, front bool) string {
+// colorName names a color code in lang: by the device table when one was
+// found, else by the samples; "" when neither knows it. A code given as
+// "#rrggbb" is its own name.
+func colorName(m locales.Messages, lang, productType, code string, front bool) string {
 	if strings.HasPrefix(code, "#") {
 		return code
+	}
+	lookup := Table.BackColor
+	if front {
+		lookup = Table.FrontColor
+	}
+	if name, ok := lookup(productType, code, lang); ok {
+		return name
 	}
 	name, ok := frontColors[code]
 	if !front {
@@ -65,14 +78,14 @@ func colorName(m locales.Messages, productType, code string, front bool) string 
 
 // colorText says a color code with its name when it has one: "Space Gray
 // (code 1)", else "code 8".
-func colorText(m locales.Messages, productType, code string, front bool) string {
+func colorText(m locales.Messages, lang, productType, code string, front bool) string {
 	switch {
 	case code == "":
 		return ""
 	case strings.HasPrefix(code, "#"):
 		return code
 	}
-	if name := colorName(m, productType, code, front); name != "" {
+	if name := colorName(m, lang, productType, code, front); name != "" {
 		return m.ColorNamed(name, code)
 	}
 	return m.ColorCode(code)

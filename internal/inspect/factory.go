@@ -9,31 +9,27 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/services"
 )
 
-// addresses compares the network addresses lockdown gives with those of
-// the factory record: a difference means another logic board or radio, or
-// an address written over.
+// addresses compares each network address lockdown gives with the factory
+// record's: a difference means another logic board or radio, or an address
+// written over.
 func (a *analysis) addresses() {
 	m, v := a.m, a.v
-	var same, differ []string
+	cat := m.CategoryIdentity()
 	for _, p := range []struct{ label, now, factory string }{
 		{m.FieldWiFiAddress(), v.str("WiFiAddress"), v.sysMAC("WMac")},
 		{m.FieldBluetoothAddress(), v.str("BluetoothAddress"), v.sysMAC("BMac")},
 		{m.FieldCellularAddress(), v.str("EthernetAddress"), v.sysMAC("EMac")},
 	} {
-		switch {
-		case p.now == "" || p.factory == "":
-		case strings.EqualFold(p.now, p.factory):
-			same = append(same, m.LabelValue(p.label, p.now))
-		default:
-			differ = append(differ, m.LabelValue(p.label, m.FactoryValues(p.factory, p.now)))
+		if p.now == "" || p.factory == "" {
+			continue
 		}
-	}
-	cat, title := m.CategoryIdentity(), m.CheckAddressesFactory()
-	switch {
-	case len(differ) > 0:
-		a.add(cat, title, m.ValueInconsistent(), Warn, m.JoinSentences(joinWith(m.JoinList, differ...), m.AddressMismatchDetail()))
-	case len(same) > 0:
-		a.add(cat, title, m.ValueConsistent(), Pass, joinWith(m.JoinList, same...))
+		ch := Check{Category: cat, Title: p.label, Value: m.ValueConsistent(), Status: Pass,
+			Factory: Reading{Value: p.factory, ID: true}, Read: Reading{Value: p.now, ID: true}}
+		if !strings.EqualFold(p.now, p.factory) {
+			ch.Value, ch.Status = m.ValueInconsistent(), Warn
+			ch.Detail = m.JoinSentences(m.FactoryValues(p.factory, p.now), m.AddressMismatchDetail())
+		}
+		a.r.Checks = append(a.r.Checks, ch)
 	}
 }
 
@@ -119,25 +115,34 @@ func (a *analysis) factory() {
 func (a *analysis) factoryCheck(cat, part, factory, current string, dated, screen bool) {
 	m := a.m
 	title := m.CheckPartFactory(part)
-	say := func(serial string) string {
-		if !dated {
-			return serial
+	reading := func(serial string) Reading {
+		rd := Reading{Value: serial}
+		if dated {
+			if d, ok := PartDate(serial, a.now); ok {
+				rd.Date = d.Format("2006-01-02")
+			}
 		}
-		if d, ok := PartDate(serial, a.now); ok {
-			return m.SerialWithDate(serial, d.Format("2006-01-02"))
-		}
-		return serial
+		return rd
 	}
+	say := func(rd Reading) string {
+		if rd.Date == "" {
+			return rd.Value
+		}
+		return m.SerialWithDate(rd.Value, rd.Date)
+	}
+	f, r := reading(factory), reading(current)
+	ch := Check{Category: cat, Title: title, Short: part, Factory: f, Read: r}
 	switch {
 	case current == "":
-		a.add(cat, title, "", Unknown, m.FactoryCurrentUnread(say(factory)))
+		ch.Status, ch.Detail = Unknown, m.FactoryCurrentUnread(say(f))
 	case strings.EqualFold(factory, current) && screen:
-		a.add(cat, title, m.ValueConsistent(), Info, m.JoinSentences(m.FactorySame(say(current)), m.FactoryScreenMatchDetail()))
+		ch.Value, ch.Status, ch.Detail = m.ValueConsistent(), Info, m.JoinSentences(m.FactorySame(say(r)), m.FactoryScreenMatchDetail())
 	case strings.EqualFold(factory, current):
-		a.add(cat, title, m.ValueConsistent(), Pass, m.JoinSentences(m.FactorySame(say(current)), m.FactoryMatchDetail()))
+		ch.Value, ch.Status, ch.Detail = m.ValueConsistent(), Pass, m.JoinSentences(m.FactorySame(say(r)), m.FactoryMatchDetail())
 	default:
-		a.add(cat, title, m.ValueInconsistent(), Warn, m.JoinSentences(m.FactoryValues(say(factory), say(current)), m.FactoryMismatchDetail()))
+		ch.Value, ch.Status, ch.Detail = m.ValueInconsistent(), Warn, m.JoinSentences(m.FactoryValues(say(f), say(r)), m.FactoryMismatchDetail())
 	}
+	a.r.Checks = append(a.r.Checks, ch)
 }
 
 // PartDate reads the date of manufacture a part's serial number carries

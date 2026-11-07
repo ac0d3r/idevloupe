@@ -14,7 +14,7 @@ import (
 // faceID checks Face ID's self test, as the Pearl driver reports it. Its
 // codes are not documented; samples: 0 on an iPhone 16 with working Face
 // ID, 8 on an iPhone X whose Face ID iOS flags in Parts and Service
-// History.
+// History. So 0 passes and any other code only asks for a test by hand.
 func (a *analysis) faceID() {
 	m := a.m
 	pearl := a.raw.Parts["pearl"]
@@ -35,7 +35,7 @@ func (a *analysis) faceID() {
 		}
 		a.add(parts, m.CheckFaceID(), m.ValuePassed(), Pass, detail)
 	case hasSelfTest:
-		a.add(parts, m.CheckFaceID(), m.FaceIDFailed(int(selfTest)), Warn, m.FaceIDFailedDetail(pearlKey, int(selfTest)))
+		a.add(parts, m.CheckFaceID(), m.FaceIDFailed(int(selfTest)), Info, m.FaceIDFailedDetail(pearlKey, int(selfTest)))
 	case HasFaceID(a.productType):
 		a.add(parts, m.CheckFaceID(), "", Unknown, m.FaceIDUnread())
 	}
@@ -196,6 +196,5 @@ func partsSection(m locales.Messages, raw *RawData, b *Battery, productType stri
 	if len(fields) == 0 {
 		return Section{}, false
 	}
-	note := Field{m.FieldNote(), m.PartsNote()}
-	return Section{m.SectionParts(), append([]Field{note}, fields...)}, true
+	return Section{Title: m.SectionParts(), Note: m.PartsNote(), Fields: fields}, true
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"slices"
 
 	"github.com/ac0d3r/idevloupe/internal/locales"
 	"github.com/ac0d3r/idevloupe/pkg/lockdown"
@@ -21,6 +22,7 @@ var Domains = []string{
 	"com.apple.mobile.chaperone",
 	"com.apple.PurpleBuddy",
 	"com.apple.mobile.backup",
+	dataSyncDomain,
 	"com.apple.international",
 	"com.apple.mobile.software_behavior",
 	"com.apple.mobile.wireless_lockdown",
@@ -38,6 +40,7 @@ var rootKeys = []string{
 	"MLBSerialNumber", "BasebandVersion", "BasebandStatus", "NonVolatileRAM",
 	"BrickState", "FusingStatus", "ActivationState", "TelephonyCapability",
 	"InternationalMobileEquipmentIdentity", "InternationalMobileEquipmentIdentity2",
+	"SIMTrayStatus", "BasebandSerialNumber",
 }
 
 // gestaltKeys are MobileGestalt keys read where the device still answers.
@@ -92,6 +95,12 @@ type RawData struct {
 
 	// Errors are the steps that failed, for the report.
 	Errors []*StepError
+}
+
+// inspected tells whether raw is an inspection's, which reads the apps
+// and AFC2, rather than CollectInfo's.
+func (raw *RawData) inspected() bool {
+	return raw.Apps != nil || raw.AppsErr != nil || raw.AFC2 != nil
 }
 
 func (raw *RawData) fail(step Step, target string, err error) {
@@ -182,9 +191,14 @@ var partLookups = []struct {
 	{key: "product", name: "product"},
 }
 
-func readParts(diag *services.DiagnosticsClient) map[string]map[string]any {
+// readParts reads the parts by partLookups, or only those whose keys are
+// given.
+func readParts(diag *services.DiagnosticsClient, only ...string) map[string]map[string]any {
 	parts := map[string]map[string]any{}
 	for _, p := range partLookups {
+		if len(only) > 0 && !slices.Contains(only, p.key) {
+			continue
+		}
 		if p.name != "" {
 			if reg, err := diag.IORegistry("", p.name, ""); err == nil && len(reg) > 0 {
 				parts[p.key] = reg
@@ -285,6 +299,8 @@ func CollectInfo(open Opener) (*RawData, error) {
 		}
 		defer diag.Close()
 		raw.readBattery(diag)
+		// The storage controller, for the storage details.
+		raw.Parts = readParts(diag, "storage")
 		return nil
 	})
 	if err != nil {
@@ -450,6 +466,7 @@ func (raw *RawData) scrub() {
 		scrubSubscriber(m)
 	}
 	scrubSubscriber(raw.Gestalt)
+	scrubAccounts(raw.Domains[dataSyncDomain])
 }
 
 // subscriberKeyRe matches the values that identify the SIM card's owner

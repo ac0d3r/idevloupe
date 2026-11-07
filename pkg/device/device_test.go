@@ -46,7 +46,7 @@ func fake(t *testing.T, paired bool) *fakedevice.Device {
 		PendingPolls: 2,
 		GasGauge:     map[string]any{"CycleCount": uint64(120), "DesignCapacity": uint64(3274), "FullChargeCapacity": uint64(3100)},
 		Profiles: map[string]any{"com.acme.mdm": map[string]any{
-			"PayloadDisplayName": "Acme 设备管理", "PayloadOrganization": "Acme", "PayloadRemovalDisallowed": true,
+			"PayloadDisplayName": "Acme 设备管理", "PayloadOrganization": "Acme", "PayloadRemovalDisallowed": true, "IsMDMProfile": true,
 		}},
 		EscrowLocked: true,
 		Hidden:       map[string]any{"ReleaseType": "Internal"},
@@ -98,8 +98,8 @@ func TestPairAndInspect(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open after pairing: %v", err)
 	}
-	// The overview reads lockdown and the battery gauge, and nothing that
-	// only an inspection needs.
+	// The overview reads lockdown, the battery gauge and the storage
+	// controller, and nothing that only an inspection needs.
 	info, err := inspect.CollectInfo(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }))
 	if err != nil {
 		t.Fatal(err)
@@ -107,7 +107,12 @@ func TestPairAndInspect(t *testing.T) {
 	if info.Root["SerialNumber"] != "K7Q2M4XW9T" || info.Root["ReleaseType"] != "Internal" || info.BatteryReg == nil {
 		t.Errorf("info: root %v battery %v", info.Root, info.BatteryReg)
 	}
-	if info.Apps != nil || info.Parts != nil || info.MC != nil || info.Analytics != nil || len(info.Errors) != 0 {
+	for k := range info.Parts {
+		if k != "storage" {
+			t.Errorf("info read the part %q", k)
+		}
+	}
+	if info.Apps != nil || info.MC != nil || info.Analytics != nil || len(info.Errors) != 0 {
 		t.Errorf("info read more than the overview: %+v", info)
 	}
 	o := inspect.Describe(info, time.Now(), "en")
@@ -115,7 +120,7 @@ func TestPairAndInspect(t *testing.T) {
 	for _, f := range o.Fields {
 		fields[f.Label] = f.Value
 	}
-	if fields["Battery health"] != "96%" || fields["Find My iPhone"] != "Off" || fields["Activation"] != "Activated" || o.StorageTotal != 512e9 {
+	if o.Battery == nil || o.Battery.Health() != 96 || fields["Activation Lock"] != "Off" || fields["Activation"] != "Activated" || o.StorageTotal != 512e9 {
 		t.Errorf("overview fields %v storage %d", fields, o.StorageTotal)
 	}
 
@@ -147,10 +152,10 @@ func TestPairAndInspect(t *testing.T) {
 	if c := got["越狱检测"]; c.Status != inspect.Fail || !strings.Contains(c.Detail, "TrollStore") {
 		t.Errorf("jailbreak %+v", c)
 	}
-	if c := got["序列号一致性"]; c.Status != inspect.Pass {
+	if c := got["序列号"]; c.Status != inspect.Pass || !strings.Contains(c.Detail, "lockdown=") {
 		t.Errorf("serial consistency %+v", c)
 	}
-	if c := got["型号一致性"]; c.Status != inspect.Pass {
+	if c := got["型号（部件号）"]; c.Status != inspect.Pass {
 		t.Errorf("model consistency %+v", c)
 	}
 	if c := got["远程管理 (MDM)"]; c.Status != inspect.Warn || !strings.Contains(c.Value, "Acme") {

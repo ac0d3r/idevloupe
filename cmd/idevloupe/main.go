@@ -20,6 +20,7 @@ import (
 
 	"github.com/egoist/mygo/i18n"
 
+	"github.com/ac0d3r/idevloupe/internal/devtable"
 	"github.com/ac0d3r/idevloupe/internal/gui"
 	"github.com/ac0d3r/idevloupe/internal/inspect"
 	"github.com/ac0d3r/idevloupe/internal/locales"
@@ -27,6 +28,7 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/device"
 	"github.com/ac0d3r/idevloupe/pkg/lockdown"
 	"github.com/ac0d3r/idevloupe/pkg/usbmux"
+	"github.com/ac0d3r/idevloupe/resources"
 )
 
 func main() {
@@ -39,6 +41,19 @@ func main() {
 	dump := flag.String("dump-ioreg", "", m.CliDump())
 	lang := flag.String("lang", "", m.CliLang())
 	flag.Parse()
+	// 3uTools' device table names colors and chips: the user's own copy,
+	// which 3uTools keeps up to date, else the one built in. A table that
+	// does not read is said and done without.
+	t, path, err := devtable.Find()
+	if t == nil && err == nil {
+		t, err = devtable.Parse(resources.DevicesTable)
+		path = "resources/devices_table.txt"
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, m.CliTableUnread(path, err.Error()))
+	} else {
+		inspect.Table = t
+	}
 	if *lang == "" {
 		*lang = systemLanguage()
 	} else {

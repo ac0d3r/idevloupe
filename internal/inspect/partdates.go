@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-// partLag is how much later than the device a part may seem to be made
-// before it is taken for a later one: the dates are read from serial numbers
-// to the week.
-const partLag = 30 * 24 * time.Hour
-
 // isoDate returns the day of an ISO week, Monday 1.
 func isoDate(year, week, day int) time.Time {
 	// ISO week 1 is the week with January 4th in it.
@@ -20,14 +15,13 @@ func isoDate(year, week, day int) time.Time {
 }
 
 // deviceMade returns when the device was made: the last day of the week
-// its legacy serial number tells, else the day its logic board's serial
-// tells, the board being made just before the device (an iPhone 12's board
-// F3Y143400… in week 43 of 2021, the week of its serial).
+// its legacy serial number tells. A randomized serial tells no date, and
+// the logic board's is the board's, not the device's: then false.
 func (a *analysis) deviceMade() (time.Time, bool) {
 	if d := a.mfg; d != nil && !d.Ambiguous {
 		return isoDate(d.Year, d.Week, 7), true
 	}
-	return PartDate(a.v.str("MLBSerialNumber"), a.now)
+	return time.Time{}, false
 }
 
 // newerPart is a part made after the device.
@@ -37,7 +31,7 @@ type newerPart struct {
 }
 
 // partsNewer returns, of the parts whose serial numbers are given by name,
-// those made more than partLag after the device, and how many were dated.
+// those made after the device's week, and how many were dated.
 func (a *analysis) partsNewer(serials map[string]string) (newer []newerPart, dated int) {
 	device, ok := a.deviceMade()
 	if !ok {
@@ -49,7 +43,7 @@ func (a *analysis) partsNewer(serials map[string]string) (newer []newerPart, dat
 			continue
 		}
 		dated++
-		if made.Sub(device) > partLag {
+		if made.After(device) {
 			newer = append(newer, newerPart{name, serial, made})
 		}
 	}
