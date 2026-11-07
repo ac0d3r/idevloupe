@@ -59,7 +59,7 @@ func Describe(raw *RawData, now time.Time, lang string) *Overview {
 	if b := o.Battery; b != nil {
 		b.identify(lang, now)
 	}
-	for _, f := range []Field{
+	o.Fields = append(o.Fields, []Field{
 		{m.FieldIOSVersion(), s.IOS},
 		{m.CheckSerial(), s.Serial},
 		{"IMEI", s.IMEI},
@@ -70,9 +70,7 @@ func Describe(raw *RawData, now time.Time, lang string) *Overview {
 		{m.CheckActivation(), activation},
 		{m.CheckFindMy(), findMy},
 		{m.FieldManufactured(), a.made()},
-	} {
-		o.Fields = append(o.Fields, f)
-	}
+	}...)
 	return o
 }
 

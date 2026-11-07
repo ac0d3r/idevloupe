@@ -263,7 +263,7 @@ func checkLine(c *ui.Context, m locales.Messages, ch inspect.Check, striped bool
 					ui.Text(c, mask(ch.Value)).FontSize(13).Wrap()
 				})
 			}
-			resultCell(c, ch.Status, m)
+			resultCell(c, ch.Status)
 		})
 		if ch.Status != inspect.Pass && ch.Detail != "" {
 			muted(c, mask(ch.Detail)).FontSize(12).Wrap().Margin(0, resultColumn+12, 0, itemColumn+12)
@@ -287,7 +287,7 @@ func readingCell(c *ui.Context, rd inspect.Reading, mask func(string) string) {
 }
 
 // resultCell is a check's status, as an icon and its name in its color.
-func resultCell(c *ui.Context, st inspect.Status, m locales.Messages) {
+func resultCell(c *ui.Context, st inspect.Status) {
 	t := c.Theme()
 	col := statusColor(t, st)
 	ui.Row(c).Width(resultColumn).Gap(6).Children(func() {
