@@ -51,3 +51,22 @@ iOS 自己对部件是否原装的判断（「部件与维修历史」）无法�
 
 颜色代码在不同机型间含义不同，颜色名、发布日期、电池厂商取自 3uTools 的设备表（`devices_table.txt`）：
 优先用 `IDEVLOUPE_DEVICES_TABLE` 指定的文件或本机 3uTools 缓存，没有则用内置副本。
+
+## 代码结构
+
+| 包 | 作用 |
+|---|---|
+| `pkg/plistx` | plist 帧读写与松散类型取值 |
+| `pkg/usbmux` | usbmuxd 协议：设备列表、热插拔、配对记录、端口连接 |
+| `pkg/lockdown` | lockdownd：取值、TLS 会话、启动服务、配对 |
+| `pkg/services` | diagnostics_relay、installation_proxy、MCInstall、AFC 等服务 |
+| `pkg/syscfg` | 解析出厂配置记录 |
+| `pkg/device` | 打开受信任的会话、读取基本信息 |
+| `internal/inspect` | 采集 → 分析 → 报告（纯函数，可用录制数据测试） |
+| `internal/gui` | 界面 |
+| `internal/locales` | 翻译文件与生成代码（`make i18n`） |
+| `internal/devtable` | 读取 3uTools 设备表 |
+| `internal/probe` | 逐项查询 IORegistry（`-dump-ioreg`），用于寻找新的部件字段 |
+| `internal/fakedevice` | 测试用的假 usbmuxd + 假 iPhone |
+
+`pkg/` 不依赖应用，可单独使用。协议实现参考 go-ios、ipsw 与 libimobiledevice。
