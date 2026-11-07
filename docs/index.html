@@ -164,9 +164,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
           <h3 data-t="f2t">锁与管理</h3><p data-t="f2d">查找我的 iPhone（激活锁）、监管模式、设备注册与 MDM、描述文件、激活状态。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M6 10v4"/><path d="M10 10v4"/></svg></div>
-          <h3 data-t="f3t">电池</h3><p data-t="f3d">健康度、循环次数、内阻指标；容量或循环次数异常时提示可能更换过。</p></div>
+          <h3 data-t="f3t">电池</h3><p data-t="f3d">健康度、循环次数、内阻指标；循环次数低于历史记录或电芯晚于整机生产时，提示更换过。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg></div>
-          <h3 data-t="f4t">面容 ID 与指纹</h3><p data-t="f4d">面容 ID 硬件自检结果、Touch ID 传感器状态，以及各部件当前报告的序列号。</p></div>
+          <h3 data-t="f4t">部件</h3><p data-t="f4d">部件序列号与出厂记录逐一对比，部件生产日期是否晚于整机，面容 ID 自检与 Touch ID 传感器状态。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></div>
           <h3 data-t="f5t">系统与越狱</h3><p data-t="f5d">常见越狱应用与 afc2 服务、启动参数、工程机芯片、内部版 / 测试版系统、基带与 SIM 状态。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
@@ -255,8 +255,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       featuresTitle: "Inspection: what it reads", featuresSub: "Each item shows the values it rests on; what cannot be read is marked Unknown.",
       f1t: "Identity", f1d: "Model, sales region, unit type, the format of the serial number and IMEI, and whether the sources agree on serial and model.",
       f2t: "Locks and management", f2d: "Find My iPhone (Activation Lock), supervision, device enrollment and MDM, configuration profiles, activation.",
-      f3t: "Battery", f3d: "Health, cycle count and a resistance metric; an odd capacity or cycle count is flagged as a possible replacement.",
-      f4t: "Face ID and Touch ID", f4d: "The result of Face ID's hardware self test, the state of the Touch ID sensor, and the serial numbers the parts report.",
+      f3t: "Battery", f3d: "Health, cycle count and a resistance metric; a cycle count below one logged before, or a cell made after the device, is flagged as a replacement.",
+      f4t: "Parts", f4d: "The parts' serial numbers against the factory record, whether a part was made after the device, Face ID's self test and the Touch ID sensor.",
       f5t: "System and jailbreak", f5d: "Common jailbreak apps and the afc2 service, boot arguments, engineering chips, internal or beta builds, baseband and SIM.",
       f6t: "Local", f6d: "No network, no upload; the phone number and SIM numbers never reach the report. Copy it or export it as text or JSON.",
       downloadTitle: "Download", downloadSub: "The latest release, from GitHub Releases.", recommended: "For you",
@@ -287,8 +287,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       featuresTitle: "Prüfung: was gelesen wird", featuresSub: "Jeder Punkt zeigt die Werte, auf denen er beruht; was sich nicht lesen lässt, heißt „Unbekannt“.",
       f1t: "Identität", f1d: "Modell, Verkaufsregion, Gerätetyp, Format von Seriennummer und IMEI, und ob die Quellen bei Seriennummer und Modell übereinstimmen.",
       f2t: "Sperren und Verwaltung", f2d: "„Mein iPhone suchen“ (Aktivierungssperre), Betreuung, Geräteregistrierung und MDM, Konfigurationsprofile, Aktivierung.",
-      f3t: "Batterie", f3d: "Zustand, Ladezyklen und ein Innenwiderstandswert; eine auffällige Kapazität oder Zyklenzahl wird als möglicher Tausch markiert.",
-      f4t: "Face ID und Touch ID", f4d: "Das Ergebnis des Hardware-Selbsttests von Face ID, der Zustand des Touch ID-Sensors und die Seriennummern der Bauteile.",
+      f3t: "Batterie", f3d: "Zustand, Ladezyklen und ein Innenwiderstandswert; weniger Zyklen als früher protokolliert oder eine Zelle, die nach dem Gerät gefertigt wurde, gelten als Tausch.",
+      f4t: "Bauteile", f4d: "Seriennummern der Bauteile im Abgleich mit dem Werksdatensatz, ob ein Bauteil nach dem Gerät gefertigt wurde, Selbsttest von Face ID und Touch ID-Sensor.",
       f5t: "System und Jailbreak", f5d: "Gängige Jailbreak-Apps und der afc2-Dienst, Boot-Argumente, Entwicklungschips, interne oder Beta-Systeme, Basisband und SIM.",
       f6t: "Lokal", f6d: "Kein Netz, kein Upload; Telefonnummer und SIM-Nummern landen nie im Bericht. Kopieren oder als Text / JSON exportieren.",
       downloadTitle: "Download", downloadSub: "Die neueste Version, aus GitHub Releases.", recommended: "Für dich",
