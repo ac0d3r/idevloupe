@@ -74,7 +74,7 @@ func (a *App) infoCard(c *ui.Context, o *inspect.Overview) {
 						return
 					}
 					v := ui.Text(c, f.Value).FontSize(13).TextAlign(ui.End).MinWidth(0).Wrap()
-					if col, ok := valueColor(t, m, f.Value); ok {
+					if col, ok := valueColor(t, m, f); ok {
 						v.TextColor(col)
 					}
 				})
@@ -139,11 +139,16 @@ func linkAction(c *ui.Context, label string, icon *ui.SVG, enabled bool) bool {
 	return enabled && link.Clicked()
 }
 
-// valueColor colors a state in the info card: on in green, off in gray,
-// activated in blue; ok is false for any other value, which keeps the text color.
-func valueColor(t *ui.Theme, m locales.Messages, value string) (ui.Color, bool) {
-	switch value {
-	case m.ValueOn(), m.FindMyOn():
+// valueColor colors a state in the info card: Activation Lock on in the
+// warning color, as the inspection weighs it, other states on in green, off
+// in gray, activated in blue; ok is false for any other value, which keeps
+// the text color.
+func valueColor(t *ui.Theme, m locales.Messages, f inspect.Field) (ui.Color, bool) {
+	if f.Label == m.CheckFindMy() && f.Value == m.FindMyOn() {
+		return t.Warning, true
+	}
+	switch f.Value {
+	case m.ValueOn():
 		return t.Success, true
 	case m.ActivationActivated():
 		return t.Accent, true

@@ -151,7 +151,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <a class="btn" href="#download" data-t="allPlatforms">所有平台</a>
     </div>
     <p class="note" data-t="heroNote">macOS · Windows · Linux ｜ 免费 ｜ 在本机运行，不上传数据</p>
-    <div class="shot"><img id="shot" src="screenshot-zh.png" width="2360" height="1560" alt="iDevLoupe 的验机报告界面" data-t-alt="shotAlt"></div>
+    <div class="shot"><img id="shotHome" src="screenshot-home-zh.png" width="2360" height="1560" alt="iDevLoupe 的设备首页" data-t-alt="homeAlt"></div>
   </div>
 
   <section id="features" class="soft">
@@ -172,6 +172,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
           <h3 data-t="f6t">本机运行</h3><p data-t="f6d">不联网、不上传，手机号与 SIM 卡号不进入报告。报告可复制或导出为文本 / JSON。</p></div>
       </div>
+      <div class="shot"><img id="shot" src="screenshot-zh.png" width="2360" height="1560" alt="iDevLoupe 的验机报告界面" data-t-alt="shotAlt"></div>
     </div>
   </section>
 
@@ -251,7 +252,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       heroLead: "Manage your iPhone from your computer. Today it inspects: it reads the hardware, system and security information the iPhone reports about itself and sums it up item by item, as a reference for an inspection. Backup parsing, photo management and more are planned.",
       downloadFree: "Free download", allPlatforms: "All platforms",
       heroNote: "macOS · Windows · Linux | Free | Runs on your computer; nothing is uploaded",
-      shotAlt: "The inspection report of iDevLoupe",
+      homeAlt: "The device home of iDevLoupe", shotAlt: "The inspection report of iDevLoupe",
       featuresTitle: "Inspection: what it reads", featuresSub: "Each item shows the values it rests on; what cannot be read is marked Unknown.",
       f1t: "Identity", f1d: "Model, sales region, unit type, the format of the serial number and IMEI, and whether the sources agree on serial and model.",
       f2t: "Locks and management", f2d: "Find My iPhone (Activation Lock), supervision, device enrollment and MDM, configuration profiles, activation.",
@@ -283,7 +284,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       heroLead: "Verwalte dein iPhone am Computer. Derzeit prüft es: Es liest die Hardware-, System- und Sicherheitsinformationen, die das iPhone über sich meldet, und fasst sie Punkt für Punkt zusammen, als Anhaltspunkt bei der Prüfung. Backup-Auswertung, Fotoverwaltung und mehr sind geplant.",
       downloadFree: "Kostenlos laden", allPlatforms: "Alle Plattformen",
       heroNote: "macOS · Windows · Linux | Kostenlos | Läuft auf deinem Computer; nichts wird hochgeladen",
-      shotAlt: "Der Prüfbericht von iDevLoupe",
+      homeAlt: "Die Geräteübersicht von iDevLoupe", shotAlt: "Der Prüfbericht von iDevLoupe",
       featuresTitle: "Prüfung: was gelesen wird", featuresSub: "Jeder Punkt zeigt die Werte, auf denen er beruht; was sich nicht lesen lässt, heißt „Unbekannt“.",
       f1t: "Identität", f1d: "Modell, Verkaufsregion, Gerätetyp, Format von Seriennummer und IMEI, und ob die Quellen bei Seriennummer und Modell übereinstimmen.",
       f2t: "Sperren und Verwaltung", f2d: "„Mein iPhone suchen“ (Aktivierungssperre), Betreuung, Geräteregistrierung und MDM, Konfigurationsprofile, Aktivierung.",
@@ -323,7 +324,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       if (t[el.dataset.t] !== undefined) el.innerHTML = t[el.dataset.t];
     });
     document.querySelectorAll("[data-t-alt]").forEach(function (el) { el.alt = t[el.dataset.tAlt]; });
-    document.getElementById("shot").src = lang === "zh" ? "screenshot-zh.png" : "screenshot-en.png";
+    var suffix = lang === "zh" ? "zh" : "en";
+    document.getElementById("shotHome").src = "screenshot-home-" + suffix + ".png";
+    document.getElementById("shot").src = "screenshot-" + suffix + ".png";
     document.getElementById("lang").value = lang;
     markPlatform();
   }
