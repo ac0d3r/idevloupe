@@ -13,14 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/plistx"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // Port is lockdownd's port on the device.
 const Port = 62078
-
-const label = "idevloupe"
 
 // Errors lockdownd reports that callers act on.
 var (
@@ -90,7 +88,7 @@ func (l *Client) callTimeout(req map[string]any, timeout time.Duration) (map[str
 	if l.broken {
 		return nil, ErrBroken
 	}
-	req["Label"] = label
+	req["Label"] = usbmux.ProgName
 	_ = l.conn.SetDeadline(time.Now().Add(timeout))
 	defer l.conn.SetDeadline(time.Time{})
 	if err := plistx.WriteFramed(l.conn, req); err != nil {

@@ -35,11 +35,11 @@ type Messages struct{ locale string }
 // source language.
 func In(locale string) Messages { return Messages{locale} }
 
-// AppTagline says "iPhone inspection"
+// AppTagline says "iPhone management"
 // in the language the app shows.
 func AppTagline() string { return In(i18n.Locale()).AppTagline() }
 
-// AppTagline says "iPhone inspection"
+// AppTagline says "iPhone management"
 // in the language of msgs.
 func (msgs Messages) AppTagline() string {
 	return Catalog.Format(msgs.locale, "appTagline", nil)
@@ -961,36 +961,6 @@ func (msgs Messages) SerialWeekAmbiguous(week int, year int) string {
 	return Catalog.Format(msgs.locale, "serialWeekAmbiguous", map[string]any{"week": week, "year": year})
 }
 
-// CheckSerialConsistency says "Serial number consistency"
-// in the language the app shows.
-func CheckSerialConsistency() string { return In(i18n.Locale()).CheckSerialConsistency() }
-
-// CheckSerialConsistency says "Serial number consistency"
-// in the language of msgs.
-func (msgs Messages) CheckSerialConsistency() string {
-	return Catalog.Format(msgs.locale, "checkSerialConsistency", nil)
-}
-
-// CheckModelConsistency says "Model number consistency"
-// in the language the app shows.
-func CheckModelConsistency() string { return In(i18n.Locale()).CheckModelConsistency() }
-
-// CheckModelConsistency says "Model number consistency"
-// in the language of msgs.
-func (msgs Messages) CheckModelConsistency() string {
-	return Catalog.Format(msgs.locale, "checkModelConsistency", nil)
-}
-
-// CheckBoardSerialConsistency says "Logic board serial consistency"
-// in the language the app shows.
-func CheckBoardSerialConsistency() string { return In(i18n.Locale()).CheckBoardSerialConsistency() }
-
-// CheckBoardSerialConsistency says "Logic board serial consistency"
-// in the language of msgs.
-func (msgs Messages) CheckBoardSerialConsistency() string {
-	return Catalog.Format(msgs.locale, "checkBoardSerialConsistency", nil)
-}
-
 // SourceDeviceTree says "device tree"
 // in the language the app shows.
 func SourceDeviceTree() string { return In(i18n.Locale()).SourceDeviceTree() }
@@ -1121,11 +1091,11 @@ func (msgs Messages) ActivationOtherDetail() string {
 	return Catalog.Format(msgs.locale, "activationOtherDetail", nil)
 }
 
-// CheckFindMy says "Find My iPhone"
+// CheckFindMy says "Activation Lock"
 // in the language the app shows.
 func CheckFindMy() string { return In(i18n.Locale()).CheckFindMy() }
 
-// CheckFindMy says "Find My iPhone"
+// CheckFindMy says "Activation Lock"
 // in the language of msgs.
 func (msgs Messages) CheckFindMy() string {
 	return Catalog.Format(msgs.locale, "checkFindMy", nil)
@@ -1141,11 +1111,11 @@ func (msgs Messages) FindMyAccount(account string) string {
 	return Catalog.Format(msgs.locale, "findMyAccount", map[string]any{"account": account})
 }
 
-// FindMyOn says "On (Activation Lock)"
+// FindMyOn says "On"
 // in the language the app shows.
 func FindMyOn() string { return In(i18n.Locale()).FindMyOn() }
 
-// FindMyOn says "On (Activation Lock)"
+// FindMyOn says "On"
 // in the language of msgs.
 func (msgs Messages) FindMyOn() string {
 	return Catalog.Format(msgs.locale, "findMyOn", nil)
@@ -1261,11 +1231,11 @@ func (msgs Messages) MdmProfile(name string) string {
 	return Catalog.Format(msgs.locale, "mdmProfile", map[string]any{"name": name})
 }
 
-// MdmProfileDetail says "An MDM profile, or one the user may not remove, is installed: the device is managed remotely, and its manager can see…"
+// MdmProfileDetail says "An MDM profile is installed: the device is managed remotely, and its manager can see and restrict it"
 // in the language the app shows.
 func MdmProfileDetail() string { return In(i18n.Locale()).MdmProfileDetail() }
 
-// MdmProfileDetail says "An MDM profile, or one the user may not remove, is installed: the device is managed remotely, and its manager can see…"
+// MdmProfileDetail says "An MDM profile is installed: the device is managed remotely, and its manager can see and restrict it"
 // in the language of msgs.
 func (msgs Messages) MdmProfileDetail() string {
 	return Catalog.Format(msgs.locale, "mdmProfileDetail", nil)
@@ -1595,36 +1565,6 @@ func (msgs Messages) CapacityNotRead() string {
 	return Catalog.Format(msgs.locale, "capacityNotRead", nil)
 }
 
-// HealthAboveDesign says "{percent, number, ::group-off}% (above design capacity)"
-// in the language the app shows.
-func HealthAboveDesign(percent int) string { return In(i18n.Locale()).HealthAboveDesign(percent) }
-
-// HealthAboveDesign says "{percent, number, ::group-off}% (above design capacity)"
-// in the language of msgs.
-func (msgs Messages) HealthAboveDesign(percent int) string {
-	return Catalog.Format(msgs.locale, "healthAboveDesign", map[string]any{"percent": percent})
-}
-
-// HealthAboveDesignDetail says "The full charge capacity is well above the design capacity, which a genuine battery never reaches; common with high-c…"
-// in the language the app shows.
-func HealthAboveDesignDetail() string { return In(i18n.Locale()).HealthAboveDesignDetail() }
-
-// HealthAboveDesignDetail says "The full charge capacity is well above the design capacity, which a genuine battery never reaches; common with high-c…"
-// in the language of msgs.
-func (msgs Messages) HealthAboveDesignDetail() string {
-	return Catalog.Format(msgs.locale, "healthAboveDesignDetail", nil)
-}
-
-// HealthNear80 says "Close to the 80% mark for a replacement"
-// in the language the app shows.
-func HealthNear80() string { return In(i18n.Locale()).HealthNear80() }
-
-// HealthNear80 says "Close to the 80% mark for a replacement"
-// in the language of msgs.
-func (msgs Messages) HealthNear80() string {
-	return Catalog.Format(msgs.locale, "healthNear80", nil)
-}
-
 // HealthBelow80 says "Below 80%: replacing the battery is advised"
 // in the language the app shows.
 func HealthBelow80() string { return In(i18n.Locale()).HealthBelow80() }
@@ -1667,6 +1607,16 @@ func (msgs Messages) CheckCycles() string {
 	return Catalog.Format(msgs.locale, "checkCycles", nil)
 }
 
+// CyclesPastRated says "Past the {rated, number, ::group-off} full charge cycles Apple rates the battery to keep 80% of its capacity through"
+// in the language the app shows.
+func CyclesPastRated(rated int) string { return In(i18n.Locale()).CyclesPastRated(rated) }
+
+// CyclesPastRated says "Past the {rated, number, ::group-off} full charge cycles Apple rates the battery to keep 80% of its capacity through"
+// in the language of msgs.
+func (msgs Messages) CyclesPastRated(rated int) string {
+	return Catalog.Format(msgs.locale, "cyclesPastRated", map[string]any{"rated": rated})
+}
+
 // CyclesFromLog says "Not read from the gas gauge; from the system's analytics log ({date})"
 // in the language the app shows.
 func CyclesFromLog(date string) string { return In(i18n.Locale()).CyclesFromLog(date) }
@@ -1675,46 +1625,6 @@ func CyclesFromLog(date string) string { return In(i18n.Locale()).CyclesFromLog(
 // in the language of msgs.
 func (msgs Messages) CyclesFromLog(date string) string {
 	return Catalog.Format(msgs.locale, "cyclesFromLog", map[string]any{"date": date})
-}
-
-// CyclesMany says "Many cycles"
-// in the language the app shows.
-func CyclesMany() string { return In(i18n.Locale()).CyclesMany() }
-
-// CyclesMany says "Many cycles"
-// in the language of msgs.
-func (msgs Messages) CyclesMany() string {
-	return Catalog.Format(msgs.locale, "cyclesMany", nil)
-}
-
-// CyclesVeryMany says "Very many cycles"
-// in the language the app shows.
-func CyclesVeryMany() string { return In(i18n.Locale()).CyclesVeryMany() }
-
-// CyclesVeryMany says "Very many cycles"
-// in the language of msgs.
-func (msgs Messages) CyclesVeryMany() string {
-	return Catalog.Format(msgs.locale, "cyclesVeryMany", nil)
-}
-
-// CheckBatteryTemperature says "Battery temperature"
-// in the language the app shows.
-func CheckBatteryTemperature() string { return In(i18n.Locale()).CheckBatteryTemperature() }
-
-// CheckBatteryTemperature says "Battery temperature"
-// in the language of msgs.
-func (msgs Messages) CheckBatteryTemperature() string {
-	return Catalog.Format(msgs.locale, "checkBatteryTemperature", nil)
-}
-
-// BatteryWarm says "The battery is warm"
-// in the language the app shows.
-func BatteryWarm() string { return In(i18n.Locale()).BatteryWarm() }
-
-// BatteryWarm says "The battery is warm"
-// in the language of msgs.
-func (msgs Messages) BatteryWarm() string {
-	return Catalog.Format(msgs.locale, "batteryWarm", nil)
 }
 
 // CheckBatteryOrigin says "Battery origin"
@@ -1727,18 +1637,6 @@ func (msgs Messages) CheckBatteryOrigin() string {
 	return Catalog.Format(msgs.locale, "checkBatteryOrigin", nil)
 }
 
-// BatteryOverCapacity says "The full charge capacity of {max, number, ::group-off} mAh is {percent, number, ::group-off}% of the design capacity …"
-// in the language the app shows.
-func BatteryOverCapacity(max int, percent int, design int) string {
-	return In(i18n.Locale()).BatteryOverCapacity(max, percent, design)
-}
-
-// BatteryOverCapacity says "The full charge capacity of {max, number, ::group-off} mAh is {percent, number, ::group-off}% of the design capacity …"
-// in the language of msgs.
-func (msgs Messages) BatteryOverCapacity(max int, percent int, design int) string {
-	return Catalog.Format(msgs.locale, "batteryOverCapacity", map[string]any{"max": max, "percent": percent, "design": design})
-}
-
 // BatteryLogCyclesHigher says "The analytics log of {date} counted {logged, number, ::group-off} cycles, the battery now has {now, number, ::group-o…"
 // in the language the app shows.
 func BatteryLogCyclesHigher(date string, logged int, now int) string {
@@ -1749,28 +1647,6 @@ func BatteryLogCyclesHigher(date string, logged int, now int) string {
 // in the language of msgs.
 func (msgs Messages) BatteryLogCyclesHigher(date string, logged int, now int) string {
 	return Catalog.Format(msgs.locale, "batteryLogCyclesHigher", map[string]any{"date": date, "logged": logged, "now": now})
-}
-
-// BatteryTooFewCycles says "The phone was made about {years, number, ::.0} years ago, yet its battery has {cycles, number, ::group-off} cycles: i…"
-// in the language the app shows.
-func BatteryTooFewCycles(years float64, cycles int) string {
-	return In(i18n.Locale()).BatteryTooFewCycles(years, cycles)
-}
-
-// BatteryTooFewCycles says "The phone was made about {years, number, ::.0} years ago, yet its battery has {cycles, number, ::group-off} cycles: i…"
-// in the language of msgs.
-func (msgs Messages) BatteryTooFewCycles(years float64, cycles int) string {
-	return Catalog.Format(msgs.locale, "batteryTooFewCycles", map[string]any{"years": years, "cycles": cycles})
-}
-
-// BatteryNonGenuine says "Likely non-genuine / replaced"
-// in the language the app shows.
-func BatteryNonGenuine() string { return In(i18n.Locale()).BatteryNonGenuine() }
-
-// BatteryNonGenuine says "Likely non-genuine / replaced"
-// in the language of msgs.
-func (msgs Messages) BatteryNonGenuine() string {
-	return Catalog.Format(msgs.locale, "batteryNonGenuine", nil)
 }
 
 // BatteryReplaced says "Likely replaced"
@@ -1803,11 +1679,11 @@ func (msgs Messages) BatteryNoSigns() string {
 	return Catalog.Format(msgs.locale, "batteryNoSigns", nil)
 }
 
-// BatteryNoSignsDetail says "No sign of a raised capacity, or of cycles at odds with the phone's age; whether it is genuine, Settings > Battery an…"
+// BatteryNoSignsDetail says "No record of a replacement found: no cycle count lower than an earlier log, no cell made after the device. Whether th…"
 // in the language the app shows.
 func BatteryNoSignsDetail() string { return In(i18n.Locale()).BatteryNoSignsDetail() }
 
-// BatteryNoSignsDetail says "No sign of a raised capacity, or of cycles at odds with the phone's age; whether it is genuine, Settings > Battery an…"
+// BatteryNoSignsDetail says "No record of a replacement found: no cycle count lower than an earlier log, no cell made after the device. Whether th…"
 // in the language of msgs.
 func (msgs Messages) BatteryNoSignsDetail() string {
 	return Catalog.Format(msgs.locale, "batteryNoSignsDetail", nil)
@@ -1873,23 +1749,23 @@ func (msgs Messages) FaceIDFDRPassed() string {
 	return Catalog.Format(msgs.locale, "faceIDFDRPassed", nil)
 }
 
-// FaceIDFailed says "Failed (code {code, number, ::group-off})"
+// FaceIDFailed says "Code {code, number, ::group-off}, test it"
 // in the language the app shows.
 func FaceIDFailed(code int) string { return In(i18n.Locale()).FaceIDFailed(code) }
 
-// FaceIDFailed says "Failed (code {code, number, ::group-off})"
+// FaceIDFailed says "Code {code, number, ::group-off}, test it"
 // in the language of msgs.
 func (msgs Messages) FaceIDFailed(code int) string {
 	return Catalog.Format(msgs.locale, "faceIDFailed", map[string]any{"code": code})
 }
 
-// FaceIDFailedDetail says "{key} = {code, number, ::group-off} (0 on a working unit). Face ID's hardware self test failed, as when Face ID is br…"
+// FaceIDFailedDetail says "{key} = {code, number, ::group-off} (0 on working units). Apple does not document the code, so it is no verdict on Fa…"
 // in the language the app shows.
 func FaceIDFailedDetail(key string, code int) string {
 	return In(i18n.Locale()).FaceIDFailedDetail(key, code)
 }
 
-// FaceIDFailedDetail says "{key} = {code, number, ::group-off} (0 on a working unit). Face ID's hardware self test failed, as when Face ID is br…"
+// FaceIDFailedDetail says "{key} = {code, number, ::group-off} (0 on working units). Apple does not document the code, so it is no verdict on Fa…"
 // in the language of msgs.
 func (msgs Messages) FaceIDFailedDetail(key string, code int) string {
 	return Catalog.Format(msgs.locale, "faceIDFailedDetail", map[string]any{"key": key, "code": code})
@@ -2251,21 +2127,21 @@ func (msgs Messages) FieldCPUArchitecture() string {
 	return Catalog.Format(msgs.locale, "fieldCPUArchitecture", nil)
 }
 
-// FieldColor says "Color"
+// FieldColor says "Front color"
 // in the language the app shows.
 func FieldColor() string { return In(i18n.Locale()).FieldColor() }
 
-// FieldColor says "Color"
+// FieldColor says "Front color"
 // in the language of msgs.
 func (msgs Messages) FieldColor() string {
 	return Catalog.Format(msgs.locale, "fieldColor", nil)
 }
 
-// FieldEnclosureColor says "Enclosure color"
+// FieldEnclosureColor says "Back color"
 // in the language the app shows.
 func FieldEnclosureColor() string { return In(i18n.Locale()).FieldEnclosureColor() }
 
-// FieldEnclosureColor says "Enclosure color"
+// FieldEnclosureColor says "Back color"
 // in the language of msgs.
 func (msgs Messages) FieldEnclosureColor() string {
 	return Catalog.Format(msgs.locale, "fieldEnclosureColor", nil)
@@ -2441,11 +2317,11 @@ func (msgs Messages) FieldNote() string {
 	return Catalog.Format(msgs.locale, "fieldNote", nil)
 }
 
-// PartsNote says "The serial numbers the parts report now. Their factory record cannot be read over the cable, so they do not tell whet…"
+// PartsNote says "The serial numbers the parts report now. Where the factory configuration could be read, the checks compare them with …"
 // in the language the app shows.
 func PartsNote() string { return In(i18n.Locale()).PartsNote() }
 
-// PartsNote says "The serial numbers the parts report now. Their factory record cannot be read over the cable, so they do not tell whet…"
+// PartsNote says "The serial numbers the parts report now. Where the factory configuration could be read, the checks compare them with …"
 // in the language of msgs.
 func (msgs Messages) PartsNote() string {
 	return Catalog.Format(msgs.locale, "partsNote", nil)
@@ -3167,21 +3043,21 @@ func (msgs Messages) Retry() string {
 	return Catalog.Format(msgs.locale, "retry", nil)
 }
 
-// EmptyTitle says "Connect an iPhone to inspect it"
+// EmptyTitle says "Connect an iPhone"
 // in the language the app shows.
 func EmptyTitle() string { return In(i18n.Locale()).EmptyTitle() }
 
-// EmptyTitle says "Connect an iPhone to inspect it"
+// EmptyTitle says "Connect an iPhone"
 // in the language of msgs.
 func (msgs Messages) EmptyTitle() string {
 	return Catalog.Format(msgs.locale, "emptyTitle", nil)
 }
 
-// EmptySubtitle says "Reads the hardware, system and security information the device reports, and gives a verdict on each item"
+// EmptySubtitle says "Shows the information the device reports once it is connected; Inspect checks its hardware, system and security item …"
 // in the language the app shows.
 func EmptySubtitle() string { return In(i18n.Locale()).EmptySubtitle() }
 
-// EmptySubtitle says "Reads the hardware, system and security information the device reports, and gives a verdict on each item"
+// EmptySubtitle says "Shows the information the device reports once it is connected; Inspect checks its hardware, system and security item …"
 // in the language of msgs.
 func (msgs Messages) EmptySubtitle() string {
 	return Catalog.Format(msgs.locale, "emptySubtitle", nil)
@@ -3207,24 +3083,14 @@ func (msgs Messages) EmptyStepTrust() string {
 	return Catalog.Format(msgs.locale, "emptyStepTrust", nil)
 }
 
-// EmptyStepDone says "The inspection runs by itself"
+// EmptyStepDone says "Review its information, then inspect it"
 // in the language the app shows.
 func EmptyStepDone() string { return In(i18n.Locale()).EmptyStepDone() }
 
-// EmptyStepDone says "The inspection runs by itself"
+// EmptyStepDone says "Review its information, then inspect it"
 // in the language of msgs.
 func (msgs Messages) EmptyStepDone() string {
 	return Catalog.Format(msgs.locale, "emptyStepDone", nil)
-}
-
-// ChipSerial says "Serial {serial}"
-// in the language the app shows.
-func ChipSerial(serial string) string { return In(i18n.Locale()).ChipSerial(serial) }
-
-// ChipSerial says "Serial {serial}"
-// in the language of msgs.
-func (msgs Messages) ChipSerial(serial string) string {
-	return Catalog.Format(msgs.locale, "chipSerial", map[string]any{"serial": serial})
 }
 
 // ActionInspectAgain says "Inspect again"
@@ -3257,46 +3123,6 @@ func (msgs Messages) ActionExport() string {
 	return Catalog.Format(msgs.locale, "actionExport", nil)
 }
 
-// TabReport says "Report"
-// in the language the app shows.
-func TabReport() string { return In(i18n.Locale()).TabReport() }
-
-// TabReport says "Report"
-// in the language of msgs.
-func (msgs Messages) TabReport() string {
-	return Catalog.Format(msgs.locale, "tabReport", nil)
-}
-
-// TabBattery says "Battery"
-// in the language the app shows.
-func TabBattery() string { return In(i18n.Locale()).TabBattery() }
-
-// TabBattery says "Battery"
-// in the language of msgs.
-func (msgs Messages) TabBattery() string {
-	return Catalog.Format(msgs.locale, "tabBattery", nil)
-}
-
-// TabInfo says "Device info"
-// in the language the app shows.
-func TabInfo() string { return In(i18n.Locale()).TabInfo() }
-
-// TabInfo says "Device info"
-// in the language of msgs.
-func (msgs Messages) TabInfo() string {
-	return Catalog.Format(msgs.locale, "tabInfo", nil)
-}
-
-// TabRaw says "Raw data"
-// in the language the app shows.
-func TabRaw() string { return In(i18n.Locale()).TabRaw() }
-
-// TabRaw says "Raw data"
-// in the language of msgs.
-func (msgs Messages) TabRaw() string {
-	return Catalog.Format(msgs.locale, "tabRaw", nil)
-}
-
 // StatusCount says "{status} {count, number, ::group-off}"
 // in the language the app shows.
 func StatusCount(status string, count int) string {
@@ -3319,26 +3145,6 @@ func (msgs Messages) IssuesTotal(count int) string {
 	return Catalog.Format(msgs.locale, "issuesTotal", map[string]any{"count": count})
 }
 
-// AttentionTitle says "Needs attention"
-// in the language the app shows.
-func AttentionTitle() string { return In(i18n.Locale()).AttentionTitle() }
-
-// AttentionTitle says "Needs attention"
-// in the language of msgs.
-func (msgs Messages) AttentionTitle() string {
-	return Catalog.Format(msgs.locale, "attentionTitle", nil)
-}
-
-// AttentionCount says "{count, plural, one {# item} other {# items}}; details in the categories below"
-// in the language the app shows.
-func AttentionCount(count int) string { return In(i18n.Locale()).AttentionCount(count) }
-
-// AttentionCount says "{count, plural, one {# item} other {# items}}; details in the categories below"
-// in the language of msgs.
-func (msgs Messages) AttentionCount(count int) string {
-	return Catalog.Format(msgs.locale, "attentionCount", map[string]any{"count": count})
-}
-
 // ManualHint says "Software cannot judge these reliably; check them on the phone"
 // in the language the app shows.
 func ManualHint() string { return In(i18n.Locale()).ManualHint() }
@@ -3357,16 +3163,6 @@ func ErrorsTitle() string { return In(i18n.Locale()).ErrorsTitle() }
 // in the language of msgs.
 func (msgs Messages) ErrorsTitle() string {
 	return Catalog.Format(msgs.locale, "errorsTitle", nil)
-}
-
-// BatteryHealthMax says "Battery health (maximum capacity)"
-// in the language the app shows.
-func BatteryHealthMax() string { return In(i18n.Locale()).BatteryHealthMax() }
-
-// BatteryHealthMax says "Battery health (maximum capacity)"
-// in the language of msgs.
-func (msgs Messages) BatteryHealthMax() string {
-	return Catalog.Format(msgs.locale, "batteryHealthMax", nil)
 }
 
 // StatTemperature says "Temperature"
@@ -3477,28 +3273,6 @@ func BatteryLogNote(note string) string { return In(i18n.Locale()).BatteryLogNot
 // in the language of msgs.
 func (msgs Messages) BatteryLogNote(note string) string {
 	return Catalog.Format(msgs.locale, "batteryLogNote", map[string]any{"note": note})
-}
-
-// RawIntro says "The data exactly as the device returned it, unprocessed, to verify the verdicts against."
-// in the language the app shows.
-func RawIntro() string { return In(i18n.Locale()).RawIntro() }
-
-// RawIntro says "The data exactly as the device returned it, unprocessed, to verify the verdicts against."
-// in the language of msgs.
-func (msgs Messages) RawIntro() string {
-	return Catalog.Format(msgs.locale, "rawIntro", nil)
-}
-
-// RawGroupTitle says "{source} ({count, plural, one {# item} other {# items}})"
-// in the language the app shows.
-func RawGroupTitle(source string, count int) string {
-	return In(i18n.Locale()).RawGroupTitle(source, count)
-}
-
-// RawGroupTitle says "{source} ({count, plural, one {# item} other {# items}})"
-// in the language of msgs.
-func (msgs Messages) RawGroupTitle(source string, count int) string {
-	return Catalog.Format(msgs.locale, "rawGroupTitle", map[string]any{"source": source, "count": count})
 }
 
 // ToastCopied says "Report copied to the clipboard"
@@ -3621,11 +3395,11 @@ func (msgs Messages) CliUDID() string {
 	return Catalog.Format(msgs.locale, "cliUDID", nil)
 }
 
-// CliDump says "query the IORegistry item by item and write the replies to this file (with a summary in .txt), to find parts' informa…"
+// CliDump says "ask for parts' keys (lockdown, MobileGestalt) and query the IORegistry item by item, writing the replies to this file…"
 // in the language the app shows.
 func CliDump() string { return In(i18n.Locale()).CliDump() }
 
-// CliDump says "query the IORegistry item by item and write the replies to this file (with a summary in .txt), to find parts' informa…"
+// CliDump says "ask for parts' keys (lockdown, MobileGestalt) and query the IORegistry item by item, writing the replies to this file…"
 // in the language of msgs.
 func (msgs Messages) CliDump() string {
 	return Catalog.Format(msgs.locale, "cliDump", nil)
@@ -3661,11 +3435,11 @@ func (msgs Messages) CliPairing() string {
 	return Catalog.Format(msgs.locale, "cliPairing", nil)
 }
 
-// CliProbing says "Querying the IORegistry ({count, plural, one {# item} other {# items}})…"
+// CliProbing says "Querying keys and the IORegistry ({count, plural, one {# item} other {# items}})…"
 // in the language the app shows.
 func CliProbing(count int) string { return In(i18n.Locale()).CliProbing(count) }
 
-// CliProbing says "Querying the IORegistry ({count, plural, one {# item} other {# items}})…"
+// CliProbing says "Querying keys and the IORegistry ({count, plural, one {# item} other {# items}})…"
 // in the language of msgs.
 func (msgs Messages) CliProbing(count int) string {
 	return Catalog.Format(msgs.locale, "cliProbing", map[string]any{"count": count})
@@ -3979,4 +3753,1020 @@ func RegionKS() string { return In(i18n.Locale()).RegionKS() }
 // in the language of msgs.
 func (msgs Messages) RegionKS() string {
 	return Catalog.Format(msgs.locale, "regionKS", nil)
+}
+
+// FieldManufactured says "Manufactured"
+// in the language the app shows.
+func FieldManufactured() string { return In(i18n.Locale()).FieldManufactured() }
+
+// FieldManufactured says "Manufactured"
+// in the language of msgs.
+func (msgs Messages) FieldManufactured() string {
+	return Catalog.Format(msgs.locale, "fieldManufactured", nil)
+}
+
+// ActionInspect says "Inspect"
+// in the language the app shows.
+func ActionInspect() string { return In(i18n.Locale()).ActionInspect() }
+
+// ActionInspect says "Inspect"
+// in the language of msgs.
+func (msgs Messages) ActionInspect() string {
+	return Catalog.Format(msgs.locale, "actionInspect", nil)
+}
+
+// ActionViewReport says "View report"
+// in the language the app shows.
+func ActionViewReport() string { return In(i18n.Locale()).ActionViewReport() }
+
+// ActionViewReport says "View report"
+// in the language of msgs.
+func (msgs Messages) ActionViewReport() string {
+	return Catalog.Format(msgs.locale, "actionViewReport", nil)
+}
+
+// ActionOverview says "Overview"
+// in the language the app shows.
+func ActionOverview() string { return In(i18n.Locale()).ActionOverview() }
+
+// ActionOverview says "Overview"
+// in the language of msgs.
+func (msgs Messages) ActionOverview() string {
+	return Catalog.Format(msgs.locale, "actionOverview", nil)
+}
+
+// OverviewHint says "Inspecting also reads the diagnostics, battery logs, apps and profiles, and gives a verdict on each item"
+// in the language the app shows.
+func OverviewHint() string { return In(i18n.Locale()).OverviewHint() }
+
+// OverviewHint says "Inspecting also reads the diagnostics, battery logs, apps and profiles, and gives a verdict on each item"
+// in the language of msgs.
+func (msgs Messages) OverviewHint() string {
+	return Catalog.Format(msgs.locale, "overviewHint", nil)
+}
+
+// CheckPartFactory says "{part} vs. factory record"
+// in the language the app shows.
+func CheckPartFactory(part string) string { return In(i18n.Locale()).CheckPartFactory(part) }
+
+// CheckPartFactory says "{part} vs. factory record"
+// in the language of msgs.
+func (msgs Messages) CheckPartFactory(part string) string {
+	return Catalog.Format(msgs.locale, "checkPartFactory", map[string]any{"part": part})
+}
+
+// FactoryValues says "factory {factory}, now {current}"
+// in the language the app shows.
+func FactoryValues(factory string, current string) string {
+	return In(i18n.Locale()).FactoryValues(factory, current)
+}
+
+// FactoryValues says "factory {factory}, now {current}"
+// in the language of msgs.
+func (msgs Messages) FactoryValues(factory string, current string) string {
+	return Catalog.Format(msgs.locale, "factoryValues", map[string]any{"factory": factory, "current": current})
+}
+
+// SerialWithDate says "{serial} (made about {date})"
+// in the language the app shows.
+func SerialWithDate(serial string, date string) string {
+	return In(i18n.Locale()).SerialWithDate(serial, date)
+}
+
+// SerialWithDate says "{serial} (made about {date})"
+// in the language of msgs.
+func (msgs Messages) SerialWithDate(serial string, date string) string {
+	return Catalog.Format(msgs.locale, "serialWithDate", map[string]any{"serial": serial, "date": date})
+}
+
+// FactoryMatchDetail says "Repair tools can write the original serial onto a new part, so a match does not prove the part was never replaced"
+// in the language the app shows.
+func FactoryMatchDetail() string { return In(i18n.Locale()).FactoryMatchDetail() }
+
+// FactoryMatchDetail says "Repair tools can write the original serial onto a new part, so a match does not prove the part was never replaced"
+// in the language of msgs.
+func (msgs Messages) FactoryMatchDetail() string {
+	return Catalog.Format(msgs.locale, "factoryMatchDetail", nil)
+}
+
+// FactoryMismatchDetail says "This is not the part fitted at the factory, so it was probably replaced; whether the replacement is genuine cannot be…"
+// in the language the app shows.
+func FactoryMismatchDetail() string { return In(i18n.Locale()).FactoryMismatchDetail() }
+
+// FactoryMismatchDetail says "This is not the part fitted at the factory, so it was probably replaced; whether the replacement is genuine cannot be…"
+// in the language of msgs.
+func (msgs Messages) FactoryMismatchDetail() string {
+	return Catalog.Format(msgs.locale, "factoryMismatchDetail", nil)
+}
+
+// FactoryCurrentUnread says "The factory record has {factory}, but the part's current serial number was not read"
+// in the language the app shows.
+func FactoryCurrentUnread(factory string) string {
+	return In(i18n.Locale()).FactoryCurrentUnread(factory)
+}
+
+// FactoryCurrentUnread says "The factory record has {factory}, but the part's current serial number was not read"
+// in the language of msgs.
+func (msgs Messages) FactoryCurrentUnread(factory string) string {
+	return Catalog.Format(msgs.locale, "factoryCurrentUnread", map[string]any{"factory": factory})
+}
+
+// CheckFactoryRecord says "Factory record of parts"
+// in the language the app shows.
+func CheckFactoryRecord() string { return In(i18n.Locale()).CheckFactoryRecord() }
+
+// CheckFactoryRecord says "Factory record of parts"
+// in the language of msgs.
+func (msgs Messages) CheckFactoryRecord() string {
+	return Catalog.Format(msgs.locale, "checkFactoryRecord", nil)
+}
+
+// FactoryUnread says "The factory configuration (SysCfg) was not read, so parts cannot be compared with the factory record; check Settings …"
+// in the language the app shows.
+func FactoryUnread() string { return In(i18n.Locale()).FactoryUnread() }
+
+// FactoryUnread says "The factory configuration (SysCfg) was not read, so parts cannot be compared with the factory record; check Settings …"
+// in the language of msgs.
+func (msgs Messages) FactoryUnread() string {
+	return Catalog.Format(msgs.locale, "factoryUnread", nil)
+}
+
+// PartBattery says "Battery"
+// in the language the app shows.
+func PartBattery() string { return In(i18n.Locale()).PartBattery() }
+
+// PartBattery says "Battery"
+// in the language of msgs.
+func (msgs Messages) PartBattery() string {
+	return Catalog.Format(msgs.locale, "partBattery", nil)
+}
+
+// PartDisplayPanel says "Display panel"
+// in the language the app shows.
+func PartDisplayPanel() string { return In(i18n.Locale()).PartDisplayPanel() }
+
+// PartDisplayPanel says "Display panel"
+// in the language of msgs.
+func (msgs Messages) PartDisplayPanel() string {
+	return Catalog.Format(msgs.locale, "partDisplayPanel", nil)
+}
+
+// FactorySame says "factory and now {serial}"
+// in the language the app shows.
+func FactorySame(serial string) string { return In(i18n.Locale()).FactorySame(serial) }
+
+// FactorySame says "factory and now {serial}"
+// in the language of msgs.
+func (msgs Messages) FactorySame(serial string) string {
+	return Catalog.Format(msgs.locale, "factorySame", map[string]any{"serial": serial})
+}
+
+// ColorBlack says "Black"
+// in the language the app shows.
+func ColorBlack() string { return In(i18n.Locale()).ColorBlack() }
+
+// ColorBlack says "Black"
+// in the language of msgs.
+func (msgs Messages) ColorBlack() string {
+	return Catalog.Format(msgs.locale, "colorBlack", nil)
+}
+
+// ColorSpaceGray says "Space Gray"
+// in the language the app shows.
+func ColorSpaceGray() string { return In(i18n.Locale()).ColorSpaceGray() }
+
+// ColorSpaceGray says "Space Gray"
+// in the language of msgs.
+func (msgs Messages) ColorSpaceGray() string {
+	return Catalog.Format(msgs.locale, "colorSpaceGray", nil)
+}
+
+// ColorNamed says "{name} (code {code})"
+// in the language the app shows.
+func ColorNamed(name string, code string) string { return In(i18n.Locale()).ColorNamed(name, code) }
+
+// ColorNamed says "{name} (code {code})"
+// in the language of msgs.
+func (msgs Messages) ColorNamed(name string, code string) string {
+	return Catalog.Format(msgs.locale, "colorNamed", map[string]any{"name": name, "code": code})
+}
+
+// ColorCode says "code {code}"
+// in the language the app shows.
+func ColorCode(code string) string { return In(i18n.Locale()).ColorCode(code) }
+
+// ColorCode says "code {code}"
+// in the language of msgs.
+func (msgs Messages) ColorCode(code string) string {
+	return Catalog.Format(msgs.locale, "colorCode", map[string]any{"code": code})
+}
+
+// FieldRegulatoryModel says "Regulatory model"
+// in the language the app shows.
+func FieldRegulatoryModel() string { return In(i18n.Locale()).FieldRegulatoryModel() }
+
+// FieldRegulatoryModel says "Regulatory model"
+// in the language of msgs.
+func (msgs Messages) FieldRegulatoryModel() string {
+	return Catalog.Format(msgs.locale, "fieldRegulatoryModel", nil)
+}
+
+// FieldCellularAddress says "Cellular address"
+// in the language the app shows.
+func FieldCellularAddress() string { return In(i18n.Locale()).FieldCellularAddress() }
+
+// FieldCellularAddress says "Cellular address"
+// in the language of msgs.
+func (msgs Messages) FieldCellularAddress() string {
+	return Catalog.Format(msgs.locale, "fieldCellularAddress", nil)
+}
+
+// AddressMismatchDetail says "The logic board or the radio may have been replaced, or the address written over"
+// in the language the app shows.
+func AddressMismatchDetail() string { return In(i18n.Locale()).AddressMismatchDetail() }
+
+// AddressMismatchDetail says "The logic board or the radio may have been replaced, or the address written over"
+// in the language of msgs.
+func (msgs Messages) AddressMismatchDetail() string {
+	return Catalog.Format(msgs.locale, "addressMismatchDetail", nil)
+}
+
+// FactoryScreenMatchDetail says "A screen's serial is often written onto a new screen during repair, so a match does not show the screen was never rep…"
+// in the language the app shows.
+func FactoryScreenMatchDetail() string { return In(i18n.Locale()).FactoryScreenMatchDetail() }
+
+// FactoryScreenMatchDetail says "A screen's serial is often written onto a new screen during repair, so a match does not show the screen was never rep…"
+// in the language of msgs.
+func (msgs Messages) FactoryScreenMatchDetail() string {
+	return Catalog.Format(msgs.locale, "factoryScreenMatchDetail", nil)
+}
+
+// CheckPartDates says "Parts' manufacture dates"
+// in the language the app shows.
+func CheckPartDates() string { return In(i18n.Locale()).CheckPartDates() }
+
+// CheckPartDates says "Parts' manufacture dates"
+// in the language of msgs.
+func (msgs Messages) CheckPartDates() string {
+	return Catalog.Format(msgs.locale, "checkPartDates", nil)
+}
+
+// PartsNewer says "{count, plural, one {# part made after the device} other {# parts made after the device}}"
+// in the language the app shows.
+func PartsNewer(count int) string { return In(i18n.Locale()).PartsNewer(count) }
+
+// PartsNewer says "{count, plural, one {# part made after the device} other {# parts made after the device}}"
+// in the language of msgs.
+func (msgs Messages) PartsNewer(count int) string {
+	return Catalog.Format(msgs.locale, "partsNewer", map[string]any{"count": count})
+}
+
+// DeviceMadeOn says "The device was made about {date}"
+// in the language the app shows.
+func DeviceMadeOn(date string) string { return In(i18n.Locale()).DeviceMadeOn(date) }
+
+// DeviceMadeOn says "The device was made about {date}"
+// in the language of msgs.
+func (msgs Messages) DeviceMadeOn(date string) string {
+	return Catalog.Format(msgs.locale, "deviceMadeOn", map[string]any{"date": date})
+}
+
+// PartsNewerDetail says "A part fitted at the factory cannot be newer than the device, so these were fitted later; whether they are genuine ca…"
+// in the language the app shows.
+func PartsNewerDetail() string { return In(i18n.Locale()).PartsNewerDetail() }
+
+// PartsNewerDetail says "A part fitted at the factory cannot be newer than the device, so these were fitted later; whether they are genuine ca…"
+// in the language of msgs.
+func (msgs Messages) PartsNewerDetail() string {
+	return Catalog.Format(msgs.locale, "partsNewerDetail", nil)
+}
+
+// PartsNotNewer says "None made after the device"
+// in the language the app shows.
+func PartsNotNewer() string { return In(i18n.Locale()).PartsNotNewer() }
+
+// PartsNotNewer says "None made after the device"
+// in the language of msgs.
+func (msgs Messages) PartsNotNewer() string {
+	return Catalog.Format(msgs.locale, "partsNotNewer", nil)
+}
+
+// PartsNotNewerDetail says "By their serial numbers, {count, plural, one {# part was} other {# parts were}} made before the device (about {date})…"
+// in the language the app shows.
+func PartsNotNewerDetail(count int, date string) string {
+	return In(i18n.Locale()).PartsNotNewerDetail(count, date)
+}
+
+// PartsNotNewerDetail says "By their serial numbers, {count, plural, one {# part was} other {# parts were}} made before the device (about {date})…"
+// in the language of msgs.
+func (msgs Messages) PartsNotNewerDetail(count int, date string) string {
+	return Catalog.Format(msgs.locale, "partsNotNewerDetail", map[string]any{"count": count, "date": date})
+}
+
+// BatteryNewer says "the battery's serial number dates it to about {made}, after the device (about {device}), so it was fitted later"
+// in the language the app shows.
+func BatteryNewer(made string, device string) string {
+	return In(i18n.Locale()).BatteryNewer(made, device)
+}
+
+// BatteryNewer says "the battery's serial number dates it to about {made}, after the device (about {device}), so it was fitted later"
+// in the language of msgs.
+func (msgs Messages) BatteryNewer(made string, device string) string {
+	return Catalog.Format(msgs.locale, "batteryNewer", map[string]any{"made": made, "device": device})
+}
+
+// FieldProcessor says "Processor"
+// in the language the app shows.
+func FieldProcessor() string { return In(i18n.Locale()).FieldProcessor() }
+
+// FieldProcessor says "Processor"
+// in the language of msgs.
+func (msgs Messages) FieldProcessor() string {
+	return Catalog.Format(msgs.locale, "fieldProcessor", nil)
+}
+
+// FieldScreen says "Screen"
+// in the language the app shows.
+func FieldScreen() string { return In(i18n.Locale()).FieldScreen() }
+
+// FieldScreen says "Screen"
+// in the language of msgs.
+func (msgs Messages) FieldScreen() string {
+	return Catalog.Format(msgs.locale, "fieldScreen", nil)
+}
+
+// FieldReleaseDate says "Released"
+// in the language the app shows.
+func FieldReleaseDate() string { return In(i18n.Locale()).FieldReleaseDate() }
+
+// FieldReleaseDate says "Released"
+// in the language of msgs.
+func (msgs Messages) FieldReleaseDate() string {
+	return Catalog.Format(msgs.locale, "fieldReleaseDate", nil)
+}
+
+// FieldBatteryMaker says "Battery maker"
+// in the language the app shows.
+func FieldBatteryMaker() string { return In(i18n.Locale()).FieldBatteryMaker() }
+
+// FieldBatteryMaker says "Battery maker"
+// in the language of msgs.
+func (msgs Messages) FieldBatteryMaker() string {
+	return Catalog.Format(msgs.locale, "fieldBatteryMaker", nil)
+}
+
+// ChargingWatts says "{state} · {watts, number, ::.0} W"
+// in the language the app shows.
+func ChargingWatts(state string, watts float64) string {
+	return In(i18n.Locale()).ChargingWatts(state, watts)
+}
+
+// ChargingWatts says "{state} · {watts, number, ::.0} W"
+// in the language of msgs.
+func (msgs Messages) ChargingWatts(state string, watts float64) string {
+	return Catalog.Format(msgs.locale, "chargingWatts", map[string]any{"state": state, "watts": watts})
+}
+
+// ValueWatts says "{watts, number, ::.0} W"
+// in the language the app shows.
+func ValueWatts(watts float64) string { return In(i18n.Locale()).ValueWatts(watts) }
+
+// ValueWatts says "{watts, number, ::.0} W"
+// in the language of msgs.
+func (msgs Messages) ValueWatts(watts float64) string {
+	return Catalog.Format(msgs.locale, "valueWatts", map[string]any{"watts": watts})
+}
+
+// InspectCardTitle says "Inspection"
+// in the language the app shows.
+func InspectCardTitle() string { return In(i18n.Locale()).InspectCardTitle() }
+
+// InspectCardTitle says "Inspection"
+// in the language of msgs.
+func (msgs Messages) InspectCardTitle() string {
+	return Catalog.Format(msgs.locale, "inspectCardTitle", nil)
+}
+
+// ActionDetails says "Device details"
+// in the language the app shows.
+func ActionDetails() string { return In(i18n.Locale()).ActionDetails() }
+
+// ActionDetails says "Device details"
+// in the language of msgs.
+func (msgs Messages) ActionDetails() string {
+	return Catalog.Format(msgs.locale, "actionDetails", nil)
+}
+
+// ActionClose says "Close"
+// in the language the app shows.
+func ActionClose() string { return In(i18n.Locale()).ActionClose() }
+
+// ActionClose says "Close"
+// in the language of msgs.
+func (msgs Messages) ActionClose() string {
+	return Catalog.Format(msgs.locale, "actionClose", nil)
+}
+
+// BatteryCardNoHealth says "Health not reported"
+// in the language the app shows.
+func BatteryCardNoHealth() string { return In(i18n.Locale()).BatteryCardNoHealth() }
+
+// BatteryCardNoHealth says "Health not reported"
+// in the language of msgs.
+func (msgs Messages) BatteryCardNoHealth() string {
+	return Catalog.Format(msgs.locale, "batteryCardNoHealth", nil)
+}
+
+// CliTableUnread says "Could not read the device table {path}: {error}"
+// in the language the app shows.
+func CliTableUnread(path string, error string) string {
+	return In(i18n.Locale()).CliTableUnread(path, error)
+}
+
+// CliTableUnread says "Could not read the device table {path}: {error}"
+// in the language of msgs.
+func (msgs Messages) CliTableUnread(path string, error string) string {
+	return Catalog.Format(msgs.locale, "cliTableUnread", map[string]any{"path": path, "error": error})
+}
+
+// ActionCheckWarranty says "Check online"
+// in the language the app shows.
+func ActionCheckWarranty() string { return In(i18n.Locale()).ActionCheckWarranty() }
+
+// ActionCheckWarranty says "Check online"
+// in the language of msgs.
+func (msgs Messages) ActionCheckWarranty() string {
+	return Catalog.Format(msgs.locale, "actionCheckWarranty", nil)
+}
+
+// FieldWarranty says "Warranty"
+// in the language the app shows.
+func FieldWarranty() string { return In(i18n.Locale()).FieldWarranty() }
+
+// FieldWarranty says "Warranty"
+// in the language of msgs.
+func (msgs Messages) FieldWarranty() string {
+	return Catalog.Format(msgs.locale, "fieldWarranty", nil)
+}
+
+// ToastWarrantySerialCopied says "Serial number copied. Paste it on Apple's page to see the warranty."
+// in the language the app shows.
+func ToastWarrantySerialCopied() string { return In(i18n.Locale()).ToastWarrantySerialCopied() }
+
+// ToastWarrantySerialCopied says "Serial number copied. Paste it on Apple's page to see the warranty."
+// in the language of msgs.
+func (msgs Messages) ToastWarrantySerialCopied() string {
+	return Catalog.Format(msgs.locale, "toastWarrantySerialCopied", nil)
+}
+
+// FieldCPUCores says "CPU cores"
+// in the language the app shows.
+func FieldCPUCores() string { return In(i18n.Locale()).FieldCPUCores() }
+
+// FieldCPUCores says "CPU cores"
+// in the language of msgs.
+func (msgs Messages) FieldCPUCores() string {
+	return Catalog.Format(msgs.locale, "fieldCPUCores", nil)
+}
+
+// FieldCallCapability says "Calls"
+// in the language the app shows.
+func FieldCallCapability() string { return In(i18n.Locale()).FieldCallCapability() }
+
+// FieldCallCapability says "Calls"
+// in the language of msgs.
+func (msgs Messages) FieldCallCapability() string {
+	return Catalog.Format(msgs.locale, "fieldCallCapability", nil)
+}
+
+// FieldBasebandStatus says "Baseband status"
+// in the language the app shows.
+func FieldBasebandStatus() string { return In(i18n.Locale()).FieldBasebandStatus() }
+
+// FieldBasebandStatus says "Baseband status"
+// in the language of msgs.
+func (msgs Messages) FieldBasebandStatus() string {
+	return Catalog.Format(msgs.locale, "fieldBasebandStatus", nil)
+}
+
+// FieldBasebandSerial says "Baseband serial number"
+// in the language the app shows.
+func FieldBasebandSerial() string { return In(i18n.Locale()).FieldBasebandSerial() }
+
+// FieldBasebandSerial says "Baseband serial number"
+// in the language of msgs.
+func (msgs Messages) FieldBasebandSerial() string {
+	return Catalog.Format(msgs.locale, "fieldBasebandSerial", nil)
+}
+
+// FieldSIMTray says "SIM tray"
+// in the language the app shows.
+func FieldSIMTray() string { return In(i18n.Locale()).FieldSIMTray() }
+
+// FieldSIMTray says "SIM tray"
+// in the language of msgs.
+func (msgs Messages) FieldSIMTray() string {
+	return Catalog.Format(msgs.locale, "fieldSIMTray", nil)
+}
+
+// ActionBatteryDetails says "Details"
+// in the language the app shows.
+func ActionBatteryDetails() string { return In(i18n.Locale()).ActionBatteryDetails() }
+
+// ActionBatteryDetails says "Details"
+// in the language of msgs.
+func (msgs Messages) ActionBatteryDetails() string {
+	return Catalog.Format(msgs.locale, "actionBatteryDetails", nil)
+}
+
+// BatteryDetailsTitle says "Battery details"
+// in the language the app shows.
+func BatteryDetailsTitle() string { return In(i18n.Locale()).BatteryDetailsTitle() }
+
+// BatteryDetailsTitle says "Battery details"
+// in the language of msgs.
+func (msgs Messages) BatteryDetailsTitle() string {
+	return Catalog.Format(msgs.locale, "batteryDetailsTitle", nil)
+}
+
+// FieldCurrentCapacity says "Current capacity"
+// in the language the app shows.
+func FieldCurrentCapacity() string { return In(i18n.Locale()).FieldCurrentCapacity() }
+
+// FieldCurrentCapacity says "Current capacity"
+// in the language of msgs.
+func (msgs Messages) FieldCurrentCapacity() string {
+	return Catalog.Format(msgs.locale, "fieldCurrentCapacity", nil)
+}
+
+// FieldBootVoltage says "Boot voltage"
+// in the language the app shows.
+func FieldBootVoltage() string { return In(i18n.Locale()).FieldBootVoltage() }
+
+// FieldBootVoltage says "Boot voltage"
+// in the language of msgs.
+func (msgs Messages) FieldBootVoltage() string {
+	return Catalog.Format(msgs.locale, "fieldBootVoltage", nil)
+}
+
+// FieldAtWarnLevel says "At warning level"
+// in the language the app shows.
+func FieldAtWarnLevel() string { return In(i18n.Locale()).FieldAtWarnLevel() }
+
+// FieldAtWarnLevel says "At warning level"
+// in the language of msgs.
+func (msgs Messages) FieldAtWarnLevel() string {
+	return Catalog.Format(msgs.locale, "fieldAtWarnLevel", nil)
+}
+
+// FieldAtCriticalLevel says "At critical level"
+// in the language the app shows.
+func FieldAtCriticalLevel() string { return In(i18n.Locale()).FieldAtCriticalLevel() }
+
+// FieldAtCriticalLevel says "At critical level"
+// in the language of msgs.
+func (msgs Messages) FieldAtCriticalLevel() string {
+	return Catalog.Format(msgs.locale, "fieldAtCriticalLevel", nil)
+}
+
+// FieldHealthRating says "Rating"
+// in the language the app shows.
+func FieldHealthRating() string { return In(i18n.Locale()).FieldHealthRating() }
+
+// FieldHealthRating says "Rating"
+// in the language of msgs.
+func (msgs Messages) FieldHealthRating() string {
+	return Catalog.Format(msgs.locale, "fieldHealthRating", nil)
+}
+
+// RatingGood says "Good"
+// in the language the app shows.
+func RatingGood() string { return In(i18n.Locale()).RatingGood() }
+
+// RatingGood says "Good"
+// in the language of msgs.
+func (msgs Messages) RatingGood() string {
+	return Catalog.Format(msgs.locale, "ratingGood", nil)
+}
+
+// RatingWorn says "Worn"
+// in the language the app shows.
+func RatingWorn() string { return In(i18n.Locale()).RatingWorn() }
+
+// RatingWorn says "Worn"
+// in the language of msgs.
+func (msgs Messages) RatingWorn() string {
+	return Catalog.Format(msgs.locale, "ratingWorn", nil)
+}
+
+// ValueVolts says "{volts, number, ::.00} V"
+// in the language the app shows.
+func ValueVolts(volts float64) string { return In(i18n.Locale()).ValueVolts(volts) }
+
+// ValueVolts says "{volts, number, ::.00} V"
+// in the language of msgs.
+func (msgs Messages) ValueVolts(volts float64) string {
+	return Catalog.Format(msgs.locale, "valueVolts", map[string]any{"volts": volts})
+}
+
+// ActionStorageDetails says "Details"
+// in the language the app shows.
+func ActionStorageDetails() string { return In(i18n.Locale()).ActionStorageDetails() }
+
+// ActionStorageDetails says "Details"
+// in the language of msgs.
+func (msgs Messages) ActionStorageDetails() string {
+	return Catalog.Format(msgs.locale, "actionStorageDetails", nil)
+}
+
+// StorageDetailsTitle says "Storage details"
+// in the language the app shows.
+func StorageDetailsTitle() string { return In(i18n.Locale()).StorageDetailsTitle() }
+
+// StorageDetailsTitle says "Storage details"
+// in the language of msgs.
+func (msgs Messages) StorageDetailsTitle() string {
+	return Catalog.Format(msgs.locale, "storageDetailsTitle", nil)
+}
+
+// StorageVendor says "Vendor"
+// in the language the app shows.
+func StorageVendor() string { return In(i18n.Locale()).StorageVendor() }
+
+// StorageVendor says "Vendor"
+// in the language of msgs.
+func (msgs Messages) StorageVendor() string {
+	return Catalog.Format(msgs.locale, "storageVendor", nil)
+}
+
+// StorageCellType says "Storage type"
+// in the language the app shows.
+func StorageCellType() string { return In(i18n.Locale()).StorageCellType() }
+
+// StorageCellType says "Storage type"
+// in the language of msgs.
+func (msgs Messages) StorageCellType() string {
+	return Catalog.Format(msgs.locale, "storageCellType", nil)
+}
+
+// StorageModel says "Storage model"
+// in the language the app shows.
+func StorageModel() string { return In(i18n.Locale()).StorageModel() }
+
+// StorageModel says "Storage model"
+// in the language of msgs.
+func (msgs Messages) StorageModel() string {
+	return Catalog.Format(msgs.locale, "storageModel", nil)
+}
+
+// StorageChip says "Controller chip"
+// in the language the app shows.
+func StorageChip() string { return In(i18n.Locale()).StorageChip() }
+
+// StorageChip says "Controller chip"
+// in the language of msgs.
+func (msgs Messages) StorageChip() string {
+	return Catalog.Format(msgs.locale, "storageChip", nil)
+}
+
+// StorageFirmware says "Firmware version"
+// in the language the app shows.
+func StorageFirmware() string { return In(i18n.Locale()).StorageFirmware() }
+
+// StorageFirmware says "Firmware version"
+// in the language of msgs.
+func (msgs Messages) StorageFirmware() string {
+	return Catalog.Format(msgs.locale, "storageFirmware", nil)
+}
+
+// StorageNANDName says "NAND flash name"
+// in the language the app shows.
+func StorageNANDName() string { return In(i18n.Locale()).StorageNANDName() }
+
+// StorageNANDName says "NAND flash name"
+// in the language of msgs.
+func (msgs Messages) StorageNANDName() string {
+	return Catalog.Format(msgs.locale, "storageNANDName", nil)
+}
+
+// StorageMSPVersion says "MSP version"
+// in the language the app shows.
+func StorageMSPVersion() string { return In(i18n.Locale()).StorageMSPVersion() }
+
+// StorageMSPVersion says "MSP version"
+// in the language of msgs.
+func (msgs Messages) StorageMSPVersion() string {
+	return Catalog.Format(msgs.locale, "storageMSPVersion", nil)
+}
+
+// StorageEncryption says "Encryption"
+// in the language the app shows.
+func StorageEncryption() string { return In(i18n.Locale()).StorageEncryption() }
+
+// StorageEncryption says "Encryption"
+// in the language of msgs.
+func (msgs Messages) StorageEncryption() string {
+	return Catalog.Format(msgs.locale, "storageEncryption", nil)
+}
+
+// StorageSystem says "System"
+// in the language the app shows.
+func StorageSystem() string { return In(i18n.Locale()).StorageSystem() }
+
+// StorageSystem says "System"
+// in the language of msgs.
+func (msgs Messages) StorageSystem() string {
+	return Catalog.Format(msgs.locale, "storageSystem", nil)
+}
+
+// StorageApps says "Apps"
+// in the language the app shows.
+func StorageApps() string { return In(i18n.Locale()).StorageApps() }
+
+// StorageApps says "Apps"
+// in the language of msgs.
+func (msgs Messages) StorageApps() string {
+	return Catalog.Format(msgs.locale, "storageApps", nil)
+}
+
+// StoragePhotos says "Photos"
+// in the language the app shows.
+func StoragePhotos() string { return In(i18n.Locale()).StoragePhotos() }
+
+// StoragePhotos says "Photos"
+// in the language of msgs.
+func (msgs Messages) StoragePhotos() string {
+	return Catalog.Format(msgs.locale, "storagePhotos", nil)
+}
+
+// StorageOther says "Other"
+// in the language the app shows.
+func StorageOther() string { return In(i18n.Locale()).StorageOther() }
+
+// StorageOther says "Other"
+// in the language of msgs.
+func (msgs Messages) StorageOther() string {
+	return Catalog.Format(msgs.locale, "storageOther", nil)
+}
+
+// StorageFree says "Free"
+// in the language the app shows.
+func StorageFree() string { return In(i18n.Locale()).StorageFree() }
+
+// StorageFree says "Free"
+// in the language of msgs.
+func (msgs Messages) StorageFree() string {
+	return Catalog.Format(msgs.locale, "storageFree", nil)
+}
+
+// StorageAppsAfterInspect says "App usage is shown after an inspection; until then it counts as Other."
+// in the language the app shows.
+func StorageAppsAfterInspect() string { return In(i18n.Locale()).StorageAppsAfterInspect() }
+
+// StorageAppsAfterInspect says "App usage is shown after an inspection; until then it counts as Other."
+// in the language of msgs.
+func (msgs Messages) StorageAppsAfterInspect() string {
+	return Catalog.Format(msgs.locale, "storageAppsAfterInspect", nil)
+}
+
+// StorageInfoTitle says "Storage chip"
+// in the language the app shows.
+func StorageInfoTitle() string { return In(i18n.Locale()).StorageInfoTitle() }
+
+// StorageInfoTitle says "Storage chip"
+// in the language of msgs.
+func (msgs Messages) StorageInfoTitle() string {
+	return Catalog.Format(msgs.locale, "storageInfoTitle", nil)
+}
+
+// StorageLimitsTitle says "Transfer limits"
+// in the language the app shows.
+func StorageLimitsTitle() string { return In(i18n.Locale()).StorageLimitsTitle() }
+
+// StorageLimitsTitle says "Transfer limits"
+// in the language of msgs.
+func (msgs Messages) StorageLimitsTitle() string {
+	return Catalog.Format(msgs.locale, "storageLimitsTitle", nil)
+}
+
+// ValueMB says "{mb, number, ::.00} MB"
+// in the language the app shows.
+func ValueMB(mb float64) string { return In(i18n.Locale()).ValueMB(mb) }
+
+// ValueMB says "{mb, number, ::.00} MB"
+// in the language of msgs.
+func (msgs Messages) ValueMB(mb float64) string {
+	return Catalog.Format(msgs.locale, "valueMB", map[string]any{"mb": mb})
+}
+
+// BatteryCardTitle says "Battery"
+// in the language the app shows.
+func BatteryCardTitle() string { return In(i18n.Locale()).BatteryCardTitle() }
+
+// BatteryCardTitle says "Battery"
+// in the language of msgs.
+func (msgs Messages) BatteryCardTitle() string {
+	return Catalog.Format(msgs.locale, "batteryCardTitle", nil)
+}
+
+// StorageUsed says "Used"
+// in the language the app shows.
+func StorageUsed() string { return In(i18n.Locale()).StorageUsed() }
+
+// StorageUsed says "Used"
+// in the language of msgs.
+func (msgs Messages) StorageUsed() string {
+	return Catalog.Format(msgs.locale, "storageUsed", nil)
+}
+
+// ValueWithPercent says "{value} ({percent, number, ::group-off}%)"
+// in the language the app shows.
+func ValueWithPercent(value string, percent int) string {
+	return In(i18n.Locale()).ValueWithPercent(value, percent)
+}
+
+// ValueWithPercent says "{value} ({percent, number, ::group-off}%)"
+// in the language of msgs.
+func (msgs Messages) ValueWithPercent(value string, percent int) string {
+	return Catalog.Format(msgs.locale, "valueWithPercent", map[string]any{"value": value, "percent": percent})
+}
+
+// ICloudContacts says "Contacts"
+// in the language the app shows.
+func ICloudContacts() string { return In(i18n.Locale()).ICloudContacts() }
+
+// ICloudContacts says "Contacts"
+// in the language of msgs.
+func (msgs Messages) ICloudContacts() string {
+	return Catalog.Format(msgs.locale, "iCloudContacts", nil)
+}
+
+// ICloudCalendars says "Calendars"
+// in the language the app shows.
+func ICloudCalendars() string { return In(i18n.Locale()).ICloudCalendars() }
+
+// ICloudCalendars says "Calendars"
+// in the language of msgs.
+func (msgs Messages) ICloudCalendars() string {
+	return Catalog.Format(msgs.locale, "iCloudCalendars", nil)
+}
+
+// ICloudSafari says "Safari"
+// in the language the app shows.
+func ICloudSafari() string { return In(i18n.Locale()).ICloudSafari() }
+
+// ICloudSafari says "Safari"
+// in the language of msgs.
+func (msgs Messages) ICloudSafari() string {
+	return Catalog.Format(msgs.locale, "iCloudSafari", nil)
+}
+
+// ICloudNotes says "Notes"
+// in the language the app shows.
+func ICloudNotes() string { return In(i18n.Locale()).ICloudNotes() }
+
+// ICloudNotes says "Notes"
+// in the language of msgs.
+func (msgs Messages) ICloudNotes() string {
+	return Catalog.Format(msgs.locale, "iCloudNotes", nil)
+}
+
+// ICloudBackup says "iCloud Backup"
+// in the language the app shows.
+func ICloudBackup() string { return In(i18n.Locale()).ICloudBackup() }
+
+// ICloudBackup says "iCloud Backup"
+// in the language of msgs.
+func (msgs Messages) ICloudBackup() string {
+	return Catalog.Format(msgs.locale, "iCloudBackup", nil)
+}
+
+// ICloudLastBackup says "Last backup"
+// in the language the app shows.
+func ICloudLastBackup() string { return In(i18n.Locale()).ICloudLastBackup() }
+
+// ICloudLastBackup says "Last backup"
+// in the language of msgs.
+func (msgs Messages) ICloudLastBackup() string {
+	return Catalog.Format(msgs.locale, "iCloudLastBackup", nil)
+}
+
+// ICloudDetailsTitle says "iCloud details"
+// in the language the app shows.
+func ICloudDetailsTitle() string { return In(i18n.Locale()).ICloudDetailsTitle() }
+
+// ICloudDetailsTitle says "iCloud details"
+// in the language of msgs.
+func (msgs Messages) ICloudDetailsTitle() string {
+	return Catalog.Format(msgs.locale, "iCloudDetailsTitle", nil)
+}
+
+// ICloudLabel says "iCloud"
+// in the language the app shows.
+func ICloudLabel() string { return In(i18n.Locale()).ICloudLabel() }
+
+// ICloudLabel says "iCloud"
+// in the language of msgs.
+func (msgs Messages) ICloudLabel() string {
+	return Catalog.Format(msgs.locale, "iCloudLabel", nil)
+}
+
+// ICloudSyncTitle says "Synced with iCloud"
+// in the language the app shows.
+func ICloudSyncTitle() string { return In(i18n.Locale()).ICloudSyncTitle() }
+
+// ICloudSyncTitle says "Synced with iCloud"
+// in the language of msgs.
+func (msgs Messages) ICloudSyncTitle() string {
+	return Catalog.Format(msgs.locale, "iCloudSyncTitle", nil)
+}
+
+// ICloudSyncNote says "Reminders, Photos and other apps are not reported over USB."
+// in the language the app shows.
+func ICloudSyncNote() string { return In(i18n.Locale()).ICloudSyncNote() }
+
+// ICloudSyncNote says "Reminders, Photos and other apps are not reported over USB."
+// in the language of msgs.
+func (msgs Messages) ICloudSyncNote() string {
+	return Catalog.Format(msgs.locale, "iCloudSyncNote", nil)
+}
+
+// ValueUnread says "Not reported"
+// in the language the app shows.
+func ValueUnread() string { return In(i18n.Locale()).ValueUnread() }
+
+// ValueUnread says "Not reported"
+// in the language of msgs.
+func (msgs Messages) ValueUnread() string {
+	return Catalog.Format(msgs.locale, "valueUnread", nil)
+}
+
+// ActionICloudDetails says "Details"
+// in the language the app shows.
+func ActionICloudDetails() string { return In(i18n.Locale()).ActionICloudDetails() }
+
+// ActionICloudDetails says "Details"
+// in the language of msgs.
+func (msgs Messages) ActionICloudDetails() string {
+	return Catalog.Format(msgs.locale, "actionICloudDetails", nil)
+}
+
+// ActionHideIdentifiers says "Hide serial numbers"
+// in the language the app shows.
+func ActionHideIdentifiers() string { return In(i18n.Locale()).ActionHideIdentifiers() }
+
+// ActionHideIdentifiers says "Hide serial numbers"
+// in the language of msgs.
+func (msgs Messages) ActionHideIdentifiers() string {
+	return Catalog.Format(msgs.locale, "actionHideIdentifiers", nil)
+}
+
+// ReportFactsTitle says "Device information"
+// in the language the app shows.
+func ReportFactsTitle() string { return In(i18n.Locale()).ReportFactsTitle() }
+
+// ReportFactsTitle says "Device information"
+// in the language of msgs.
+func (msgs Messages) ReportFactsTitle() string {
+	return Catalog.Format(msgs.locale, "reportFactsTitle", nil)
+}
+
+// ReportColumnItem says "Check"
+// in the language the app shows.
+func ReportColumnItem() string { return In(i18n.Locale()).ReportColumnItem() }
+
+// ReportColumnItem says "Check"
+// in the language of msgs.
+func (msgs Messages) ReportColumnItem() string {
+	return Catalog.Format(msgs.locale, "reportColumnItem", nil)
+}
+
+// ReportColumnFactory says "Factory value"
+// in the language the app shows.
+func ReportColumnFactory() string { return In(i18n.Locale()).ReportColumnFactory() }
+
+// ReportColumnFactory says "Factory value"
+// in the language of msgs.
+func (msgs Messages) ReportColumnFactory() string {
+	return Catalog.Format(msgs.locale, "reportColumnFactory", nil)
+}
+
+// ReportColumnRead says "Read value"
+// in the language the app shows.
+func ReportColumnRead() string { return In(i18n.Locale()).ReportColumnRead() }
+
+// ReportColumnRead says "Read value"
+// in the language of msgs.
+func (msgs Messages) ReportColumnRead() string {
+	return Catalog.Format(msgs.locale, "reportColumnRead", nil)
+}
+
+// ReportColumnResult says "Result"
+// in the language the app shows.
+func ReportColumnResult() string { return In(i18n.Locale()).ReportColumnResult() }
+
+// ReportColumnResult says "Result"
+// in the language of msgs.
+func (msgs Messages) ReportColumnResult() string {
+	return Catalog.Format(msgs.locale, "reportColumnResult", nil)
 }

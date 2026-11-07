@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
 // Text renders the report as plain text, in its language, for copying and
@@ -74,10 +74,16 @@ func (r *Report) Text() string {
 		}
 		if bt.Serial != "" {
 			field(m.FieldBatterySerial(), bt.Serial)
+			if bt.Maker != "" {
+				field(m.FieldBatteryMaker(), bt.Maker)
+			}
 		}
 	}
 	for _, sec := range r.Sections {
 		heading(sec.Title)
+		if sec.Note != "" {
+			field(m.FieldNote(), sec.Note)
+		}
 		for _, f := range sec.Fields {
 			field(f.Label, f.Value)
 		}

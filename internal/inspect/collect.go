@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"slices"
 
-	"idevloupe/internal/locales"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/services"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/services"
+	"github.com/ac0d3r/idevloupe/pkg/syscfg"
 )
 
 // Domains read besides the root domain.
@@ -20,6 +22,7 @@ var Domains = []string{
 	"com.apple.mobile.chaperone",
 	"com.apple.PurpleBuddy",
 	"com.apple.mobile.backup",
+	dataSyncDomain,
 	"com.apple.international",
 	"com.apple.mobile.software_behavior",
 	"com.apple.mobile.wireless_lockdown",
@@ -37,6 +40,7 @@ var rootKeys = []string{
 	"MLBSerialNumber", "BasebandVersion", "BasebandStatus", "NonVolatileRAM",
 	"BrickState", "FusingStatus", "ActivationState", "TelephonyCapability",
 	"InternationalMobileEquipmentIdentity", "InternationalMobileEquipmentIdentity2",
+	"SIMTrayStatus", "BasebandSerialNumber",
 }
 
 // gestaltKeys are MobileGestalt keys read where the device still answers.
@@ -50,6 +54,9 @@ var gestaltKeys = []string{
 	"DeviceEnclosureColor",
 	"ReleaseType",
 	"ProductionSOC",
+	// The factory configuration, with the serial numbers of the parts
+	// fitted at the factory: parsed into RawData.SysCfg.
+	"SysCfg",
 }
 
 // RawData is everything read from a device, before analysis.
@@ -62,6 +69,10 @@ type RawData struct {
 	PlatformReg map[string]any
 	Gestalt     map[string]any
 	GestaltErr  error
+	// SysCfg is the factory configuration by tag, from MobileGestalt; nil
+	// when it was not read (SysCfgErr says why, if it failed to parse).
+	SysCfg    map[string][]byte
+	SysCfgErr error
 	// DiagAll is the "All" diagnostics: GasGauge, NAND, WiFi, HDMI.
 	DiagAll map[string]any
 	// Parts are the IORegistry entries of parts (cameras, Face ID, display,
@@ -86,8 +97,14 @@ type RawData struct {
 	Errors []*StepError
 }
 
-func (r *RawData) fail(step Step, target string, err error) {
-	r.Errors = append(r.Errors, &StepError{Step: step, Target: target, Err: err})
+// inspected tells whether raw is an inspection's, which reads the apps
+// and AFC2, rather than CollectInfo's.
+func (raw *RawData) inspected() bool {
+	return raw.Apps != nil || raw.AppsErr != nil || raw.AFC2 != nil
+}
+
+func (raw *RawData) fail(step Step, target string, err error) {
+	raw.Errors = append(raw.Errors, &StepError{Step: step, Target: target, Err: err})
 }
 
 // Step is a step of the collection, which Collect reports as it begins
@@ -174,9 +191,14 @@ var partLookups = []struct {
 	{key: "product", name: "product"},
 }
 
-func readParts(diag *services.DiagnosticsClient) map[string]map[string]any {
+// readParts reads the parts by partLookups, or only those whose keys are
+// given.
+func readParts(diag *services.DiagnosticsClient, only ...string) map[string]map[string]any {
 	parts := map[string]map[string]any{}
 	for _, p := range partLookups {
+		if len(only) > 0 && !slices.Contains(only, p.key) {
+			continue
+		}
 		if p.name != "" {
 			if reg, err := diag.IORegistry("", p.name, ""); err == nil && len(reg) > 0 {
 				parts[p.key] = reg
@@ -260,6 +282,34 @@ func (s *session) close() {
 	}
 }
 
+// CollectInfo reads what the overview shows: lockdown's values and the
+// battery gauge. It is quick and judges nothing; Collect reads the rest an
+// inspection needs.
+func CollectInfo(open Opener) (*RawData, error) {
+	ss := &session{open: open}
+	defer ss.close()
+	raw := &RawData{Domains: map[string]map[string]any{}}
+	if err := raw.readLockdown(ss); err != nil {
+		return nil, err
+	}
+	err := ss.do(func(l *lockdown.Client) error {
+		diag, err := services.OpenDiagnostics(l)
+		if err != nil {
+			return err
+		}
+		defer diag.Close()
+		raw.readBattery(diag)
+		// The storage controller, for the storage details.
+		raw.Parts = readParts(diag, "storage")
+		return nil
+	})
+	if err != nil {
+		raw.fail(StepStartDiagnostics, "", err)
+	}
+	raw.scrub()
+	return raw, nil
+}
+
 // Collect reads a device through trusted lockdown sessions that open
 // makes: the first is used for every step, and replaced when a step leaves
 // it unusable. It reads as much as it can and records what failed; it fails
@@ -276,61 +326,18 @@ func Collect(open Opener, progress func(Step)) (*RawData, error) {
 	raw := &RawData{Domains: map[string]map[string]any{}}
 
 	say(StepDeviceInfo)
-	err := ss.do(func(l *lockdown.Client) error {
-		raw.UDID = l.Device().UDID
-		root, err := l.GetDomain("")
-		if err != nil {
-			return err
-		}
-		raw.Root = root
-		return nil
-	})
-	if err != nil {
-		return nil, &StepError{Step: StepDeviceInfo, Err: err}
-	}
-	for _, k := range rootKeys {
-		if _, ok := raw.Root[k]; ok {
-			continue
-		}
-		_ = ss.do(func(l *lockdown.Client) error {
-			v, err := l.GetValue("", k)
-			if err == nil {
-				raw.Root[k] = v
-			}
-			if errors.Is(err, lockdown.ErrMissingValue) {
-				return nil
-			}
-			return err
-		})
-	}
-
-	for _, d := range Domains {
-		err := ss.do(func(l *lockdown.Client) error {
-			m, err := l.GetDomain(d)
-			if err == nil {
-				raw.Domains[d] = m
-			}
-			return err
-		})
-		if err != nil && !errors.Is(err, lockdown.ErrMissingValue) {
-			raw.fail(StepReadDomain, d, err)
-		}
+	if err := raw.readLockdown(ss); err != nil {
+		return nil, err
 	}
 
 	say(StepDiagnostics)
-	err = ss.do(func(l *lockdown.Client) error {
+	err := ss.do(func(l *lockdown.Client) error {
 		diag, err := services.OpenDiagnostics(l)
 		if err != nil {
 			return err
 		}
 		defer diag.Close()
-		if reg, err := diag.IORegistry("", "", "IOPMPowerSource"); err == nil {
-			raw.BatteryReg = reg
-		} else if reg, err2 := diag.IORegistry("", "AppleSmartBattery", ""); err2 == nil {
-			raw.BatteryReg = reg
-		} else {
-			raw.fail(StepReadBattery, "", err)
-		}
+		raw.readBattery(diag)
 		if reg, err := diag.IORegistry("", "", "IOPlatformExpertDevice"); err == nil {
 			raw.PlatformReg = reg
 		}
@@ -339,6 +346,7 @@ func Collect(open Opener, progress func(Step)) (*RawData, error) {
 		}
 		raw.Parts = readParts(diag)
 		raw.Gestalt, raw.GestaltErr = diag.MobileGestalt(gestaltKeys...)
+		raw.readSysCfg()
 		return nil
 	})
 	if err != nil {
@@ -380,12 +388,85 @@ func Collect(open Opener, progress func(Step)) (*RawData, error) {
 	if raw.MCErr != nil {
 		raw.fail(StepReadProfiles, "", raw.MCErr)
 	}
+	raw.scrub()
+	return raw, nil
+}
+
+// readLockdown reads the root domain, the root keys it left out, and the
+// other domains. It fails only when the root domain cannot be read.
+func (raw *RawData) readLockdown(ss *session) error {
+	err := ss.do(func(l *lockdown.Client) error {
+		raw.UDID = l.Device().UDID
+		root, err := l.GetDomain("")
+		if err != nil {
+			return err
+		}
+		raw.Root = root
+		return nil
+	})
+	if err != nil {
+		return &StepError{Step: StepDeviceInfo, Err: err}
+	}
+	for _, k := range rootKeys {
+		if _, ok := raw.Root[k]; ok {
+			continue
+		}
+		_ = ss.do(func(l *lockdown.Client) error {
+			v, err := l.GetValue("", k)
+			if err == nil {
+				raw.Root[k] = v
+			}
+			if errors.Is(err, lockdown.ErrMissingValue) {
+				return nil
+			}
+			return err
+		})
+	}
+	for _, d := range Domains {
+		err := ss.do(func(l *lockdown.Client) error {
+			m, err := l.GetDomain(d)
+			if err == nil {
+				raw.Domains[d] = m
+			}
+			return err
+		})
+		if err != nil && !errors.Is(err, lockdown.ErrMissingValue) {
+			raw.fail(StepReadDomain, d, err)
+		}
+	}
+	return nil
+}
+
+// readBattery reads the battery's IORegistry entry.
+func (raw *RawData) readBattery(diag *services.DiagnosticsClient) {
+	if reg, err := diag.IORegistry("", "", "IOPMPowerSource"); err == nil {
+		raw.BatteryReg = reg
+	} else if reg, err2 := diag.IORegistry("", "AppleSmartBattery", ""); err2 == nil {
+		raw.BatteryReg = reg
+	} else {
+		raw.fail(StepReadBattery, "", err)
+	}
+}
+
+// readSysCfg parses the factory configuration out of the MobileGestalt
+// answer, where it is a block too large to keep as one raw value.
+func (raw *RawData) readSysCfg() {
+	b, ok := raw.Gestalt["SysCfg"].([]byte)
+	if !ok {
+		return
+	}
+	delete(raw.Gestalt, "SysCfg")
+	raw.SysCfg, raw.SysCfgErr = syscfg.Parse(b)
+}
+
+// scrub drops the subscriber values from everything read.
+func (raw *RawData) scrub() {
 	scrubSubscriber(raw.Root)
 	for _, m := range raw.Domains {
 		scrubSubscriber(m)
 	}
 	scrubSubscriber(raw.Gestalt)
-	return raw, nil
+	scrubAccounts(raw.Domains[dataSyncDomain])
 }
 
 // subscriberKeyRe matches the values that identify the SIM card's owner

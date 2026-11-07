@@ -2,7 +2,6 @@ package gui
 
 import (
 	"errors"
-	"fmt"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -12,10 +11,10 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/services"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/services"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 func sampleRaw() *inspect.RawData {
@@ -97,39 +96,25 @@ func TestPartsAndBatteryInUI(t *testing.T) {
 	a := testApp()
 	d := &devState{dev: usbmux.Device{DeviceID: 3, UDID: "x", ConnectionType: "USB"}, phase: phaseDone, raw: iphoneXRaw(), time: testTime}
 	a.devices, a.selected = []*devState{d}, "x"
-	tabs := []struct {
-		tab  int
-		name string
-		want []string
-	}{
-		{0, "x-report", []string{"面容 ID 自检 未通过（代码 8）", "电池健康 76%", "充电循环 1575 次", "需人工核对", "原彩显示"}},
-		{1, "x-battery", []string{"内阻指标", "282", "1575 次"}},
-		{2, "x-info", []string{"部件序列号（当前值）", "面容 ID 点阵投影器", "DN875235AV1JJGXAS", "屏幕盖板", "FXV73552871J6DX90"}},
+	tt := shot(t, a, "x-report", false)
+	texts := strings.Join(tt.Texts(), "\n")
+	for _, w := range []string{"面容 ID 自检", "返回代码 8，请实测", "电池健康", "76%", "1575 次", "需人工核对", "原彩显示", "检测项", "出厂值", "读取值", "结果"} {
+		if !strings.Contains(texts, w) {
+			t.Errorf("report lacks %q", w)
+		}
 	}
-	for _, tc := range tabs {
-		a.tab = tc.tab
-		tt := shot(t, a, tc.name, false)
-		texts := strings.Join(tt.Texts(), "\n")
-		for _, w := range tc.want {
-			if !strings.Contains(texts, w) {
-				t.Errorf("tab %d lacks %q", tc.tab, w)
-			}
+	// Scroll to the parts and the manual checks, for the screenshot.
+	tt.Wheel(700, 500, 0, -3000)
+	tt.Frame()
+	if dir := os.Getenv("SHOT_DIR"); dir != "" {
+		f, err := os.Create(filepath.Join(dir, "x-report-bottom.png"))
+		if err != nil {
+			t.Fatal(err)
 		}
-		if tc.tab == 0 {
-			// Scroll to the parts and the manual checks, for the screenshot.
-			tt.Wheel(700, 500, 0, -3000)
-			tt.Frame()
-			if dir := os.Getenv("SHOT_DIR"); dir != "" {
-				f, err := os.Create(filepath.Join(dir, "x-report-bottom.png"))
-				if err != nil {
-					t.Fatal(err)
-				}
-				if err := png.Encode(f, tt.Image()); err != nil {
-					t.Fatal(err)
-				}
-				f.Close()
-			}
+		if err := png.Encode(f, tt.Image()); err != nil {
+			t.Fatal(err)
 		}
+		f.Close()
 	}
 }
 
@@ -157,21 +142,21 @@ func TestTouchIDInUI(t *testing.T) {
 	if got := d.subtitle("zh-Hans"); got != "iPhone 8" {
 		t.Errorf("subtitle %q: no separator without a capacity", got)
 	}
-	for tab, want := range map[int][]string{
-		0: {"指纹（Touch ID）", "自检通过", "MesaSelfTest = OK", "序列号 FFNZMYBEJC6C"},
-		2: {"指纹传感器", "0217106c608085293b5a1369060200d5"},
-	} {
-		a.tab = tab
-		tt := shot(t, a, fmt.Sprintf("8-tab%d", tab), false)
-		texts := strings.Join(tt.Texts(), "\n")
-		for _, w := range want {
-			if !strings.Contains(texts, w) {
-				t.Errorf("tab %d lacks %q", tab, w)
-			}
+	tt := shot(t, a, "8-report", false)
+	texts := strings.Join(tt.Texts(), "\n")
+	for _, w := range []string{"指纹（Touch ID）", "自检通过", "FFNZMYBEJC6C"} {
+		if !strings.Contains(texts, w) {
+			t.Errorf("report lacks %q", w)
 		}
-		if strings.Contains(texts, "面容 ID") {
-			t.Errorf("tab %d shows Face ID on a Touch ID model", tab)
-		}
+	}
+	if strings.Contains(texts, "面容 ID") {
+		t.Error("report shows Face ID on a Touch ID model")
+	}
+	// Hidden for a screenshot, the serial keeps its ends.
+	a.hideIDs = true
+	texts = strings.Join(shot(t, a, "8-report-hidden", false).Texts(), "\n")
+	if strings.Contains(texts, "FFNZMYBEJC6C") || !strings.Contains(texts, "FFN***C6C") {
+		t.Errorf("serial not hidden in\n%s", texts)
 	}
 }
 
@@ -212,7 +197,7 @@ func testApp() *App {
 func TestViews(t *testing.T) {
 	a := testApp()
 	tt := shot(t, a, "empty", false)
-	if !tt.HasText("连接 iPhone 开始验机") {
+	if !tt.HasText("连接你的 iPhone") {
 		t.Errorf("empty state texts %q", tt.Texts())
 	}
 
@@ -223,20 +208,50 @@ func TestViews(t *testing.T) {
 	pair.basic.ProductType = "iPhone17,1"
 	a.devices = []*devState{d, pair}
 	a.selected = d.dev.UDID
-	for i, name := range []string{"report", "battery", "info", "raw"} {
-		a.tab = i
-		if name == "raw" {
-			a.rawOpen["lockdown"] = true
-		}
-		tt = shot(t, a, name, false)
-	}
-	a.tab = 0
+	tt = shot(t, a, "report", false)
 	shot(t, a, "report-dark", true)
-	if !tt.HasText("原始数据") {
-		t.Error("tabs missing")
+	if !tt.HasText("检测项") {
+		t.Error("checks table missing")
 	}
 	a.selected = "x2"
 	shot(t, a, "pairing", false)
+}
+
+// On connecting, the window shows what the device says about itself and
+// judges nothing until asked to inspect it.
+func TestOverview(t *testing.T) {
+	a := testApp()
+	d := &devState{dev: usbmux.Device{DeviceID: 1, UDID: "u", ConnectionType: "USB"}, phase: phaseReady, info: sampleRaw(), infoTime: testTime}
+	a.devices, a.selected = []*devState{d}, "u"
+	a.detailsOpen = true
+	tt := shot(t, a, "overview", false)
+	texts := strings.Join(tt.Texts(), "\n")
+	for _, w := range []string{"iPhone 13 Pro", "验机", "已激活", "激活锁", "已开启", "H4K2L9QXWT", "电池健康", "84%", "612 次", "100.00 GB", "156.00 GB（61%）", "设备详情", "硬件", "电池信息", "76%", "--"} {
+		if !strings.Contains(texts, w) {
+			t.Errorf("overview lacks %q in\n%s", w, texts)
+		}
+	}
+	for _, w := range []string{"通过", "警告", "需要关注", "验机报告"} {
+		if strings.Contains(texts, w) {
+			t.Errorf("overview judges: %q", w)
+		}
+	}
+	shot(t, a, "overview-dark", true)
+	for _, lang := range []string{"en", "de"} {
+		shotIn(t, a, "overview-"+lang, false, lang)
+	}
+	// Inspecting starts from the button. The device is not real: what the
+	// worker finds is dropped.
+	t.Setenv("USBMUXD_SOCKET_ADDRESS", "tcp://127.0.0.1:1")
+	a.update = func(func()) {}
+	a.detailsOpen = false
+	tt = shot(t, a, "overview", false)
+	if err := tt.Click("验机"); err != nil {
+		t.Fatal(err)
+	}
+	if d.phase != phaseInspecting || d.info == nil {
+		t.Errorf("phase %v, info %v after clicking Inspect", d.phase, d.info != nil)
+	}
 }
 
 // The window says everything in its language, the report included, made
@@ -246,32 +261,26 @@ func TestLanguagesInUI(t *testing.T) {
 	d := &devState{dev: usbmux.Device{DeviceID: 3, UDID: "x", ConnectionType: "USB"}, phase: phaseDone, raw: iphoneXRaw(), time: testTime}
 	a.devices, a.selected = []*devState{d}, "x"
 	for lang, want := range map[string][]string{
-		"en": {"Needs attention", "Face ID self test", "Failed (code 8)", "Battery health", "Export report", "Connected devices", "English"},
-		"de": {"Zu beachten", "Face ID-Selbsttest", "Fehlgeschlagen (Code 8)", "Batteriezustand", "Bericht exportieren", "Verbundene Geräte", "Deutsch"},
+		"en": {"Some items need attention", "Factory value", "Face ID self test", "Code 8, test it", "Battery health", "Export report", "Connected devices", "English"},
+		"de": {"Einige Punkte erfordern Aufmerksamkeit", "Werkswert", "Face ID-Selbsttest", "Code 8, bitte testen", "Batteriezustand", "Bericht exportieren", "Verbundene Geräte", "Deutsch"},
 	} {
-		for tab := range 4 {
-			a.tab = tab
-			tt := shotIn(t, a, fmt.Sprintf("%s-tab%d", lang, tab), false, lang)
-			texts := strings.Join(tt.Texts(), "\n")
-			if tab == 0 {
-				for _, w := range want {
-					if !strings.Contains(texts, w) {
-						t.Errorf("%s: no %q in\n%s", lang, w, texts)
-					}
-				}
+		tt := shotIn(t, a, lang+"-report", false, lang)
+		texts := strings.Join(tt.Texts(), "\n")
+		for _, w := range want {
+			if !strings.Contains(texts, w) {
+				t.Errorf("%s: no %q in\n%s", lang, w, texts)
 			}
-			for _, r := range strings.ReplaceAll(texts, "whoami的iPhone", "") {
-				if r >= 0x4e00 && r <= 0x9fff {
-					t.Errorf("%s tab %d shows Chinese: %q", lang, tab, string(r))
-					break
-				}
+		}
+		for _, r := range strings.ReplaceAll(texts, "whoami的iPhone", "") {
+			if r >= 0x4e00 && r <= 0x9fff {
+				t.Errorf("%s report shows Chinese: %q", lang, string(r))
+				break
 			}
 		}
 		if d.report.Lang != lang {
 			t.Errorf("report in %q, window in %q", d.report.Lang, lang)
 		}
 	}
-	a.tab = 0
 	shotIn(t, a, "en-empty", false, "en")
 	a.devices = nil
 	shotIn(t, a, "de-empty", false, "de")
@@ -295,5 +304,38 @@ func TestLanguagePicker(t *testing.T) {
 	}
 	if got != "de" {
 		t.Errorf("chose %q, want de", got)
+	}
+}
+
+// After an inspection, the home sums it up by category, and the details
+// open over it.
+func TestHomeInspected(t *testing.T) {
+	a := testApp()
+	d := &devState{dev: usbmux.Device{DeviceID: 3, UDID: "x", ConnectionType: "USB"}, phase: phaseReady, raw: iphoneXRaw(), time: testTime}
+	a.devices, a.selected = []*devState{d}, "x"
+	tt := shot(t, a, "home-inspected", false)
+	texts := strings.Join(tt.Texts(), "\n")
+	for _, w := range []string{"存在需要注意的项目", "查看报告", "部件", "注意"} {
+		if !strings.Contains(texts, w) {
+			t.Errorf("home lacks %q in\n%s", w, texts)
+		}
+	}
+	if err := tt.Click("查看报告"); err != nil {
+		t.Fatal(err)
+	}
+	if d.phase != phaseDone {
+		t.Errorf("phase %v after View report", d.phase)
+	}
+	d.phase = phaseReady
+	a.detailsOpen = true
+	tt = shot(t, a, "home-details", false)
+	if !tt.HasText("关闭") || !tt.HasText("硬件") {
+		t.Errorf("details modal texts %q", tt.Texts())
+	}
+	if err := tt.Click("关闭"); err != nil {
+		t.Fatal(err)
+	}
+	if a.detailsOpen {
+		t.Error("Close left the details open")
 	}
 }

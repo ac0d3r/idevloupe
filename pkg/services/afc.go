@@ -144,7 +144,7 @@ func (a *AFC) ReadDir(path string) ([]string, error) {
 	return names, nil
 }
 
-// AFCFileInfo is the part of a file's information the inspection uses.
+// AFCFileInfo is the part of a file's information this client reads.
 type AFCFileInfo struct {
 	Size  int64
 	MTime time.Time

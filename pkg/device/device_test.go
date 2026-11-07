@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"idevloupe/internal/device"
-	"idevloupe/internal/fakedevice"
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/probe"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/fakedevice"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/internal/probe"
+	"github.com/ac0d3r/idevloupe/pkg/device"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 func fake(t *testing.T, paired bool) *fakedevice.Device {
@@ -46,7 +46,7 @@ func fake(t *testing.T, paired bool) *fakedevice.Device {
 		PendingPolls: 2,
 		GasGauge:     map[string]any{"CycleCount": uint64(120), "DesignCapacity": uint64(3274), "FullChargeCapacity": uint64(3100)},
 		Profiles: map[string]any{"com.acme.mdm": map[string]any{
-			"PayloadDisplayName": "Acme 设备管理", "PayloadOrganization": "Acme", "PayloadRemovalDisallowed": true,
+			"PayloadDisplayName": "Acme 设备管理", "PayloadOrganization": "Acme", "PayloadRemovalDisallowed": true, "IsMDMProfile": true,
 		}},
 		EscrowLocked: true,
 		Hidden:       map[string]any{"ReleaseType": "Internal"},
@@ -98,6 +98,36 @@ func TestPairAndInspect(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open after pairing: %v", err)
 	}
+	// The overview reads lockdown, the battery gauge and the storage
+	// controller, and nothing that only an inspection needs.
+	info, err := inspect.CollectInfo(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Root["SerialNumber"] != "K7Q2M4XW9T" || info.Root["ReleaseType"] != "Internal" || info.BatteryReg == nil {
+		t.Errorf("info: root %v battery %v", info.Root, info.BatteryReg)
+	}
+	for k := range info.Parts {
+		if k != "storage" {
+			t.Errorf("info read the part %q", k)
+		}
+	}
+	if info.Apps != nil || info.MC != nil || info.Analytics != nil || len(info.Errors) != 0 {
+		t.Errorf("info read more than the overview: %+v", info)
+	}
+	o := inspect.Describe(info, time.Now(), "en")
+	fields := map[string]string{}
+	for _, f := range o.Fields {
+		fields[f.Label] = f.Value
+	}
+	if o.Battery == nil || o.Battery.Health() != 96 || fields["Activation Lock"] != "Off" || fields["Activation"] != "Activated" || o.StorageTotal != 512e9 {
+		t.Errorf("overview fields %v storage %d", fields, o.StorageTotal)
+	}
+
+	l, err = device.Open(dev)
+	if err != nil {
+		t.Fatal(err)
+	}
 	raw, err := inspect.Collect(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }), nil)
 	if err != nil {
 		t.Fatal(err)
@@ -122,10 +152,10 @@ func TestPairAndInspect(t *testing.T) {
 	if c := got["越狱检测"]; c.Status != inspect.Fail || !strings.Contains(c.Detail, "TrollStore") {
 		t.Errorf("jailbreak %+v", c)
 	}
-	if c := got["序列号一致性"]; c.Status != inspect.Pass {
+	if c := got["序列号"]; c.Status != inspect.Pass || !strings.Contains(c.Detail, "lockdown=") {
 		t.Errorf("serial consistency %+v", c)
 	}
-	if c := got["型号一致性"]; c.Status != inspect.Pass {
+	if c := got["型号（部件号）"]; c.Status != inspect.Pass {
 		t.Errorf("model consistency %+v", c)
 	}
 	if c := got["远程管理 (MDM)"]; c.Status != inspect.Warn || !strings.Contains(c.Value, "Acme") {
@@ -213,14 +243,14 @@ func TestProbeIORegistry(t *testing.T) {
 	}
 	defer l.Close()
 	path := filepath.Join(t.TempDir(), "ioreg.plist")
-	results, err := probe.Probe(l, path)
+	rep, err := probe.Probe(l, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(results) != len(probe.Queries) {
-		t.Fatalf("%d results for %d queries", len(results), len(probe.Queries))
+	if len(rep.Queries) != len(probe.Queries) {
+		t.Fatalf("%d results for %d queries", len(rep.Queries), len(probe.Queries))
 	}
-	sum := probe.Summary(results, 100)
+	sum := probe.Summary(rep, 100)
 	for _, want := range []string{
 		"plane=IODeviceTree", "Success", // a query that answered
 		"Failure", // ones the device does not know

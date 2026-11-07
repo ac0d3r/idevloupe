@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>iDevLoupe · iPhone 验机</title>
-<meta name="description" content="iDevLoupe：通过数据线读取 iPhone 自身报告的硬件、系统与安全信息，整理成验机参考报告，在本机运行。">
+<title>iDevLoupe · iPhone 设备管理工具</title>
+<meta name="description" content="iDevLoupe：在电脑上管理 iPhone 的设备管理工具。目前提供验机：读取 iPhone 自身报告的硬件、系统与安全信息，整理成逐项参考报告。">
 <link rel="icon" href="icon.png">
 <style>
 :root {
@@ -141,8 +141,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <main>
   <div class="hero wrap">
     <img class="logo" src="icon.png" alt="iDevLoupe">
-    <h1 data-t="heroTitle">用数据线读取 iPhone 的验机信息</h1>
-    <p class="lead" data-t="heroLead">读取 iPhone 自身报告的硬件、系统与安全信息，整理成一份逐项报告，作为验机时的参考。</p>
+    <h1 data-t="heroTitle">iPhone 设备管理工具</h1>
+    <p class="lead" data-t="heroLead">在电脑上管理你的 iPhone。目前提供验机：读取 iPhone 自身报告的硬件、系统与安全信息，整理成逐项报告，作为验机时的参考。备份解析、照片管理等功能计划中。</p>
     <div class="cta">
       <a class="btn primary" id="primary" href="#download">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -156,7 +156,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <section id="features" class="soft">
     <div class="wrap">
-      <h2 data-t="featuresTitle">读取哪些信息</h2>
+      <h2 data-t="featuresTitle">验机：读取哪些信息</h2>
       <p class="sub" data-t="featuresSub">每项附上读到的原始值；读不到的标为「未知」。</p>
       <div class="grid">
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
@@ -245,14 +245,14 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 (function () {
   var T = {
     en: {
-      title: "iDevLoupe · iPhone inspection",
+      title: "iDevLoupe · iPhone management",
       navFeatures: "Features", navDownload: "Download",
-      heroTitle: "Read an iPhone's inspection data over the cable",
-      heroLead: "Reads the hardware, system and security information an iPhone reports about itself and sums it up item by item, as a reference for an inspection.",
+      heroTitle: "iPhone management on your computer",
+      heroLead: "Manage your iPhone from your computer. Today it inspects: it reads the hardware, system and security information the iPhone reports about itself and sums it up item by item, as a reference for an inspection. Backup parsing, photo management and more are planned.",
       downloadFree: "Free download", allPlatforms: "All platforms",
       heroNote: "macOS · Windows · Linux | Free | Runs on your computer; nothing is uploaded",
       shotAlt: "The inspection report of iDevLoupe",
-      featuresTitle: "What it reads", featuresSub: "Each item shows the values it rests on; what cannot be read is marked Unknown.",
+      featuresTitle: "Inspection: what it reads", featuresSub: "Each item shows the values it rests on; what cannot be read is marked Unknown.",
       f1t: "Identity", f1d: "Model, sales region, unit type, the format of the serial number and IMEI, and whether the sources agree on serial and model.",
       f2t: "Locks and management", f2d: "Find My iPhone (Activation Lock), supervision, device enrollment and MDM, configuration profiles, activation.",
       f3t: "Battery", f3d: "Health, cycle count and a resistance metric; an odd capacity or cycle count is flagged as a possible replacement.",
@@ -277,14 +277,14 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       sourceCode: "Source code"
     },
     de: {
-      title: "iDevLoupe · iPhone-Prüfung",
+      title: "iDevLoupe · iPhone-Verwaltung",
       navFeatures: "Funktionen", navDownload: "Download",
-      heroTitle: "Prüfdaten eines iPhone per Kabel lesen",
-      heroLead: "Liest die Hardware-, System- und Sicherheitsinformationen, die ein iPhone über sich meldet, und fasst sie Punkt für Punkt zusammen, als Anhaltspunkt bei der Prüfung.",
+      heroTitle: "iPhone-Verwaltung am Computer",
+      heroLead: "Verwalte dein iPhone am Computer. Derzeit prüft es: Es liest die Hardware-, System- und Sicherheitsinformationen, die das iPhone über sich meldet, und fasst sie Punkt für Punkt zusammen, als Anhaltspunkt bei der Prüfung. Backup-Auswertung, Fotoverwaltung und mehr sind geplant.",
       downloadFree: "Kostenlos laden", allPlatforms: "Alle Plattformen",
       heroNote: "macOS · Windows · Linux | Kostenlos | Läuft auf deinem Computer; nichts wird hochgeladen",
       shotAlt: "Der Prüfbericht von iDevLoupe",
-      featuresTitle: "Was es liest", featuresSub: "Jeder Punkt zeigt die Werte, auf denen er beruht; was sich nicht lesen lässt, heißt „Unbekannt“.",
+      featuresTitle: "Prüfung: was gelesen wird", featuresSub: "Jeder Punkt zeigt die Werte, auf denen er beruht; was sich nicht lesen lässt, heißt „Unbekannt“.",
       f1t: "Identität", f1d: "Modell, Verkaufsregion, Gerätetyp, Format von Seriennummer und IMEI, und ob die Quellen bei Seriennummer und Modell übereinstimmen.",
       f2t: "Sperren und Verwaltung", f2d: "„Mein iPhone suchen“ (Aktivierungssperre), Betreuung, Geräteregistrierung und MDM, Konfigurationsprofile, Aktivierung.",
       f3t: "Batterie", f3d: "Zustand, Ladezyklen und ein Innenwiderstandswert; eine auffällige Kapazität oder Zyklenzahl wird als möglicher Tausch markiert.",

@@ -3,10 +3,10 @@ package inspect
 import (
 	"errors"
 
-	"idevloupe/internal/locales"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/services"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/services"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // joinWith joins the parts that are not empty with join, a message such as

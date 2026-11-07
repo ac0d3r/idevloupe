@@ -1,10 +1,11 @@
-// Command idevloupe inspects iPhones connected by USB.
+// Command idevloupe manages iPhones connected by USB from the desktop; for
+// now it inspects them.
 //
 //	idevloupe            open the desktop window
 //	idevloupe -list      list connected devices
 //	idevloupe -report    print the inspection report of the first device (or -udid)
 //	idevloupe -json      the same, as JSON with every raw value
-//	idevloupe -dump-ioreg f.plist   probe the IORegistry, with a summary in f.plist.txt
+//	idevloupe -dump-ioreg f.plist   probe parts' keys and the IORegistry, with a summary in f.plist.txt
 //	-lang en|zh-Hans|de  the language of the report (default: the system's)
 package main
 
@@ -19,16 +20,19 @@ import (
 
 	"github.com/egoist/mygo/i18n"
 
-	"idevloupe/internal/device"
-	"idevloupe/internal/gui"
-	"idevloupe/internal/inspect"
-	"idevloupe/internal/locales"
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/probe"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/internal/devtable"
+	"github.com/ac0d3r/idevloupe/internal/gui"
+	"github.com/ac0d3r/idevloupe/internal/inspect"
+	"github.com/ac0d3r/idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/probe"
+	"github.com/ac0d3r/idevloupe/pkg/device"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
+	"github.com/ac0d3r/idevloupe/resources"
 )
 
 func main() {
+	usbmux.ProgName, usbmux.BundleID = "idevloupe", "com.imipy.idevloupe"
 	m := locales.In(systemLanguage())
 	list := flag.Bool("list", false, m.CliList())
 	report := flag.Bool("report", false, m.CliReport())
@@ -37,6 +41,19 @@ func main() {
 	dump := flag.String("dump-ioreg", "", m.CliDump())
 	lang := flag.String("lang", "", m.CliLang())
 	flag.Parse()
+	// 3uTools' device table names colors and chips: the user's own copy,
+	// which 3uTools keeps up to date, else the one built in. A table that
+	// does not read is said and done without.
+	t, path, err := devtable.Find()
+	if t == nil && err == nil {
+		t, err = devtable.Parse(resources.DevicesTable)
+		path = "resources/devices_table.txt"
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, m.CliTableUnread(path, err.Error()))
+	} else {
+		inspect.Table = t
+	}
 	if *lang == "" {
 		*lang = systemLanguage()
 	} else {
@@ -149,8 +166,8 @@ func cli(lang, udid string, asJSON bool) error {
 	return nil
 }
 
-// dumpIORegistry runs the IORegistry probe, writing the responses to path
-// and a summary of them to path.txt.
+// dumpIORegistry runs the probe of keys and the IORegistry, writing the
+// responses to path and a summary of them to path.txt.
 func dumpIORegistry(lang, udid, path string) error {
 	m := locales.In(lang)
 	_, l, err := openDevice(lang, udid)
@@ -158,12 +175,12 @@ func dumpIORegistry(lang, udid, path string) error {
 		return err
 	}
 	defer l.Close()
-	fmt.Fprintln(os.Stderr, m.CliProbing(len(probe.Queries)))
-	results, err := probe.Probe(l, path)
+	fmt.Fprintln(os.Stderr, m.CliProbing(len(probe.Keys)*2+len(probe.Queries)))
+	rep, err := probe.Probe(l, path)
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(path+".txt", []byte(probe.Summary(results, 300)), 0o644); err != nil {
+	if err := os.WriteFile(path+".txt", []byte(probe.Summary(rep, 300)), 0o644); err != nil {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, m.CliWrote(path))

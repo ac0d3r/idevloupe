@@ -1,8 +1,11 @@
-// Package services implements the few lockdown services the inspection
-// reads: diagnostics_relay (IORegistry, MobileGestalt), installation_proxy
-// (installed apps) and MCInstall (profiles, cloud configuration).
+// Package services reads lockdown services of a device: diagnostics_relay
+// (IORegistry, the "All" diagnostics, MobileGestalt), installation_proxy
+// (installed apps), MCInstall (profiles, cloud configuration), and over AFC
+// the analytics logs that crashreportcopymobile serves. ServiceAvailable
+// tells whether a service is registered at all.
 //
-// All of them exchange 4-byte length-prefixed plists.
+// The plist services exchange 4-byte length-prefixed plists; AFC has its
+// own framing (afc.go).
 package services
 
 import (
@@ -11,9 +14,9 @@ import (
 	"net"
 	"time"
 
-	"idevloupe/internal/lockdown"
-	"idevloupe/internal/plistx"
-	"idevloupe/internal/usbmux"
+	"github.com/ac0d3r/idevloupe/pkg/lockdown"
+	"github.com/ac0d3r/idevloupe/pkg/plistx"
+	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
 // Service names.
@@ -175,6 +178,9 @@ type App struct {
 	Name     string
 	Version  string
 	Type     string // "User", "System", "Internal", ...
+	// DiskUsage is the bytes the app takes, its bundle and its data
+	// (StaticDiskUsage + DynamicDiskUsage); 0 when iOS does not say.
+	DiskUsage int64
 }
 
 // ListApps lists installed applications of every type.
@@ -192,6 +198,7 @@ func ListApps(l *lockdown.Client) ([]App, error) {
 			"ReturnAttributes": []string{
 				"CFBundleIdentifier", "CFBundleDisplayName", "CFBundleName",
 				"CFBundleShortVersionString", "ApplicationType",
+				"StaticDiskUsage", "DynamicDiskUsage",
 			},
 		},
 	})
@@ -221,6 +228,9 @@ func ListApps(l *lockdown.Client) ([]App, error) {
 			}
 			a.Version, _ = m["CFBundleShortVersionString"].(string)
 			a.Type, _ = m["ApplicationType"].(string)
+			static, _ := plistx.Int(m["StaticDiskUsage"])
+			dynamic, _ := plistx.Int(m["DynamicDiskUsage"])
+			a.DiskUsage = static + dynamic
 			apps = append(apps, a)
 		}
 		if s, _ := resp["Status"].(string); s == "Complete" {

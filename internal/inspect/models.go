@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"idevloupe/internal/locales"
+	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
 // Model is what an identifier such as "iPhone16,1" is.
@@ -188,7 +188,8 @@ func UnitKindOf(modelNumber, lang string) UnitKind {
 	case "3":
 		return UnitKind{l, m.UnitDemo(), Fail, m.UnitDemoDetail()}
 	}
-	return UnitKind{l, m.UnitOther(), Warn, m.UnitOtherDetail(l)}
+	// A letter not listed is only unknown, no sign of a problem.
+	return UnitKind{l, m.UnitOther(), Info, m.UnitOtherDetail(l)}
 }
 
 // SerialDate is a manufacture date decoded from a legacy 12-character serial.
