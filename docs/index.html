@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>iDevLoupe · iPhone 设备管理工具</title>
-<meta name="description" content="iDevLoupe：在电脑上管理 iPhone 的设备管理工具。目前提供验机：读取 iPhone 自身报告的硬件、系统与安全信息，整理成逐项参考报告。">
+<title>iDevLoupe · iPhone management</title>
+<meta name="description" content="iDevLoupe manages your iPhone from your desktop. Today it inspects: it reads the hardware, system and security information the iPhone reports about itself and judges it item by item.">
 <link rel="icon" href="icon.png">
 <style>
 :root {
@@ -310,7 +310,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   var zh = {};
   document.querySelectorAll("[data-t]").forEach(function (el) { zh[el.dataset.t] = el.innerHTML; });
   document.querySelectorAll("[data-t-alt]").forEach(function (el) { zh[el.dataset.tAlt] = el.alt; });
-  zh.title = document.title;
+  zh.title = "iDevLoupe · iPhone 设备管理工具";
   T.zh = zh;
 
   function apply(lang) {
