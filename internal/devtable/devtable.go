@@ -1,25 +1,13 @@
-// Package devtable reads 3uTools' device table (devices_table.txt), a
-// JSON file 3uTools downloads to its cache: colors by model and color code,
-// release dates, screen sizes, chips and battery makers.
-//
-// The program reads the user's own copy when it finds one (Find), else
-// the data built in (Builtin): only the values it reads, as Go values.
-// Every lookup of a nil Table finds nothing, so the program works without
-// it.
+// Package devtable is device data taken from 3uTools' device table
+// (devices_table.txt) and built in: colors by model and color code,
+// release dates, screen sizes, chips and battery makers. Every lookup of a
+// nil Table finds nothing.
 package devtable
 
 import (
 	"cmp"
-	"encoding/json"
-	"errors"
-	"io/fs"
-	"os"
-	"path/filepath"
 	"strings"
 )
-
-// EnvPath names the environment variable that gives the table's path.
-const EnvPath = "IDEVLOUPE_DEVICES_TABLE"
 
 // Text is a value in Chinese and in English.
 type Text struct{ Zh, En string }
@@ -47,114 +35,14 @@ type color struct {
 
 // Table is the device table.
 type Table struct {
-	Version   string
 	colors    map[string][]color // by ProductType
 	models    map[string]Model   // by ProductType
 	batteries map[string]Text    // battery makers by serial prefix
 }
 
-// file is the table's layout, as far as it is read.
-type file struct {
-	Version string `json:"version"`
-	Images  []struct {
-		SupportTypes []struct {
-			ProductType string
-		}
-		Imgs []struct {
-			BackColor, BackColorText, BackColorText_en    string
-			FrontColor, FrontColorText, FrontColorText_en string
-		} `json:"imgs"`
-	}
-	Devices []struct {
-		ProductType, ReleaseDate, ReleaseDate_en, ScreenSize, ScreenSize_en string
-	} `json:"devices"`
-	CPUs []struct {
-		ProductType   string `json:"productType"`
-		DisplayName   string `json:"displayName"`
-		DisplayNameEn string `json:"displayName_en"`
-		CoreCount     string `json:"coreCount"`
-		Rate          string `json:"rate"`
-		Resolution    string `json:"resolution"`
-	} `json:"cpus"`
-	Batteries []struct {
-		Cn, En, Prefix string
-	} `json:"batfacotry"`
-}
-
-// Parse reads a table.
-func Parse(data []byte) (*Table, error) {
-	var f file
-	if err := json.Unmarshal(data, &f); err != nil {
-		return nil, err
-	}
-	t := &Table{Version: f.Version, colors: map[string][]color{}, models: map[string]Model{}, batteries: map[string]Text{}}
-	for _, img := range f.Images {
-		for _, st := range img.SupportTypes {
-			for _, c := range img.Imgs {
-				t.colors[st.ProductType] = append(t.colors[st.ProductType], color{
-					back: c.BackColor, front: c.FrontColor,
-					backName:  Text{c.BackColorText, c.BackColorText_en},
-					frontName: Text{c.FrontColorText, c.FrontColorText_en},
-				})
-			}
-		}
-	}
-	for _, d := range f.Devices {
-		m := t.models[d.ProductType]
-		m.ReleaseDate, m.ScreenSize = Text{d.ReleaseDate, d.ReleaseDate_en}, Text{d.ScreenSize, d.ScreenSize_en}
-		t.models[d.ProductType] = m
-	}
-	for _, c := range f.CPUs {
-		m := t.models[c.ProductType]
-		m.Chip = Text{c.DisplayName, c.DisplayNameEn}
-		m.Cores, m.Frequency, m.Resolution = c.CoreCount, c.Rate, c.Resolution
-		t.models[c.ProductType] = m
-	}
-	for _, b := range f.Batteries {
-		if b.Prefix != "" {
-			t.batteries[b.Prefix] = Text{b.Cn, b.En}
-		}
-	}
-	if len(t.colors) == 0 && len(t.models) == 0 {
-		return nil, errors.New("devtable: no devices in the table")
-	}
-	return t, nil
-}
-
 // Builtin returns the table built in.
 func Builtin() *Table {
-	return &Table{Version: builtinVersion, colors: builtinColors, models: builtinModels, batteries: builtinBatteries}
-}
-
-// Paths are where Find looks, in order: the environment variable's path,
-// 3uTools' cache in the Downloads folder, and devices_table/ in the working
-// directory.
-func Paths() []string {
-	var ps []string
-	if p := os.Getenv(EnvPath); p != "" {
-		ps = append(ps, p)
-	}
-	if home, err := os.UserHomeDir(); err == nil {
-		ps = append(ps, filepath.Join(home, "Downloads", "3uToolsDownloads", "cache", "devices_table", "devices_table.txt"))
-	}
-	return append(ps, filepath.Join("devices_table", "devices_table.txt"))
-}
-
-// Find loads the first table of Paths that exists, returning its path; nil
-// and no error when there is none.
-func Find() (*Table, string, error) {
-	for _, p := range Paths() {
-		data, err := os.ReadFile(p)
-		if errors.Is(err, fs.ErrNotExist) {
-			continue
-		}
-		if err != nil {
-			return nil, p, err
-		}
-		t, err := Parse(data)
-		return t, p, err
-	}
-	return nil, "", nil
+	return &Table{colors: builtinColors, models: builtinModels, batteries: builtinBatteries}
 }
 
 // BackColor names a model's back color code in lang.

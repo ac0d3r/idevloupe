@@ -36,11 +36,11 @@ func (a *analysis) addresses() {
 // factory compares the serial numbers of the parts the factory
 // configuration records with those the parts report now. Samples: an
 // iPhone 8 (iOS 16) whose front camera, display panel and touch glass differ
-// from the record, as 3uTools also reports for the camera and the panel; an
-// iPhone X (iOS 16) whose record all matches although its screen was
-// replaced, the original's serial most likely written onto the new one. So a
-// match is consistency, not proof that a part is original, and a mismatch
-// is a replacement, not proof that the new part is not genuine.
+// from the record; an iPhone X (iOS 16) whose record all matches although
+// its screen was replaced, the original's serial most likely written onto
+// the new one. So a match is consistency, not proof that a part is
+// original, and a mismatch is a replacement, not proof that the new part is
+// not genuine.
 func (a *analysis) factory() {
 	m, raw := a.m, a.raw
 	cat := m.CategoryParts()
@@ -148,8 +148,7 @@ func (a *analysis) factoryCheck(cat, part, factory, current string, dated, scree
 // PartDate reads the date of manufacture a part's serial number carries
 // after its three-character supplier code: the year's last digit, the ISO
 // week and the weekday, Monday 1. An iPhone 8's front camera F0W94170…
-// was made on 2019-10-13 (2019, week 41, day 7), as 3uTools also dates it,
-// and so its other parts. The decade is the latest that is not in the future
+// was made on 2019-10-13 (2019, week 41, day 7), and so its other parts. The decade is the latest that is not in the future
 // at now. Serials of other forms, such as the Touch ID sensor's hex, are not
 // dated.
 func PartDate(serial string, now time.Time) (time.Time, bool) {

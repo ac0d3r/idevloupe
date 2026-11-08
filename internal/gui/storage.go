@@ -77,7 +77,7 @@ func storageBar(c *ui.Context, total int64, parts []usage) {
 				if w <= 0 {
 					continue
 				}
-				// A sliver stays visible, as 3uTools' bar keeps it.
+				// A sliver stays visible.
 				w = max(w, 2)
 				p.Fill(ui.Rect{X: x, Y: r.Y, W: w, H: r.H}, u.color, 0)
 				x += w

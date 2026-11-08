@@ -966,8 +966,6 @@
       }
     }
   },
-  "colorBlack": "Black",
-  "colorSpaceGray": "Space Gray",
   "colorNamed": "{name} (code {code})",
   "@colorNamed": {
     "placeholders": {
@@ -1059,17 +1057,6 @@
   "actionDetails": "Device details",
   "actionClose": "Close",
   "batteryCardNoHealth": "Health not reported",
-  "cliTableUnread": "Could not read the device table {path}: {error}",
-  "@cliTableUnread": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "actionCheckWarranty": "Check online",
   "fieldWarranty": "Warranty",
   "toastWarrantySerialCopied": "Serial number copied. Paste it on Apple's page to see the warranty.",

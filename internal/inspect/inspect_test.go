@@ -9,7 +9,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/ac0d3r/idevloupe/internal/devtable"
 	"github.com/ac0d3r/idevloupe/internal/locales"
 	"github.com/ac0d3r/idevloupe/pkg/services"
 )
@@ -897,7 +896,7 @@ func TestFactoryRecordUnread(t *testing.T) {
 	}
 }
 
-// Dates as 3uTools gives them for an iPhone 8's parts.
+// Dates of an iPhone 8's parts.
 func TestPartDate(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	for serial, want := range map[string]string{
@@ -972,7 +971,7 @@ func TestAddressesAndColors(t *testing.T) {
 		t.Errorf("a changed address %+v", c)
 	}
 
-	// iPhone 8: space gray is code 8 there; a code no sample settled stays a code.
+	// iPhone 8: space gray is code 8 there; a code the table lacks stays a code.
 	raw.Root["ProductType"] = "iPhone10,1"
 	delete(raw.Root, "DeviceColor")
 	raw.SysCfg["CLHS"] = color(8)
@@ -985,10 +984,10 @@ func TestAddressesAndColors(t *testing.T) {
 	if fields["Front color"] != "Black (code 1)" || fields["Back color"] != "Space Gray (code 8)" {
 		t.Errorf("iPhone 8 colors %v", fields)
 	}
-	raw.SysCfg["CLHS"] = color(3)
+	raw.SysCfg["CLHS"] = color(99)
 	for _, sec := range Analyze(raw, now, "en").Sections {
 		for _, f := range sec.Fields {
-			if f.Label == "Back color" && f.Value != "code 3" {
+			if f.Label == "Back color" && f.Value != "code 99" {
 				t.Errorf("unsettled code: %q", f.Value)
 			}
 		}
@@ -1058,20 +1057,9 @@ func TestPartDates(t *testing.T) {
 	}
 }
 
-// With 3uTools' device table, the report names colors, the chip, the
-// screen, the release date and the battery's maker; an unknown prefix
-// names none.
+// With the device table, the report names colors, the chip, the screen,
+// the release date and the battery's maker; an unknown prefix names none.
 func TestDeviceTable(t *testing.T) {
-	tb, err := devtable.Parse([]byte(`{"Images":[{"SupportTypes":[{"ProductType":"iPhone13,2"}],"imgs":[
-		{"BackColor":"9","BackColorText":"蓝色","BackColorText_en":"Blue","FrontColor":"1","FrontColorText":"黑色","FrontColorText_en":"Black"}]}],
-		"devices":[{"ProductType":"iPhone13,2","ReleaseDate":"2020年10月13日","ReleaseDate_en":"10/13/2020","ScreenSize":"6.1 英寸","ScreenSize_en":"6.1 inches"}],
-		"cpus":[{"productType":"iPhone13,2","displayName":"A14 六核","displayName_en":"A14 Hexa","rate":"3.1GHz","resolution":"2532 x 1170"}],
-		"batfacotry":[{"cn":"常熟新普","en":"SIMPLO","prefix":"FG"}]}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	Table = tb
-	t.Cleanup(func() { Table = nil })
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	raw := &RawData{
 		Root:       map[string]any{"ProductType": "iPhone13,2", "DeviceColor": "1", "DeviceEnclosureColor": "9"},

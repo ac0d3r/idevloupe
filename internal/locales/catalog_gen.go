@@ -3921,26 +3921,6 @@ func (msgs Messages) FactorySame(serial string) string {
 	return Catalog.Format(msgs.locale, "factorySame", map[string]any{"serial": serial})
 }
 
-// ColorBlack says "Black"
-// in the language the app shows.
-func ColorBlack() string { return In(i18n.Locale()).ColorBlack() }
-
-// ColorBlack says "Black"
-// in the language of msgs.
-func (msgs Messages) ColorBlack() string {
-	return Catalog.Format(msgs.locale, "colorBlack", nil)
-}
-
-// ColorSpaceGray says "Space Gray"
-// in the language the app shows.
-func ColorSpaceGray() string { return In(i18n.Locale()).ColorSpaceGray() }
-
-// ColorSpaceGray says "Space Gray"
-// in the language of msgs.
-func (msgs Messages) ColorSpaceGray() string {
-	return Catalog.Format(msgs.locale, "colorSpaceGray", nil)
-}
-
 // ColorNamed says "{name} (code {code})"
 // in the language the app shows.
 func ColorNamed(name string, code string) string { return In(i18n.Locale()).ColorNamed(name, code) }
@@ -4175,18 +4155,6 @@ func BatteryCardNoHealth() string { return In(i18n.Locale()).BatteryCardNoHealth
 // in the language of msgs.
 func (msgs Messages) BatteryCardNoHealth() string {
 	return Catalog.Format(msgs.locale, "batteryCardNoHealth", nil)
-}
-
-// CliTableUnread says "Could not read the device table {path}: {error}"
-// in the language the app shows.
-func CliTableUnread(path string, error string) string {
-	return In(i18n.Locale()).CliTableUnread(path, error)
-}
-
-// CliTableUnread says "Could not read the device table {path}: {error}"
-// in the language of msgs.
-func (msgs Messages) CliTableUnread(path string, error string) string {
-	return Catalog.Format(msgs.locale, "cliTableUnread", map[string]any{"path": path, "error": error})
 }
 
 // ActionCheckWarranty says "Check online"

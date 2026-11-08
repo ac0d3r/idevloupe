@@ -111,7 +111,7 @@ func (a *analysis) summary() {
 	if strings.HasPrefix(s.Color, "#") && len(s.Color) == 7 {
 		s.ColorHex = s.Color
 	} else {
-		s.ColorName = colorName(a.m, a.lang, a.productType, back, false)
+		s.ColorName = colorName(a.lang, a.productType, back, false)
 	}
 	if name, ok := RegionName(a.regionInfo, a.lang); ok {
 		s.Region = name

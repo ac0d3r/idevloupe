@@ -63,8 +63,7 @@ and Service History) cannot be read over the cable.
 ## Colors and model data
 
 Color codes mean different colors on different models. Color names, release dates and battery makers come
-from 3uTools' device table (`devices_table.txt`): the file `IDEVLOUPE_DEVICES_TABLE` names, else 3uTools'
-cache on this computer, else the values the program reads of it, built in as Go values (`internal/devtable`).
+from a device table built in as Go values (`internal/devtable`).
 
 ## Code layout
 
@@ -79,7 +78,7 @@ cache on this computer, else the values the program reads of it, built in as Go 
 | `internal/inspect` | Collect → analyze → report (pure functions, tested on recorded data) |
 | `internal/gui` | The UI |
 | `internal/locales` | Translations and their generated code (`make i18n`) |
-| `internal/devtable` | 3uTools' device table: the user's copy, or the values built in |
+| `internal/devtable` | The built-in device table: colors, release dates, chips, battery makers |
 | `internal/probe` | Querying the IORegistry entry by entry (`-dump-ioreg`), to find new part fields |
 | `internal/fakedevice` | A fake usbmuxd and iPhone for tests |
 

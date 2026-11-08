@@ -1,8 +1,8 @@
 # iDevLoupe
 
-A native desktop iPhone manager written in Go with [MyGo](https://github.com/egoist/mygo), no WebView.
+A native desktop iPhone manager written in Go with [MyGo](https://github.com/egoist/mygo).
 Today it inspects: connect an iPhone by cable, and it reads what the phone reports about itself and judges it
-item by item, on evidence alone. Backup parsing, photo management and more are planned.
+item by item, on evidence alone.
 
 ![The device home of iDevLoupe](docs/screenshot-home-en.png)
 
@@ -33,8 +33,9 @@ make screenshots  # regenerate the download page's screenshots
 go run ./cmd/idevloupe -report   # print an inspection report (-json / -list / -lang)
 ```
 
-Pushing a `vX.Y.Z` tag packages and publishes a release, versioned by the tag. `docs/` is the GitHub Pages download page.
-
 ## License
 
-[MIT](LICENSE)
+Copyright © 2026 ac0d3r. Licensed under the [GNU General Public License v3.0](LICENSE).
+
+iDevLoupe is not affiliated with or endorsed by Apple Inc. iPhone, iPad and iOS are trademarks of Apple Inc.
+Inspection results are for reference only.

@@ -6,8 +6,6 @@ package devtable
 // and color code, release dates, screens, chips, and battery makers by
 // serial prefix.
 
-const builtinVersion = "2026.10.23.01"
-
 // builtinColors are the colors by ProductType, in the table's order: the
 // first that matches a code names it.
 var builtinColors = map[string][]color{

@@ -7,9 +7,9 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// icloudRow is the info card's iCloud row, beside activation and Find My
-// as 3uTools has it: on or off, and a link to what it syncs, grayed out
-// when iCloud is off or the device does not say.
+// icloudRow is the info card's iCloud row, beside activation and Find My:
+// on or off, and a link to what it syncs, grayed out when iCloud is off or
+// the device does not say.
 func (a *App) icloudRow(c *ui.Context, m locales.Messages, ic *inspect.ICloud) {
 	t := c.Theme()
 	on := ic != nil && ic.On()

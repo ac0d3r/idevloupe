@@ -20,7 +20,6 @@ import (
 
 	"github.com/egoist/mygo/i18n"
 
-	"github.com/ac0d3r/idevloupe/internal/devtable"
 	"github.com/ac0d3r/idevloupe/internal/gui"
 	"github.com/ac0d3r/idevloupe/internal/inspect"
 	"github.com/ac0d3r/idevloupe/internal/locales"
@@ -40,17 +39,6 @@ func main() {
 	dump := flag.String("dump-ioreg", "", m.CliDump())
 	lang := flag.String("lang", "", m.CliLang())
 	flag.Parse()
-	// 3uTools' device table names colors and chips: the user's own copy,
-	// which 3uTools keeps up to date, else the data built in. A copy that
-	// does not read is said, and the built-in data used.
-	t, path, err := devtable.Find()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, m.CliTableUnread(path, err.Error()))
-	}
-	if t == nil || err != nil {
-		t = devtable.Builtin()
-	}
-	inspect.Table = t
 	if *lang == "" {
 		*lang = systemLanguage()
 	} else {
