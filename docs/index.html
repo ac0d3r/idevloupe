@@ -6,16 +6,17 @@
 <title>iDevLoupe · iPhone management</title>
 <meta name="description" content="iDevLoupe manages your iPhone from your desktop. Today it inspects: it reads the hardware, system and security information the iPhone reports about itself and judges it item by item.">
 <link rel="icon" href="icon.png">
-<style>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11/dist/index.global.js"></script>
+<style type="text/tailwindcss">
 :root {
   --bg: #ffffff;
   --bg-soft: #f7f6fb;
-  --text: #17151f;
+  --ink: #17151f;
   --muted: #625e70;
-  --border: #e6e3ef;
+  --line: #e6e3ef;
   --accent: #7c3aed;
   --accent-2: #a855f7;
-  --accent-text: #ffffff;
+  --on-accent: #ffffff;
   --accent-soft: rgba(124, 58, 237, 0.09);
   --card: #ffffff;
   --shadow: 0 1px 2px rgba(20, 10, 40, 0.05), 0 8px 24px rgba(20, 10, 40, 0.06);
@@ -25,110 +26,57 @@
   :root {
     --bg: #111017;
     --bg-soft: #17151f;
-    --text: #efedf5;
+    --ink: #efedf5;
     --muted: #a6a1b5;
-    --border: #2b2836;
+    --line: #2b2836;
     --accent: #a678f5;
     --accent-2: #c08cff;
-    --accent-text: #160b29;
+    --on-accent: #160b29;
     --accent-soft: rgba(166, 120, 245, 0.13);
     --card: #1a1823;
     --shadow: none;
     color-scheme: dark;
   }
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-  -webkit-font-smoothing: antialiased;
+@theme inline {
+  --color-page: var(--bg);
+  --color-soft: var(--bg-soft);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-card: var(--card);
+  --shadow-shot: var(--shadow);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, Menlo, Consolas, monospace;
 }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-
-header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-header .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); font-size: 17px; }
-.brand:hover { text-decoration: none; }
-.brand img { width: 30px; height: 30px; }
-nav { display: flex; gap: 18px; margin-left: auto; align-items: center; }
-nav a { color: var(--muted); font-size: 14px; }
-nav a:hover { color: var(--text); text-decoration: none; }
-select { font: inherit; font-size: 13px; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; }
-
-.hero { padding-top: 72px; padding-bottom: 40px; text-align: center; }
-.hero img.logo { width: 96px; height: 96px; }
-h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; margin: 18px 0 14px; letter-spacing: -0.02em; }
-.lead { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0 auto 28px; }
-.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 15px; border: 1px solid var(--border); color: var(--text); background: var(--card); }
-.btn:hover { text-decoration: none; border-color: var(--accent); }
-.btn.primary { background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: var(--accent-text); border: 0; }
-.btn.primary:hover { filter: brightness(1.06); }
-.btn svg { width: 18px; height: 18px; }
-.note { color: var(--muted); font-size: 13px; margin-top: 12px; }
-
-.shot { margin: 44px auto 0; max-width: 1000px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--card); }
-.shot img { display: block; width: 100%; height: auto; }
-
-section { padding: 64px 0; }
-section.soft { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-h2 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
-.sub { color: var(--muted); margin: 0 0 32px; }
-.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-.card h3 { margin: 0 0 6px; font-size: 16px; }
-.card p { margin: 0; color: var(--muted); font-size: 14px; }
-.ico { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); margin-bottom: 12px; }
-.ico svg { width: 20px; height: 20px; }
-
-.dl .card { display: flex; flex-direction: column; gap: 12px; }
-.dl .card.recommended { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.dl .head { display: flex; align-items: center; gap: 10px; }
-.dl .head h3 { margin: 0; font-size: 18px; }
-.badge { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px; display: none; }
-.recommended .badge { display: inline-block; }
-.files { display: flex; flex-direction: column; gap: 8px; }
-.files a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; }
-.files a:hover { border-color: var(--accent); text-decoration: none; }
-.files a span:last-child { color: var(--muted); font-size: 12px; font-family: ui-monospace, Menlo, Consolas, monospace; }
-.req { font-size: 13px; color: var(--muted); margin: 0; }
-.req b { color: var(--text); font-weight: 600; }
-.more { margin-top: 20px; font-size: 14px; color: var(--muted); }
-
-ol.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); counter-reset: s; }
-ol.steps li { counter-increment: s; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 20px 20px 64px; position: relative; color: var(--muted); font-size: 14px; }
-ol.steps li::before { content: counter(s); position: absolute; left: 20px; top: 18px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--accent-text); background: linear-gradient(135deg, var(--accent-2), var(--accent)); }
-ol.steps li b { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
-
-.faq details { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; }
-.faq summary { cursor: pointer; font-weight: 600; }
-.faq details p { color: var(--muted); font-size: 14px; margin: 10px 0 0; }
-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
-
-footer { padding: 32px 0 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
-footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-
-@media (max-width: 640px) {
-  nav a.hide-sm { display: none; }
-  .hero { padding-top: 48px; }
-  section { padding: 48px 0; }
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-page text-ink font-sans antialiased leading-relaxed; }
+  /* Elements that arrive through the translations' innerHTML. */
+  code { @apply font-mono text-[0.9em] bg-accent-soft px-1.5 py-px rounded; }
+  b { @apply font-semibold text-ink; }
+}
+@utility card {
+  @apply bg-card border border-line rounded-xl p-5;
+}
+@utility gradient-accent {
+  background-image: linear-gradient(135deg, var(--accent-2), var(--accent));
 }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <a class="brand" href="#"><img src="icon.png" alt="">iDevLoupe</a>
-    <nav>
-      <a class="hide-sm" href="#features" data-t="navFeatures">功能</a>
-      <a class="hide-sm" href="#download" data-t="navDownload">下载</a>
-      <select id="lang" aria-label="Language">
+<header class="sticky top-0 z-10 border-b border-line bg-page/85 backdrop-blur-md">
+  <div class="mx-auto flex h-15 max-w-[1080px] items-center gap-5 px-5">
+    <a class="flex items-center gap-2.5 text-[17px] font-bold text-ink" href="#"><img class="size-7.5" src="icon.png" alt="">iDevLoupe</a>
+    <nav class="ml-auto flex items-center gap-4.5 text-sm">
+      <a class="hidden text-muted hover:text-ink sm:inline" href="#features" data-t="navFeatures">功能</a>
+      <a class="hidden text-muted hover:text-ink sm:inline" href="#download" data-t="navDownload">下载</a>
+      <select id="lang" aria-label="Language" class="rounded-lg border border-line bg-card px-2 py-1 text-[13px] text-ink">
         <option value="zh">简体中文</option>
         <option value="en">English</option>
         <option value="de">Deutsch</option>
@@ -138,26 +86,26 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 </header>
 
 <main>
-  <div class="hero wrap">
-    <img class="logo" src="icon.png" alt="iDevLoupe">
-    <h1 data-t="heroTitle">iPhone 设备管理工具</h1>
-    <p class="lead" data-t="heroLead">用 Go 与 MyGo 写成的原生桌面应用，没有 WebView。目前提供验机：用数据线连上 iPhone，读取它自己报告的硬件、系统与安全信息，只凭证据逐项给出结论。备份解析、照片管理等功能计划中。</p>
-    <div class="cta">
-      <a class="btn primary" id="primary" href="#download">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+  <div class="mx-auto max-w-[1080px] px-5 pt-12 pb-10 text-center sm:pt-18">
+    <img class="mx-auto size-24" src="icon.png" alt="iDevLoupe">
+    <h1 class="mt-4.5 mb-3.5 text-[clamp(32px,5vw,48px)] leading-tight font-bold tracking-tight" data-t="heroTitle">iPhone 设备管理工具</h1>
+    <p class="mx-auto mb-7 max-w-160 text-lg text-muted" data-t="heroLead">用 Go 与 MyGo 写成的原生桌面应用，没有 WebView。目前提供验机：用数据线连上 iPhone，读取它自己报告的硬件、系统与安全信息，只凭证据逐项给出结论。备份解析、照片管理等功能计划中。</p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <a class="gradient-accent inline-flex items-center gap-2 rounded-[10px] px-5 py-3 text-[15px] font-semibold text-on-accent hover:brightness-106" id="primary" href="#download">
+        <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
         <span id="primaryLabel" data-t="downloadFree">免费下载</span>
       </a>
-      <a class="btn" href="#download" data-t="allPlatforms">所有平台</a>
+      <a class="inline-flex items-center rounded-[10px] border border-line bg-card px-5 py-3 text-[15px] font-semibold text-ink hover:border-accent" href="#download" data-t="allPlatforms">所有平台</a>
     </div>
-    <p class="note" data-t="heroNote">免费 · macOS、Windows 与 Linux · 在本机运行，不上传数据</p>
-    <div class="shot"><img id="shotHome" src="screenshot-home-zh.png" width="2360" height="1560" alt="iDevLoupe 的设备首页" data-t-alt="homeAlt"></div>
+    <p class="mt-3 text-[13px] text-muted" data-t="heroNote">免费 · macOS、Windows 与 Linux · 在本机运行，不上传数据</p>
+    <div class="mx-auto mt-11 max-w-250 overflow-hidden rounded-[14px] border border-line bg-card shadow-shot"><img class="block h-auto w-full" id="shotHome" src="screenshot-home-zh.png" width="2360" height="1560" alt="iDevLoupe 的设备首页" data-t-alt="homeAlt"></div>
   </div>
 
-  <section id="features" class="soft">
-    <div class="wrap">
-      <h2 data-t="featuresTitle">功能</h2>
-      <p class="sub" data-t="featuresSub">该查的都查，查不到的直说。每项附上依据，读不到的标为「未知」。</p>
-      <div class="grid">
+  <section id="features" class="border-y border-line bg-soft py-12 sm:py-16">
+    <div class="mx-auto max-w-[1080px] px-5">
+      <h2 class="mb-2 text-[28px] font-bold tracking-tight" data-t="featuresTitle">功能</h2>
+      <p class="mb-8 text-muted" data-t="featuresSub">该查的都查，查不到的直说。每项附上依据，读不到的标为「未知」。</p>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4 [&_h3]:mb-1.5 [&_h3]:font-bold [&_p]:text-sm [&_p]:text-muted [&_.ico]:mb-3 [&_.ico]:grid [&_.ico]:size-9 [&_.ico]:place-items-center [&_.ico]:rounded-[9px] [&_.ico]:bg-accent-soft [&_.ico]:text-accent [&_svg]:size-5">
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
           <h3 data-t="f1t">是它说的那台吗</h3><p data-t="f1d">型号、销售地区、机器类型，序列号与 IMEI 格式，不同来源的序列号与型号是否一致。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
@@ -171,24 +119,25 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
           <h3 data-t="f6t">只留在你的电脑上</h3><p data-t="f6d">不联网、不上传，手机号与 SIM 卡号不进入报告。报告可复制或导出为文本 / JSON。</p></div>
       </div>
-      <div class="shot"><img id="shot" src="screenshot-zh.png" width="2360" height="1560" alt="iDevLoupe 的验机报告界面" data-t-alt="shotAlt"></div>
+      <div class="mx-auto mt-11 max-w-250 overflow-hidden rounded-[14px] border border-line bg-card shadow-shot"><img class="block h-auto w-full" id="shot" src="screenshot-zh.png" width="2360" height="1560" alt="iDevLoupe 的验机报告界面" data-t-alt="shotAlt"></div>
     </div>
   </section>
 
-  <section id="download">
-    <div class="wrap dl">
-      <h2 data-t="downloadTitle">下载</h2>
-      <p class="sub" data-t="downloadSub">最新版本。</p>
-      <div class="grid">
+  <section id="download" class="py-12 sm:py-16">
+    <div class="mx-auto max-w-[1080px] px-5">
+      <h2 class="mb-2 text-[28px] font-bold tracking-tight" data-t="downloadTitle">下载</h2>
+      <p class="mb-8 text-muted" data-t="downloadSub">最新版本。</p>
+      <!-- The script adds .recommended to the visitor's card. -->
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4 [&>.card]:flex [&>.card]:flex-col [&>.card]:gap-3 [&_.recommended]:border-accent [&_.recommended]:ring-3 [&_.recommended]:ring-accent-soft [&_h3]:text-lg [&_h3]:font-bold [&_.badge]:hidden [&_.badge]:rounded-full [&_.badge]:bg-accent-soft [&_.badge]:px-2 [&_.badge]:py-0.5 [&_.badge]:text-xs [&_.badge]:font-semibold [&_.badge]:text-accent [&_.recommended_.badge]:inline-block [&_.files]:flex [&_.files]:flex-col [&_.files]:gap-2 [&_.files_a]:flex [&_.files_a]:items-center [&_.files_a]:justify-between [&_.files_a]:gap-3 [&_.files_a]:rounded-lg [&_.files_a]:border [&_.files_a]:border-line [&_.files_a]:px-3 [&_.files_a]:py-2.5 [&_.files_a]:text-sm [&_.files_a]:text-ink [&_.files_a:hover]:border-accent [&_.files_a>span:last-child]:font-mono [&_.files_a>span:last-child]:text-xs [&_.files_a>span:last-child]:text-muted [&_.req]:text-[13px] [&_.req]:text-muted">
         <div class="card" data-os="mac">
-          <div class="head"><h3>macOS</h3><span class="badge" data-t="recommended">推荐</span></div>
+          <div class="flex items-center gap-2.5"><h3>macOS</h3><span class="badge" data-t="recommended">推荐</span></div>
           <div class="files">
             <a href="downloads/idevloupe-macos.dmg"><span data-t="macUniversal">Apple 芯片与 Intel</span><span>.dmg</span></a>
           </div>
           <p class="req" data-t="macReq"><b>macOS</b> 自带 usbmuxd，无需额外安装。</p>
         </div>
         <div class="card" data-os="win">
-          <div class="head"><h3>Windows</h3><span class="badge" data-t="recommended">推荐</span></div>
+          <div class="flex items-center gap-2.5"><h3>Windows</h3><span class="badge" data-t="recommended">推荐</span></div>
           <div class="files">
             <a href="downloads/idevloupe-windows-amd64.exe"><span>x64</span><span>.exe</span></a>
             <a href="downloads/idevloupe-windows-arm64.exe"><span>ARM64</span><span>.exe</span></a>
@@ -196,7 +145,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <p class="req" data-t="winReq">需先安装 <b>Apple 设备</b>（Microsoft Store）或 <b>iTunes</b>，以提供 iPhone 驱动。</p>
         </div>
         <div class="card" data-os="linux">
-          <div class="head"><h3>Linux</h3><span class="badge" data-t="recommended">推荐</span></div>
+          <div class="flex items-center gap-2.5"><h3>Linux</h3><span class="badge" data-t="recommended">推荐</span></div>
           <div class="files">
             <a href="downloads/idevloupe-linux-amd64.deb"><span>x86_64 · Debian / Ubuntu</span><span>.deb</span></a>
             <a href="downloads/idevloupe-linux-amd64.tar.gz"><span>x86_64</span><span>.tar.gz</span></a>
@@ -206,26 +155,25 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <p class="req" data-t="linuxReq">需要 <b>usbmuxd</b>：<code>sudo apt install usbmuxd</code>（.deb 会自动安装）。</p>
         </div>
       </div>
-      <p class="more"><span data-t="moreText">校验文件：</span> <a href="downloads/SHA256SUMS">SHA256SUMS</a></p>
+      <p class="mt-5 text-sm text-muted"><span data-t="moreText">校验文件：</span> <a class="text-accent hover:underline" href="downloads/SHA256SUMS">SHA256SUMS</a></p>
     </div>
   </section>
 
-  <section class="soft">
-    <div class="wrap">
-      <h2 data-t="howTitle">怎么用</h2>
-      <p class="sub" data-t="howSub">无需登录，无需在手机上装任何东西。</p>
-      <ol class="steps">
-        <li><b data-t="s1t">用数据线连接电脑</b><span data-t="s1d">打开 iDevLoupe，用 USB 线连接 iPhone，设备会自动出现在左侧。</span></li>
-        <li><b data-t="s2t">解锁并点「信任」</b><span data-t="s2d">首次连接时，在 iPhone 上选择「信任此电脑」并输入锁屏密码。</span></li>
-        <li><b data-t="s3t">查看报告</b><span data-t="s3d">需要关注的项排在最前面。报告末尾的「需人工核对」清单请在手机上逐项确认。</span></li>
+  <section class="border-y border-line bg-soft py-12 sm:py-16">
+    <div class="mx-auto max-w-[1080px] px-5">
+      <h2 class="mb-2 text-[28px] font-bold tracking-tight" data-t="howTitle">怎么用</h2>
+      <p class="mb-8 text-muted" data-t="howSub">无需登录，无需在手机上装任何东西。</p>
+      <ol class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4 [&>li]:card [&>li]:relative [&>li]:pl-16 [&>li]:text-sm [&>li]:text-muted [&_b]:mb-1 [&_b]:block [&_b]:text-[15px] [&_i]:gradient-accent [&_i]:absolute [&_i]:top-4.5 [&_i]:left-5 [&_i]:grid [&_i]:size-7.5 [&_i]:place-items-center [&_i]:rounded-full [&_i]:font-bold [&_i]:not-italic [&_i]:text-on-accent">
+        <li><i aria-hidden="true">1</i><b data-t="s1t">用数据线连接电脑</b><span data-t="s1d">打开 iDevLoupe，用 USB 线连接 iPhone，设备会自动出现在左侧。</span></li>
+        <li><i aria-hidden="true">2</i><b data-t="s2t">解锁并点「信任」</b><span data-t="s2d">首次连接时，在 iPhone 上选择「信任此电脑」并输入锁屏密码。</span></li>
+        <li><i aria-hidden="true">3</i><b data-t="s3t">查看报告</b><span data-t="s3d">需要关注的项排在最前面。报告末尾的「需人工核对」清单请在手机上逐项确认。</span></li>
       </ol>
     </div>
   </section>
 
-  <section class="faq">
-    <div class="wrap">
-      <h2 data-t="faqTitle">常见问题</h2>
-      <p class="sub"></p>
+  <section class="py-12 sm:py-16">
+    <div class="mx-auto max-w-[1080px] px-5 [&_details]:mb-2.5 [&_details]:rounded-[10px] [&_details]:border [&_details]:border-line [&_details]:bg-card [&_details]:px-4.5 [&_details]:py-3.5 [&_summary]:cursor-pointer [&_summary]:font-semibold [&_details_p]:mt-2.5 [&_details_p]:text-sm [&_details_p]:text-muted">
+      <h2 class="mb-8 text-[28px] font-bold tracking-tight" data-t="faqTitle">常见问题</h2>
       <details><summary data-t="q1">macOS 阻止打开 iDevLoupe？</summary><p data-t="a1">应用未经 Apple 公证，首次打开会被 Gatekeeper 拦截。先双击一次并在弹窗中点「完成」，然后前往「系统设置 › 隐私与安全性」，在「安全性」一栏点「仍要打开」，输入密码确认；之后可正常双击启动。若提示「已损坏，无法打开」，在终端执行 <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code> 后再打开。</p></details>
       <details><summary data-t="q2">Windows 弹出 SmartScreen 警告？</summary><p data-t="a2">程序未经代码签名，SmartScreen 会拦截首次运行：点「更多信息」→「仍要运行」。如果找不到设备，请确认已安装「Apple 设备」或 iTunes，并在 iPhone 上解锁后点「信任」。</p></details>
       <details><summary data-t="q3">能判断屏幕、电池是否原装吗？</summary><p data-t="a3">不能确定。部件与出厂记录不符、或生产日期晚于整机时，报告会标出更换；但 iOS 自己对部件是否原装的判断无法通过数据线读取，请到「设置 > 通用 > 关于本机 > 部件与维修历史」查看。</p></details>
@@ -234,10 +182,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>© 2026 <a href="https://github.com/ac0d3r">ac0d3r</a> · iDevLoupe</span>
-    <a href="https://github.com/egoist/mygo">Made with MyGo</a>
+<footer class="border-t border-line pt-8 pb-12 text-[13px] text-muted">
+  <div class="mx-auto flex max-w-[1080px] flex-wrap justify-between gap-4 px-5">
+    <span>© 2026 <a class="text-accent hover:underline" href="https://github.com/ac0d3r">ac0d3r</a> · iDevLoupe</span>
+    <a class="text-accent hover:underline" href="https://github.com/egoist/mygo">Made with MyGo</a>
   </div>
 </footer>
 
