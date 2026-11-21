@@ -7,15 +7,12 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// usage is one category of the storage bar.
 type usage struct {
 	label string
 	bytes int64
 	color ui.Color
 }
 
-// storageModal shows how the storage is used, as a bar and its legend,
-// and what the storage controller says of itself.
 func (a *App) storageModal(c *ui.Context, o *inspect.Overview) {
 	s := o.Storage
 	if s == nil {
@@ -63,8 +60,6 @@ func (a *App) storageModal(c *ui.Context, o *inspect.Overview) {
 	})
 }
 
-// storageBar draws the categories end to end over the whole capacity; the
-// rest of the track is the free space.
 func storageBar(c *ui.Context, total int64, parts []usage) {
 	t := c.Theme()
 	ui.Box(c).Height(22).Draw(func(p *ui.Painter, r ui.Rect) {
@@ -77,7 +72,6 @@ func storageBar(c *ui.Context, total int64, parts []usage) {
 				if w <= 0 {
 					continue
 				}
-				// A sliver stays visible.
 				w = max(w, 2)
 				p.Fill(ui.Rect{X: x, Y: r.Y, W: w, H: r.H}, u.color, 0)
 				x += w
@@ -96,7 +90,6 @@ func legendItem(c *ui.Context, m locales.Messages, u usage) {
 	})
 }
 
-// bytesText says a size in GB, or in MB under one GB.
 func bytesText(m locales.Messages, n int64) string {
 	if n < 1e9 {
 		return m.ValueMB(float64(n) / 1e6)
@@ -104,8 +97,6 @@ func bytesText(m locales.Messages, n int64) string {
 	return m.ValueGB(float64(n) / 1e9)
 }
 
-// fieldsCard lists fields under a title, label left and value right; mono
-// sets the values in the monospaced font, for numbers to line up.
 func fieldsCard(c *ui.Context, key, title string, fields []inspect.Field, mono bool) {
 	if len(fields) == 0 {
 		return

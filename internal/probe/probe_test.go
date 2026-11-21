@@ -42,8 +42,6 @@ func TestFind(t *testing.T) {
 	}
 }
 
-// The probe asks lockdown and MobileGestalt for each key, records what
-// each answered, and keeps a source that fails as a whole to one line.
 func TestProbeKeys(t *testing.T) {
 	for _, gestalt := range []bool{true, false} {
 		fd := &fakedevice.Device{

@@ -15,14 +15,10 @@ import (
 	"unicode"
 )
 
-// dataFiles are Go files of data in Chinese and English, each value
-// chosen by language as a catalog's: the device table built in.
 var dataFiles = map[string]bool{
 	filepath.Join("..", "..", "internal", "devtable", "builtin.go"): true,
 }
 
-// sources returns the app's Go files that are not tests, not generated
-// and not data, from the module's root.
 func sources(t *testing.T) map[string][]byte {
 	t.Helper()
 	out := map[string][]byte{}
@@ -43,13 +39,10 @@ func sources(t *testing.T) map[string][]byte {
 	return out
 }
 
-// isCJK tells a Han character or a full-width punctuation mark.
 func isCJK(r rune) bool {
 	return unicode.Is(unicode.Han, r) || (r >= 0x3000 && r <= 0x303f) || (r >= 0xff00 && r <= 0xffef)
 }
 
-// The app says what the user reads through the catalogs: no Go string of
-// it is written in Chinese, which a reader of another language would see.
 func TestNoTextOutsideCatalogs(t *testing.T) {
 	fset := token.NewFileSet()
 	for path, src := range sources(t) {
@@ -71,7 +64,6 @@ func TestNoTextOutsideCatalogs(t *testing.T) {
 	}
 }
 
-// Every message is said somewhere: one no code says is left over.
 func TestEveryMessageUsed(t *testing.T) {
 	b, err := os.ReadFile("en.json")
 	if err != nil {

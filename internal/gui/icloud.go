@@ -7,9 +7,6 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// icloudRow is the info card's iCloud row, beside activation and Find My:
-// on or off, and a link to what it syncs, grayed out when iCloud is off or
-// the device does not say.
 func (a *App) icloudRow(c *ui.Context, m locales.Messages, ic *inspect.ICloud) {
 	t := c.Theme()
 	on := ic != nil && ic.On()
@@ -27,7 +24,6 @@ func (a *App) icloudRow(c *ui.Context, m locales.Messages, ic *inspect.ICloud) {
 	})
 }
 
-// backupRows says whether iCloud backup is on and when it last ran.
 func backupRows(c *ui.Context, m locales.Messages, ic *inspect.ICloud) {
 	onOff(c, m, m.ICloudBackup(), ic.Backup, ic.HasBackup)
 	if !ic.LastBackup.IsZero() {
@@ -35,8 +31,6 @@ func backupRows(c *ui.Context, m locales.Messages, ic *inspect.ICloud) {
 	}
 }
 
-// onOff is a row of a setting: on in the success color, off muted, and
-// "not reported" when the device does not say.
 func onOff(c *ui.Context, m locales.Messages, label string, on, known bool) {
 	t := c.Theme()
 	ui.Row(c.Key(label)).Gap(12).Padding(6, 0).Children(func() {
@@ -53,8 +47,6 @@ func onOff(c *ui.Context, m locales.Messages, label string, on, known bool) {
 	})
 }
 
-// icloudModal lists the data classes the device syncs with iCloud, and the
-// iCloud backup.
 func (a *App) icloudModal(c *ui.Context, o *inspect.Overview) {
 	ic := o.ICloud
 	if ic == nil {

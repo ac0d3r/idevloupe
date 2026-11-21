@@ -1,12 +1,3 @@
-// Command idevloupe manages iPhones connected by USB from the desktop; for
-// now it inspects them.
-//
-//	idevloupe            open the desktop window
-//	idevloupe -list      list connected devices
-//	idevloupe -report    print the inspection report of the first device (or -udid)
-//	idevloupe -json      the same, as JSON with every raw value
-//	idevloupe -dump-ioreg f.plist   probe parts' keys and the IORegistry, with a summary in f.plist.txt
-//	-lang en|zh-Hans|de  the language of the report (default: the system's)
 package main
 
 import (
@@ -75,9 +66,6 @@ func main() {
 	}
 }
 
-// systemLanguage is the language of the catalogs that suits the
-// environment's (LC_ALL, LC_MESSAGES, LANG) best, else the catalogs'
-// source language. The window asks the system through MyGo instead.
 func systemLanguage() string {
 	var preferred []string
 	for _, k := range []string{"LC_ALL", "LC_MESSAGES", "LANG"} {
@@ -89,8 +77,6 @@ func systemLanguage() string {
 	return i18n.Match(preferred, locales.Catalog.Languages())
 }
 
-// openDevice finds the device (the first one, or udid) and opens a trusted
-// session with it, pairing first when it does not trust this computer.
 func openDevice(lang, udid string) (usbmux.Device, *lockdown.Client, error) {
 	m := locales.In(lang)
 	devs, err := usbmux.ListDevices()
@@ -151,8 +137,6 @@ func cli(lang, udid string, asJSON bool) error {
 	return nil
 }
 
-// dumpIORegistry runs the probe of keys and the IORegistry, writing the
-// responses to path and a summary of them to path.txt.
 func dumpIORegistry(lang, udid, path string) error {
 	m := locales.In(lang)
 	_, l, err := openDevice(lang, udid)

@@ -11,17 +11,14 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
-// faceID checks Face ID's self test, as the Pearl driver reports it. Its
-// codes are not documented; samples: 0 on an iPhone 16 with working Face
-// ID, 8 on an iPhone X whose Face ID iOS flags in Parts and Service
-// History. So 0 passes and any other code only asks for a test by hand.
+// Pearl self-test codes are undocumented: 0 on a working iPhone 16, 8 on an
+// iPhone X flagged by iOS. Non-zero only asks for a manual test.
 func (a *analysis) faceID() {
 	m := a.m
 	pearl := a.raw.Parts["pearl"]
 	selfTest, hasSelfTest := plistx.Int(pearl["PearlSelfTestResult"])
-	// FDRValidated (iOS 17 and later) tells whether the module matches the
-	// factory pairing data (FDR). Seen true on working units; false is read
-	// from its meaning, no sample has it yet.
+	// FDRValidated (iOS 17+): the module matches the factory pairing data. Seen
+	// true on working units; false is inferred, no sample yet.
 	fdr, hasFDR := plistx.Bool(pearl["FDRValidated"])
 	const pearlKey = "ApplePearlSEPDriver PearlSelfTestResult"
 	parts := m.CategoryParts()
@@ -41,12 +38,8 @@ func (a *analysis) faceID() {
 	}
 }
 
-// touchID judges Touch ID from what its drivers report. Samples:
-// an iPhone 8 (iOS 16) and an iPhone SE 2 (iOS 27), both working, report
-// a serial number from the sensor and its calibration from the factory
-// pairing data (MesaCalBlobSource = FDR); only the iPhone 8's device tree
-// node has MesaSelfTest, "OK". Without a self test, a sensor reporting the
-// same passes.
+// Samples (iPhone 8 iOS 16, SE 2 iOS 27, both working): a sensor serial and
+// MesaCalBlobSource = FDR; only the iPhone 8 has MesaSelfTest "OK".
 func (a *analysis) touchID() {
 	m, raw, productType := a.m, a.raw, a.productType
 	mesa, driver, sensor := raw.Parts["mesa"], raw.Parts["mesadriver"], raw.Parts["touchid"]
@@ -59,9 +52,7 @@ func (a *analysis) touchID() {
 		cal = "MesaCalBlobSource = " + calSource
 	}
 	cat, title := m.CategoryParts(), m.CheckTouchID()
-	// mesa-state is the sensor's power state (its IOReport channel is
-	// "Mesa Power State"; 30, 1 and 6 on three reads of one working SE 2),
-	// so it says nothing about the sensor's health and is not used.
+	// mesa-state is the sensor's power state, not its health; unused.
 	serial := partSerial(sensor, "SerialNumber")
 	switch {
 	case hasSelfTest && selfTest == "OK":
@@ -88,7 +79,6 @@ func (a *analysis) touchID() {
 	}
 }
 
-// cameraLabels name the camera modules by their IORegistry key prefix.
 var cameraLabels = map[string]func(locales.Messages) string{
 	"Back":                            locales.Messages.PartBackWide,
 	"BackTele":                        locales.Messages.PartBackTele,
@@ -100,13 +90,9 @@ var cameraLabels = map[string]func(locales.Messages) string{
 
 var serialNumStringRe = regexp.MustCompile(`^(.*?)(CameraModule)?SerialNumString$`)
 
-// placeholderRe matches the filler drivers report for a part a model
-// lacks, as the Face ID projector's "XXXXXXXX" on an iPhone 8.
+// Filler for a part a model lacks, as the Face ID projector's "XXXXXXXX" on an iPhone 8.
 var placeholderRe = regexp.MustCompile(`^(?:[Xx]+|0+|[Ff]+)$`)
 
-// partSerial reads a part's serial number, which drivers give as text or
-// as raw bytes (the Touch ID sensor's 16 bytes), shown then in hex.
-// Placeholders read as none.
 func partSerial(m map[string]any, key string) string {
 	var s string
 	switch v := m[key].(type) {
@@ -126,10 +112,8 @@ func partSerial(m map[string]any, key string) string {
 	return s
 }
 
-// partsSection lists the serial numbers the parts report now. The factory
-// record of them (syscfg) is not readable over lockdown, so they are
-// information for comparing with a repair record or the parts' labels, not
-// evidence of a replacement.
+// syscfg is not readable over lockdown: these serials are for comparison,
+// not evidence of a replacement.
 func partsSection(m locales.Messages, raw *RawData, b *Battery, productType string) (Section, bool) {
 	var fields []Field
 	faceID := HasFaceID(productType)
@@ -144,7 +128,6 @@ func partsSection(m locales.Messages, raw *RawData, b *Battery, productType stri
 		for _, k := range keys {
 			s := partSerial(cam, k)
 			prefix := serialNumStringRe.FindStringSubmatch(k)[1]
-			// Face ID's modules belong only to models that have it.
 			if s == "" || (!faceID && strings.HasPrefix(prefix, "FrontIR")) {
 				continue
 			}
@@ -161,8 +144,7 @@ func partsSection(m locales.Messages, raw *RawData, b *Battery, productType stri
 		first, _, _ := strings.Cut(cg, "+")
 		fields = append(fields, Field{m.PartCoverGlass(), first})
 	}
-	// The panel's record joins several serials with '+', in an order that
-	// differs between models: shown whole, not taken apart.
+	// The panel's record joins serials with '+' in a model-specific order: shown whole.
 	panel := str(product, "raw-panel-serial-number")
 	if panel == "" {
 		panel = str(raw.Parts["display"], "Panel_ID")

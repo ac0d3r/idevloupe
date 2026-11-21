@@ -10,8 +10,6 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// batteryModal shows all the gas gauge tells: the charge now, the health,
-// and the readings, label left and value right.
 func (a *App) batteryModal(c *ui.Context, o *inspect.Overview) {
 	b := o.Battery
 	if b == nil {
@@ -74,7 +72,6 @@ func (a *App) batteryModal(c *ui.Context, o *inspect.Overview) {
 					if b.ResistanceMetric > 0 {
 						row(m.FieldResistance(), strconv.FormatInt(b.ResistanceMetric, 10))
 					}
-					// From iOS's analytics log, which an inspection reads.
 					logDate := ""
 					if !b.LogDate.IsZero() {
 						logDate = b.LogDate.Format("2006-01-02")
@@ -92,7 +89,6 @@ func (a *App) batteryModal(c *ui.Context, o *inspect.Overview) {
 	})
 }
 
-// kvRow is a label left and its value right; nothing when value is "".
 func kvRow(c *ui.Context, label, value string) {
 	if value == "" {
 		return
@@ -104,7 +100,6 @@ func kvRow(c *ui.Context, label, value string) {
 	})
 }
 
-// opt says n with say when ok, else "".
 func opt(ok bool, say func(int) string, n int64) string {
 	if !ok {
 		return ""
@@ -112,8 +107,6 @@ func opt(ok bool, say func(int) string, n int64) string {
 	return say(int(n))
 }
 
-// chargeRows says how the battery is charging and its level, and its
-// temperature when withTemp.
 func chargeRows(c *ui.Context, m locales.Messages, b *inspect.Battery, withTemp bool) {
 	kvRow(c, m.StatCharging(), chargingText(m, b))
 	kvRow(c, m.FieldChargeLevel(), opt(b.HasCurrentLevel, m.ValuePercent, b.CurrentPercent))
@@ -122,8 +115,6 @@ func chargeRows(c *ui.Context, m locales.Messages, b *inspect.Battery, withTemp 
 	}
 }
 
-// healthRows shows the health, the cycles and the rating, with a ring of
-// the health in the rating's color.
 func healthRows(c *ui.Context, lang string, b *inspect.Battery) {
 	t := c.Theme()
 	m := locales.In(lang)
@@ -147,8 +138,6 @@ func healthRows(c *ui.Context, lang string, b *inspect.Battery) {
 	})
 }
 
-// chargingText says how the battery is charging, with the power into it
-// while it charges.
 func chargingText(m locales.Messages, b *inspect.Battery) string {
 	state := m.ChargingNot()
 	switch {
@@ -163,7 +152,6 @@ func chargingText(m locales.Messages, b *inspect.Battery) string {
 	return state
 }
 
-// chargeWatts is the power into the battery while it charges, else 0.
 func chargeWatts(b *inspect.Battery) float64 {
 	if !b.IsCharging {
 		return 0
@@ -171,8 +159,6 @@ func chargeWatts(b *inspect.Battery) float64 {
 	return max(float64(b.VoltageMV)*float64(b.AmperageMA)/1e6, 0)
 }
 
-// batteryGlyph draws a battery filled to its charge level, in the warning
-// color at 20% or below.
 func batteryGlyph(c *ui.Context, b *inspect.Battery, height float32) {
 	t := c.Theme()
 	level := -1.0
@@ -196,7 +182,6 @@ func batteryGlyph(c *ui.Context, b *inspect.Battery, height float32) {
 		const pad = 5
 		fill := ui.Rect{X: body.X + pad, Y: body.Y + pad, W: float32(math.Min(level, 1)) * (body.W - 2*pad), H: body.H - 2*pad}
 		p.FillGradient(fill, ui.LinearGradient{From: from, To: to, Angle: 90, Oklab: true}, radius-pad)
-		// A sheen on the upper half.
 		p.Fill(ui.Rect{X: fill.X, Y: fill.Y, W: fill.W, H: fill.H * 0.4}, ui.Hex("#ffffff").Alpha(0.18), radius-pad)
 	})
 }

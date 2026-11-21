@@ -24,11 +24,8 @@ const (
 
 var magic = []byte("gfCS")
 
-// ErrNotSysCfg means the data does not start with syscfg's header.
 var ErrNotSysCfg = errors.New("syscfg: not a syscfg block")
 
-// Parse returns the block's values by tag, such as "SrNm" (the serial
-// number), "Batt" (the battery's) or "FCMS" (the front camera module's).
 func Parse(b []byte) (map[string][]byte, error) {
 	if len(b) < headerSize || !bytes.Equal(b[:4], magic) {
 		return nil, ErrNotSysCfg
@@ -64,8 +61,6 @@ func reversed(b []byte) string {
 	return string(r)
 }
 
-// Text returns a value as text, without its trailing NULs, when it is all
-// printable ASCII.
 func Text(v []byte) (string, bool) {
 	v = bytes.TrimRight(v, "\x00")
 	if len(v) == 0 {

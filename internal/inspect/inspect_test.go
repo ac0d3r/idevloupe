@@ -197,7 +197,6 @@ func TestIpswDerivedChecks(t *testing.T) {
 		}
 	}
 
-	// Without IORegistry the gas gauge still gives the health.
 	raw = sampleRaw()
 	raw.BatteryReg = nil
 	raw.DiagAll = map[string]any{"GasGauge": map[string]any{"CycleCount": uint64(80), "DesignCapacity": uint64(3000), "FullChargeCapacity": uint64(2700)}}
@@ -207,9 +206,8 @@ func TestIpswDerivedChecks(t *testing.T) {
 	}
 }
 
-// Values of a real iPhone 12 whose battery iOS reports as not
-// genuine: an over-capacity aftermarket cell with few cycles in an old unit,
-// and Find My shown only through NVRAM.
+// A real iPhone 12 whose battery iOS reports as not genuine: an over-capacity
+// aftermarket cell with few cycles in an old unit, Find My only in NVRAM.
 func TestRealIPhone12AftermarketBattery(t *testing.T) {
 	raw := &RawData{
 		Root: map[string]any{
@@ -237,8 +235,6 @@ func TestRealIPhone12AftermarketBattery(t *testing.T) {
 		MC:      &services.MCInfo{Cloud: map[string]any{"IsSupervised": false}},
 	}
 	r := Analyze(raw, now, "zh-Hans")
-	// Capacity above design is no evidence by itself: the health is what
-	// the capacities give. The cell made after the device is.
 	if c := find(t, r, "电池健康"); c.Status != Pass || c.Value != "108%" {
 		t.Errorf("health: %+v", c)
 	}
@@ -261,7 +257,7 @@ func TestRealIPhone12AftermarketBattery(t *testing.T) {
 }
 
 func TestAnalyticsHealth(t *testing.T) {
-	raw := sampleRaw() // gauge without MaximumCapacityPercent: 88.5% by capacity
+	raw := sampleRaw() // 88.5% by capacity
 	raw.Analytics = &services.AnalyticsBattery{File: "/log-aggregated-2026-11-04-080000.ips", Date: now.Add(-24 * time.Hour),
 		Values: map[string]int64{"MaximumCapacityPercent": 86, "CycleCount": 410}}
 	r := Analyze(raw, now, "zh-Hans")
@@ -291,8 +287,8 @@ func TestParseAnalytics(t *testing.T) {
 	}
 }
 
-// A genuine iPhone 16 logged a peak full charge of 105.05% of
-// its design capacity: a new genuine cell at that level is no warning.
+// A genuine iPhone 16 logged a peak full charge of 105.05% of its design
+// capacity: no warning.
 func TestGenuineNewCellNotOverCapacity(t *testing.T) {
 	raw := sampleRaw()
 	raw.Root["ProductType"] = "iPhone17,3"
@@ -308,9 +304,7 @@ func TestGenuineNewCellNotOverCapacity(t *testing.T) {
 	}
 }
 
-// Fixes from the code audit.
 func TestAuditFixes(t *testing.T) {
-	// A device tree without region-info is no mismatch.
 	raw := sampleRaw()
 	raw.PlatformReg = map[string]any{"model-number": []byte("MLTE3\x00")}
 	r := Analyze(raw, now, "zh-Hans")
@@ -319,27 +313,23 @@ func TestAuditFixes(t *testing.T) {
 			t.Errorf("compared an incomplete part number: %+v", c)
 		}
 	}
-	// A complete one in the device tree is compared with lockdown's.
 	for region, want := range map[string]Status{"CH/A": Pass, "LL/A": Fail} {
 		raw.PlatformReg = map[string]any{"model-number": []byte("MLTE3\x00"), "region-info": []byte(region + "\x00")}
 		c := find(t, Analyze(raw, now, "zh-Hans"), "型号（部件号）")
 		if c.Status != want {
 			t.Errorf("device tree region %s: %+v, want %v", region, c, want)
 		}
-		// No factory record, as from iOS 17.4: the value read, no factory's.
 		if c.Read.Value != "MLTE3CH/A" || c.Factory.Value != "" {
 			t.Errorf("columns without a factory record: %+v", c)
 		}
 	}
 
-	// The app list unread: no clean bill for jailbreaks.
 	raw = sampleRaw()
 	raw.Apps, raw.AppsErr = nil, errTest{}
 	if c := find(t, Analyze(raw, now, "zh-Hans"), "越狱检测"); c.Status != Unknown {
 		t.Errorf("jailbreak with apps unread: %+v", c)
 	}
 
-	// The gas gauge's FullChargeCapacity is a percent: no 3.6% health.
 	raw = sampleRaw()
 	raw.BatteryReg = nil
 	raw.DiagAll = map[string]any{"GasGauge": map[string]any{"CycleCount": uint64(14), "FullChargeCapacity": uint64(100)}}
@@ -351,7 +341,6 @@ func TestAuditFixes(t *testing.T) {
 		t.Errorf("cycles alone were weighed: %+v", c)
 	}
 
-	// Over capacity with a health iOS reports: the health stands.
 	raw = sampleRaw()
 	raw.BatteryReg["NominalChargeCapacity"] = uint64(3400) // 110% of 3095
 	raw.BatteryReg["MaximumCapacityPercent"] = uint64(100)
@@ -363,7 +352,6 @@ func TestAuditFixes(t *testing.T) {
 		t.Errorf("capacity above design taken for evidence: %+v", c)
 	}
 
-	// Nothing to weigh: unknown, not a clean bill.
 	raw = sampleRaw()
 	raw.BatteryReg = nil
 	raw.Domains["com.apple.mobile.battery"] = map[string]any{"BatteryCurrentCapacity": uint64(50)}
@@ -372,7 +360,6 @@ func TestAuditFixes(t *testing.T) {
 	}
 }
 
-// Part entries as an iPhone X reports them.
 func TestPartsFromRealIPhoneX(t *testing.T) {
 	raw := sampleRaw()
 	raw.Parts = map[string]map[string]any{
@@ -425,8 +412,6 @@ func TestPartsFromRealIPhoneX(t *testing.T) {
 	}
 }
 
-// An iPhone 16 with working Face ID: self test 0, and
-// sensors the iPhone X does not report.
 func TestPartsFromRealIPhone16(t *testing.T) {
 	raw := sampleRaw()
 	raw.Parts = map[string]map[string]any{
@@ -457,7 +442,6 @@ func TestPartsFromRealIPhone16(t *testing.T) {
 	}
 }
 
-// Four real phones and what was known of them.
 func TestFaceIDRules(t *testing.T) {
 	cases := []struct {
 		name  string
@@ -481,10 +465,8 @@ func TestFaceIDRules(t *testing.T) {
 			t.Errorf("%s: %+v, want %v", c.name, got, c.want)
 		}
 	}
-	// iPhone SE (2nd generation) has Touch ID: no Face ID item.
 	raw := sampleRaw()
 	raw.Root["ProductType"] = "iPhone12,8"
-	// The sensor reports its serial as 16 raw bytes (iPhone SE 2, iPhone 8).
 	raw.Parts = map[string]map[string]any{"touchid": {"SerialNumber": []byte{0x02, 0x19, 0x60, 0x3c, 0x5f, 0x22, 0xca, 0x22, 0x35, 0xd1, 0x82, 0x4e, 0xfe, 0x01, 0x00, 0xcf}}}
 	r := Analyze(raw, now, "zh-Hans")
 	for _, c := range r.Checks {
@@ -508,7 +490,6 @@ func TestFaceIDRules(t *testing.T) {
 	}
 }
 
-// iPhone 16: the gauge unread, the analytics log gives the cycles.
 func TestCyclesFromLog(t *testing.T) {
 	raw := sampleRaw()
 	raw.BatteryReg = nil
@@ -524,8 +505,7 @@ func TestCyclesFromLog(t *testing.T) {
 	}
 }
 
-// iPhone 8: Touch ID; its camera driver fills the Face ID projector
-// it lacks with "XXXXXXXX".
+// iPhone 8: its camera driver fills the Face ID projector it lacks with "XXXXXXXX".
 func TestPartsFromRealIPhone8(t *testing.T) {
 	raw := sampleRaw()
 	raw.Root["ProductType"] = "iPhone10,1"
@@ -557,9 +537,8 @@ func TestPartsFromRealIPhone8(t *testing.T) {
 	}
 }
 
-// iPhone 8: 85% health, yet iOS asks for service; the gauge's
-// resistance metric is high. It is shown, not judged: three samples of
-// different cells give no threshold.
+// iPhone 8: 85% health, yet iOS asks for service; the resistance metric is
+// high. Shown, not judged: three samples give no threshold.
 func TestResistanceMetric(t *testing.T) {
 	raw := sampleRaw()
 	raw.BatteryReg["BatteryData"] = map[string]any{"BatteryHealthMetric": uint64(454), "ChemicalWeightedRa": uint64(454)}
@@ -567,7 +546,6 @@ func TestResistanceMetric(t *testing.T) {
 	if r.Battery.ResistanceMetric != 454 || !strings.Contains(r.Text(), "内阻指标：454") {
 		t.Errorf("metric %d", r.Battery.ResistanceMetric)
 	}
-	// iOS 17 on: from the analytics log.
 	raw = sampleRaw()
 	raw.Analytics = &services.AnalyticsBattery{Date: now, Values: map[string]int64{"BatteryHealthMetric": 116}}
 	if r := Analyze(raw, now, "zh-Hans"); r.Battery.ResistanceMetric != 116 {
@@ -575,8 +553,6 @@ func TestResistanceMetric(t *testing.T) {
 	}
 }
 
-// Touch ID from the drivers of an iPhone 8 (iOS 16) and an iPhone SE 2
-// (iOS 27), both working.
 func TestTouchIDRules(t *testing.T) {
 	sensor := map[string]any{"SerialNumber": []byte{0x02, 0x17}}
 	cases := []struct {
@@ -611,7 +587,6 @@ func TestTouchIDRules(t *testing.T) {
 			t.Errorf("%s: %+v, want %v", c.name, got, c.want)
 		}
 	}
-	// A Face ID model gets no Touch ID item.
 	raw := sampleRaw()
 	for _, c := range Analyze(raw, now, "zh-Hans").Checks {
 		if c.Title == "指纹（Touch ID）" {
@@ -620,8 +595,6 @@ func TestTouchIDRules(t *testing.T) {
 	}
 }
 
-// The worst issues lead: failures, then warnings, a lock or a part before
-// the battery.
 func TestIssuesOrder(t *testing.T) {
 	r := &Report{Lang: "zh-Hans", Checks: []Check{
 		{Category: "电池", Title: "电池健康", Value: "76%", Status: Warn},
@@ -644,8 +617,6 @@ func TestIssuesOrder(t *testing.T) {
 	}
 }
 
-// The SIM owner's phone number, ICCID and IMSI never reach a report, also
-// not inside CarrierBundleInfoArray (as on an iPhone 16).
 func TestScrubSubscriber(t *testing.T) {
 	root := map[string]any{
 		"PhoneNumber":                            "+49 152 31415926",
@@ -681,9 +652,6 @@ func TestScrubSubscriber(t *testing.T) {
 	}
 }
 
-// The language changes the words only: the same raw data makes the same
-// checks with the same statuses in every language, and a report in
-// English or German has no Chinese but what the device itself reports.
 func TestLanguages(t *testing.T) {
 	problems := sampleRaw()
 	problems.Root["ModelNumber"] = "FLTE3"
@@ -718,7 +686,6 @@ func TestLanguages(t *testing.T) {
 			if len(r.Issues()) != len(zh.Issues()) {
 				t.Errorf("%s: %d issues, %d in Chinese", lang, len(r.Issues()), len(zh.Issues()))
 			}
-			// The device's name is the device's: "Ada 的 iPhone".
 			text := strings.ReplaceAll(r.Text(), r.Summary.DeviceName, "")
 			if i := strings.IndexFunc(text, func(r rune) bool { return unicode.Is(unicode.Han, r) }); i >= 0 {
 				t.Errorf("%s report has Chinese: …%s…", lang, text[max(0, i-60):min(len(text), i+60)])
@@ -733,8 +700,6 @@ func TestLanguages(t *testing.T) {
 	}
 }
 
-// The overview and the report read Find My the same way, NVRAM included
-// when the fmip domain is missing.
 func TestOverviewFindMyFromNVRAM(t *testing.T) {
 	raw := &RawData{
 		Root: map[string]any{"ProductType": "iPhone14,2", "NonVolatileRAM": map[string]any{
@@ -761,7 +726,6 @@ func TestOverviewFindMyFromNVRAM(t *testing.T) {
 	}
 }
 
-// sysCfg builds a factory configuration of text values.
 func sysCfg(vals map[string]string) map[string][]byte {
 	out := map[string][]byte{}
 	for k, v := range vals {
@@ -770,10 +734,8 @@ func sysCfg(vals map[string]string) map[string][]byte {
 	return out
 }
 
-// The factory record against the parts, as on an iPhone 8 whose front
-// camera, panel and glass were replaced and an iPhone X whose record all
-// matches. Serials keep the real ones' form, dates included, with made-up
-// tails.
+// Real iPhone 8 (front camera, panel, glass replaced) and iPhone X (record
+// matches) serial forms, with made-up tails.
 func TestFactoryRecord(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	raw := &RawData{
@@ -817,19 +779,15 @@ func TestFactoryRecord(t *testing.T) {
 			t.Errorf("front camera detail lacks %q: %s", w, front.Detail)
 		}
 	}
-	// A match says what it does not prove.
 	if d := got["电池与出厂记录"].Detail; !strings.Contains(d, "一致不能证明未更换") {
 		t.Errorf("battery match detail: %s", d)
 	}
-	// The serial's row holds its sources' agreement and the factory's serial.
 	if c := got["序列号"]; !strings.Contains(c.Detail, "SysCfg=FFNZMYBEAAAA") || c.Factory.Value != "FFNZMYBEAAAA" || c.Read.Value != "FFNZMYBEAAAA" {
 		t.Errorf("serial leaves out the factory record: %+v", c)
 	}
-	// The panel compares its own serial, the first of its record.
 	if d := got["屏幕面板与出厂记录"].Detail; strings.Contains(d, "S12657P0") || !strings.Contains(d, "DKH94342AAAAAAAAA") {
 		t.Errorf("panel detail: %s", d)
 	}
-	// A board serial that is not the factory's fails its consistency.
 	raw.Root["MLBSerialNumber"] = "FG3OTHERBOARD0000"
 	for _, c := range Analyze(raw, now, "zh-Hans").Checks {
 		if c.Title == "主板序列号" && c.Status != Fail {
@@ -837,7 +795,6 @@ func TestFactoryRecord(t *testing.T) {
 		}
 	}
 
-	// iPhone X: no panel or Touch ID record, all the others match.
 	x := &RawData{
 		Root:    map[string]any{"ProductType": "iPhone10,3"},
 		Domains: map[string]map[string]any{}, Gestalt: map[string]any{},
@@ -851,15 +808,12 @@ func TestFactoryRecord(t *testing.T) {
 	for _, c := range Analyze(x, now, "en").Checks {
 		gotX[c.Title] = c
 	}
-	// A screen whose serial matches is only worth knowing: the original's
-	// serial is often written onto a new screen, as on this iPhone X.
 	if gotX["Front camera vs. factory record"].Status != Pass || gotX["Cover glass vs. factory record"].Status != Info {
 		t.Errorf("iPhone X: %+v", gotX)
 	}
 	if _, ok := gotX["Display panel vs. factory record"]; ok {
 		t.Error("a panel check without a panel record")
 	}
-	// The battery is recorded but its gauge not read.
 	x.SysCfg["Batt"] = []byte("F8Y75174AAAAAAAAA")
 	for _, c := range Analyze(x, now, "en").Checks {
 		if c.Title == "Battery vs. factory record" && c.Status != Unknown {
@@ -868,8 +822,6 @@ func TestFactoryRecord(t *testing.T) {
 	}
 }
 
-// Without a record: nothing to say on an iOS that gives no MobileGestalt,
-// Unknown when MobileGestalt answered without it or it did not parse.
 func TestFactoryRecordUnread(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	for name, tc := range map[string]struct {
@@ -896,7 +848,6 @@ func TestFactoryRecordUnread(t *testing.T) {
 	}
 }
 
-// Dates of an iPhone 8's parts.
 func TestPartDate(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	for serial, want := range map[string]string{
@@ -920,8 +871,6 @@ func TestPartDate(t *testing.T) {
 	}
 }
 
-// The network addresses and the colors, as the iPhone X and the iPhone 8
-// report them, and the regulatory model from the device tree or the record.
 func TestAddressesAndColors(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	mac := func(s string) []byte {
@@ -965,13 +914,11 @@ func TestAddressesAndColors(t *testing.T) {
 		t.Errorf("summary color %q", r.Summary.ColorName)
 	}
 
-	// Another Wi-Fi address than the factory's.
 	raw.Root["WiFiAddress"] = "d8:8f:76:00:00:99"
 	if c := find(Analyze(raw, now, "zh-Hans"), "Wi-Fi 地址"); c.Status != Warn || c.Factory.Value != "d8:8f:76:00:00:68" || !strings.Contains(c.Detail, "出厂 d8:8f:76:00:00:68，当前 d8:8f:76:00:00:99") {
 		t.Errorf("a changed address %+v", c)
 	}
 
-	// iPhone 8: space gray is code 8 there; a code the table lacks stays a code.
 	raw.Root["ProductType"] = "iPhone10,1"
 	delete(raw.Root, "DeviceColor")
 	raw.SysCfg["CLHS"] = color(8)
@@ -994,10 +941,8 @@ func TestAddressesAndColors(t *testing.T) {
 	}
 }
 
-// A part made after the device was fitted later, which needs no factory
-// record: an iPhone 12 (iOS 27, no SysCfg) made in week 43 of 2021 with a
-// battery its serial dates to October 2025. Serials keep the real ones'
-// form, dates included, with made-up tails.
+// iPhone 12 (iOS 27, no SysCfg) made in week 43 of 2021 with a battery dated
+// October 2025; real serial forms, made-up tails.
 func TestPartDates(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	raw := &RawData{
@@ -1018,8 +963,6 @@ func TestPartDates(t *testing.T) {
 		return got
 	}
 	got := checks()
-	// Only the battery is newer, weighed as the battery's origin; the other
-	// parts are older than the device.
 	if c := got["电池来源"]; c.Status != Warn || !strings.Contains(c.Detail, "约 2025-10-14 生产，晚于整机（约 2021-10-31）") {
 		t.Errorf("battery origin %+v", c)
 	}
@@ -1027,29 +970,23 @@ func TestPartDates(t *testing.T) {
 		t.Errorf("part dates %+v", c)
 	}
 
-	// A new screen: its panel made in 2024.
 	raw.Parts["product"]["raw-panel-serial-number"] = "G9P4101BAAAAAAAAA+A100"
 	if c := checks()["部件生产日期"]; c.Status != Warn || !strings.Contains(c.Detail, "屏幕面板：G9P4101BAAAAAAAAA（约 2024-03-04 生产）") ||
 		!strings.Contains(c.Value, "1 个部件") {
 		t.Errorf("a newer panel %+v", c)
 	}
-	// No margin: a part dated after the device's week is newer.
 	raw.Parts["product"]["raw-panel-serial-number"] = "G9P1446BAAAAAAAAA"
 	if c := checks()["部件生产日期"]; c.Status != Warn {
 		t.Errorf("a part after the device's week %+v", c)
 	}
-	// One made in the device's week is not.
 	raw.Parts["product"]["raw-panel-serial-number"] = "G9P1436BAAAAAAAAA"
 	if c := checks()["部件生产日期"]; c.Status != Pass {
 		t.Errorf("a part of the device's week %+v", c)
 	}
-	// With a factory record, the comparison with it stands for the parts
-	// that are not newer.
 	raw.SysCfg = map[string][]byte{"SrNm": []byte("DNPGL1CQAAAA")}
 	if _, ok := checks()["部件生产日期"]; ok {
 		t.Error("a part date check beside the factory record")
 	}
-	// A random serial and a board serial that tells no date: no device date.
 	raw.SysCfg = nil
 	raw.Root["SerialNumber"], raw.Root["MLBSerialNumber"] = "H4K2L9QXWT", ""
 	if _, ok := checks()["部件生产日期"]; ok {
@@ -1057,8 +994,6 @@ func TestPartDates(t *testing.T) {
 	}
 }
 
-// With the device table, the report names colors, the chip, the screen,
-// the release date and the battery's maker; an unknown prefix names none.
 func TestDeviceTable(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	raw := &RawData{
@@ -1093,8 +1028,6 @@ func TestDeviceTable(t *testing.T) {
 	}
 }
 
-// TestDetailsFields checks the device details have what a buyer compares
-// with other tools, and the inspection's findings once it has run.
 func TestDetailsFields(t *testing.T) {
 	now := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	raw := sampleRaw()
@@ -1127,22 +1060,16 @@ func TestDetailsFields(t *testing.T) {
 	if got["Sales region"] == "" || !strings.Contains(got["Sales region"], "CH/A") {
 		t.Errorf("Sales region = %q", got["Sales region"])
 	}
-	// The report's details and the overview's, from the same data, agree.
 	if r := fields(Analyze(raw, now, "en").Sections); len(r) != len(got) {
 		t.Errorf("report has %d fields, overview %d", len(r), len(got))
 	}
 
-	// Read on connecting: no apps, no AFC2, so no jailbreak verdict yet.
 	raw.Apps, raw.AFC2 = nil, nil
 	if v, ok := fields(Describe(raw, now, "en").Sections)["Jailbreak"]; ok {
 		t.Errorf("jailbreak shown before an inspection: %q", v)
 	}
 }
 
-// TestBatteryDetails checks the readings the battery details show, and the
-// rating, which follows the battery check's thresholds.
-// Cycles are judged by the count Apple rates the model for: 500 before
-// the iPhone 15, 1000 from it; none for a model not in the table.
 func TestRatedCycles(t *testing.T) {
 	for _, c := range []struct {
 		product string
@@ -1183,8 +1110,6 @@ func TestBatteryDetails(t *testing.T) {
 	}
 }
 
-// TestStorage reads the storage as an iPhone X (iOS 16.7) reports it, its
-// controller node trimmed to the keys the details show.
 func TestStorage(t *testing.T) {
 	raw := sampleRaw()
 	raw.Domains["com.apple.disk_usage"] = map[string]any{
@@ -1228,16 +1153,12 @@ func TestStorage(t *testing.T) {
 			t.Errorf("%s = %q, want %q", k, got[k], v)
 		}
 	}
-	// Before an inspection the apps are unknown and count as other.
 	raw.Apps = nil
 	if s := parseStorage(locales.In("en"), raw); s.HasApps || s.Other() != int64(64e9-52365996032-4943917056-14e6) {
 		t.Errorf("before inspection: apps known %v, other %d", s.HasApps, s.Other())
 	}
 }
 
-// TestICloud reads iCloud as an iPhone 12 (iOS 27.2) reports it with
-// Contacts turned off in Settings, and as an iPhone X (iOS 16.7) does,
-// which says nothing of it.
 func TestICloud(t *testing.T) {
 	icloud := []any{"iCloud"}
 	raw := sampleRaw()

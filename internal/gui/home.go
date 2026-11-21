@@ -9,8 +9,6 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// overviewView is the device's home: what it says about itself, with no
-// verdict, and the inspection, run when asked for, summed up by category.
 func (a *App) overviewView(c *ui.Context, d *devState) {
 	o := d.overviewIn(c.Locale())
 	ui.Column(c).Fill().Children(func() {
@@ -33,8 +31,6 @@ func (a *App) overviewView(c *ui.Context, d *devState) {
 	})
 }
 
-// homeBar names the device; its model, capacity and charge are in the
-// sidebar and the cards below.
 func (a *App) homeBar(c *ui.Context, d *devState, o *inspect.Overview) {
 	ui.Row(c).Padding(14, 28).Children(func() {
 		ui.Text(c, d.title(o.Lang)).FontSize(15).Bold().SingleLine()
@@ -55,16 +51,12 @@ func joinDot(parts ...string) string {
 	return out
 }
 
-// infoCard lists the facts a buyer looks for first, label left and value
-// right, and opens the device details.
 func (a *App) infoCard(c *ui.Context, o *inspect.Overview) {
 	t := c.Theme()
 	m := locales.In(o.Lang)
 	card(c.Key("info")).Grow(1).MinWidth(0).Padding(8, 18, 16, 18).Children(func() {
 		ui.Column(c).Selectable().Children(func() {
-			// Every device shows the same rows, "--" for what it lacks or
-			// does not say, so the card keeps its shape; iCloud and the
-			// warranty follow the activation lock.
+			// The same rows for every device, "--" for what it lacks, so the card keeps its shape.
 			for _, f := range o.Fields {
 				ui.Row(c.Key(f.Label)).Gap(12).Padding(8, 0).AlignItems(ui.Start).Children(func() {
 					ui.Text(c, f.Label).FontSize(13).TextColor(t.TextMuted).SingleLine()
@@ -83,7 +75,6 @@ func (a *App) infoCard(c *ui.Context, o *inspect.Overview) {
 				}
 			}
 		})
-		// The buttons sit at the bottom, level with the inspect card's.
 		ui.Spacer(c)
 		ui.Row(c).Gap(8).Margin(8, 0, 0, 0).Children(func() {
 			ui.Spacer(c)
@@ -94,15 +85,13 @@ func (a *App) infoCard(c *ui.Context, o *inspect.Overview) {
 	})
 }
 
-// statusRows are the info card's rows that act: iCloud, and the warranty.
 func (a *App) statusRows(c *ui.Context, m locales.Messages, o *inspect.Overview) {
 	a.icloudRow(c, m, o.ICloud)
 	a.warrantyRow(c, m, o.Summary.Serial)
 }
 
-// warrantyRow looks the warranty up online. It is known only to Apple,
-// whose page asks for a captcha: copy the serial and let the person paste
-// it there. Grayed out with no serial to look up.
+// Warranty status is only on Apple's captcha-protected page: copy the serial
+// for the person to paste there.
 func (a *App) warrantyRow(c *ui.Context, m locales.Messages, serial string) {
 	t := c.Theme()
 	ui.Row(c.Key("warranty")).Gap(12).Padding(8, 0).Children(func() {
@@ -116,9 +105,6 @@ func (a *App) warrantyRow(c *ui.Context, m locales.Messages, serial string) {
 	})
 }
 
-// linkAction is an action set as a link: text in the accent color, an
-// icon after it if any, true when clicked; muted and inert when not
-// enabled.
 func linkAction(c *ui.Context, label string, icon *ui.SVG, enabled bool) bool {
 	t := c.Theme()
 	col := t.TextMuted.Alpha(0.6)
@@ -139,10 +125,6 @@ func linkAction(c *ui.Context, label string, icon *ui.SVG, enabled bool) bool {
 	return enabled && link.Clicked()
 }
 
-// valueColor colors a state in the info card: Activation Lock on in the
-// warning color, as the inspection weighs it, other states on in green, off
-// in gray, activated in blue; ok is false for any other value, which keeps
-// the text color.
 func valueColor(t *ui.Theme, m locales.Messages, f inspect.Field) (ui.Color, bool) {
 	if f.Label == m.CheckFindMy() && f.Value == m.FindMyOn() {
 		return t.Warning, true
@@ -158,10 +140,8 @@ func valueColor(t *ui.Theme, m locales.Messages, f inspect.Field) (ui.Color, boo
 	return ui.Color{}, false
 }
 
-// warrantyURL is Apple's coverage check, which takes a serial number.
 const warrantyURL = "https://checkcoverage.apple.com/"
 
-// ring draws frac of a circle from the top, clockwise, with label in it.
 func ring(c *ui.Context, frac float64, col ui.Color, label string) {
 	t := c.Theme()
 	const size, width = 64, 6
@@ -173,7 +153,6 @@ func ring(c *ui.Context, frac float64, col ui.Color, label string) {
 		if frac <= 0 {
 			return
 		}
-		// A circle from the top, clockwise: four quarters of cubics.
 		k := rad * 0.5522847498
 		var arc ui.Path
 		arc.MoveTo(cx, cy-rad).
@@ -188,16 +167,10 @@ func ring(c *ui.Context, frac float64, col ui.Color, label string) {
 	})
 }
 
-// batteryCard shows the battery: its charge level, and the power into it
-// while it charges, above; its health and cycles as the gauge reports
-// them below, judging nothing: the inspection weighs them. Its button opens
-// the battery details.
 func (a *App) batteryCard(c *ui.Context, o *inspect.Overview) {
 	m := locales.In(o.Lang)
 	b := o.Battery
 	card(c.Key("battery")).Padding(14, 16).Gap(6).Children(func() {
-		// The title, then the charge level and the power while charging:
-		// the badge says what it is, with no label.
 		ui.Row(c).Gap(8).Children(func() {
 			ui.Text(c, m.BatteryCardTitle()).FontSize(13).Bold().SingleLine()
 			if b != nil && b.HasCurrentLevel {
@@ -226,7 +199,6 @@ func (a *App) batteryCard(c *ui.Context, o *inspect.Overview) {
 	})
 }
 
-// iconRow is kvRow with an icon before the label; nothing when value is "".
 func iconRow(c *ui.Context, icon *ui.SVG, label, value string) {
 	if value == "" {
 		return
@@ -240,8 +212,6 @@ func iconRow(c *ui.Context, icon *ui.SVG, label, value string) {
 	})
 }
 
-// levelBadge shows the charge level on green, on the warning color at 20%
-// or below, with a bolt while the battery charges.
 func levelBadge(c *ui.Context, m locales.Messages, b *inspect.Battery) {
 	t := c.Theme()
 	col := t.Success
@@ -257,8 +227,6 @@ func levelBadge(c *ui.Context, m locales.Messages, b *inspect.Battery) {
 	})
 }
 
-// storageCard shows how much of the storage is used: a bar of the used
-// share over the used and the free space.
 func (a *App) storageCard(c *ui.Context, o *inspect.Overview) {
 	t := c.Theme()
 	m := locales.In(o.Lang)
@@ -282,8 +250,6 @@ func (a *App) storageCard(c *ui.Context, o *inspect.Overview) {
 			p.Fill(r, t.Text.Alpha(0.08), 3)
 			p.Fill(ui.Rect{X: r.X, Y: r.Y, W: float32(used) * r.W, H: r.H}, t.Accent, 3)
 		})
-		// The used and the free space, each by a dot of its color in the
-		// bar; the words are its tooltip.
 		ui.Row(c).Padding(4, 0).Children(func() {
 			storageAmount(c, m.StorageUsed(), m.ValueWithPercent(bytesText(m, total-free), int(math.Round(used*100))), t.Accent)
 			ui.Spacer(c)
@@ -292,8 +258,6 @@ func (a *App) storageCard(c *ui.Context, o *inspect.Overview) {
 	})
 }
 
-// storageAmount is an amount of space after a dot of its color in the
-// storage bar, named by label for the tooltip and screen readers.
 func storageAmount(c *ui.Context, label, value string, col ui.Color) {
 	ui.Row(c.Key(label)).Gap(6).Tooltip(label).Label(label).Children(func() {
 		ui.Box(c).Size(8, 8).Radius(4).Background(col)
@@ -301,8 +265,6 @@ func storageAmount(c *ui.Context, label, value string, col ui.Color) {
 	})
 }
 
-// inspectCard sums the inspection up by category: "--" before it runs,
-// each category's worst status after.
 func (a *App) inspectCard(c *ui.Context, d *devState) {
 	t := c.Theme()
 	lang := c.Locale()
@@ -318,8 +280,6 @@ func (a *App) inspectCard(c *ui.Context, d *devState) {
 				ui.Text(c, verdict).FontSize(12).FontWeight(600).TextColor(statusColor(t, st)).SingleLine()
 			}
 		})
-		// The categories two a row, each with its worst status as an icon
-		// ("--" before the inspection), to keep the card short.
 		cats := inspect.Categories(lang)
 		statuses := map[string]inspect.Status{}
 		if r != nil {
@@ -341,10 +301,8 @@ func (a *App) inspectCard(c *ui.Context, d *devState) {
 				})
 			}
 		})
-		// The actions sit at the bottom, level with the info card's.
 		ui.Spacer(c)
 		if r == nil {
-			// What an inspection reads is the button's tooltip.
 			if ui.PrimaryButton(c, "").Tooltip(m.OverviewHint()).Children(func() {
 				ui.Icon(c, icLoupe)
 				ui.Text(c, m.ActionInspect()).SingleLine()
@@ -366,13 +324,9 @@ func (a *App) inspectCard(c *ui.Context, d *devState) {
 	})
 }
 
-// detailsModal shows all the device information, as tall as it is so
-// that one screenshot takes it all; it scrolls only in a window too short
-// for it.
 func (a *App) detailsModal(c *ui.Context, o *inspect.Overview) {
 	m := locales.In(o.Lang)
 	w, h := c.Size()
-	// The modal's own padding and its margin to the window.
 	const inset = 80
 	width := min(w-inset, 1280)
 	columns := 3

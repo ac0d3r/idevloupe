@@ -1,7 +1,5 @@
-// Package fakedevice is a fake usbmuxd with one fake iPhone behind it,
-// speaking the wire protocols the real ones do (usbmux framing, lockdown,
-// TLS sessions, pairing with a trust dialog, diagnostics_relay,
-// installation_proxy, MCInstall). Tests point USBMUXD_SOCKET_ADDRESS at it.
+// Package fakedevice is a fake usbmuxd with one fake iPhone behind it, for
+// tests via USBMUXD_SOCKET_ADDRESS.
 package fakedevice
 
 import (
@@ -25,7 +23,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
-// Device is the fake phone's data.
 type Device struct {
 	UDID     string
 	Root     map[string]any
@@ -33,51 +30,39 @@ type Device struct {
 	Battery  map[string]any
 	Platform map[string]any
 	Apps     []map[string]any
-	// Paired starts the device with a pair record in usbmuxd.
-	Paired bool
+	Paired   bool
 	// PendingPolls is how many Pair requests answer
 	// PairingDialogResponsePending before the user taps Trust.
 	PendingPolls   int
 	JailbrokenAFC2 bool
-	// GasGauge is the "All" diagnostics' battery section.
-	GasGauge map[string]any
-	// Profiles is MCInstall's ProfileMetadata.
-	Profiles map[string]any
-	// EscrowLocked makes StartService demand the escrow bag.
-	EscrowLocked bool
-	// RefuseDiagnostics is how many connections to diagnostics_relay the
-	// device refuses before it accepts one, as right after another client.
+	GasGauge       map[string]any
+	Profiles       map[string]any
+	EscrowLocked   bool
+	// RefuseDiagnostics is how many diagnostics_relay connections are refused
+	// before one is accepted.
 	RefuseDiagnostics int
-	// Planes are whole IORegistry planes, by name.
-	Planes map[string]map[string]any
-	// CrashFiles are the files crashreportcopymobile serves, by path.
-	CrashFiles map[string][]byte
-	// LateReplyDomain makes the reply to this domain arrive twice, as a
-	// reply that came after the client's timeout does.
+	Planes            map[string]map[string]any
+	CrashFiles        map[string][]byte
+	// LateReplyDomain makes the reply to this domain arrive twice, as a reply
+	// after the client's timeout does.
 	LateReplyDomain string
-	// Hidden are root keys left out of the whole-domain answer, as
-	// lockdownd does for some.
+	// Hidden are root keys left out of the whole-domain answer.
 	Hidden map[string]any
-	// Gestalt answers MobileGestalt queries, as iOS before 17.4 does; nil
-	// answers that they are deprecated.
+	// Gestalt answers MobileGestalt queries; nil answers that they are deprecated.
 	Gestalt map[string]any
 
-	mu         sync.Mutex
-	record     []byte // pair record data saved in usbmuxd
-	hostID     string
-	pairPolls  int
-	ports      map[uint16]string
-	nextPort   uint16
-	serverCert certPair
-	ln         net.Listener
-	// Requests records lockdown requests, for assertions.
-	Requests []string
-	// PairHostIDs records the HostID of each Pair request.
+	mu          sync.Mutex
+	record      []byte
+	hostID      string
+	pairPolls   int
+	ports       map[uint16]string
+	nextPort    uint16
+	serverCert  certPair
+	ln          net.Listener
+	Requests    []string
 	PairHostIDs []string
 }
 
-// Start listens on a loopback TCP port, as usbmuxd does on Windows, which
-// every system has, and returns its address for USBMUXD_SOCKET_ADDRESS.
 func (d *Device) Start() (string, error) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -109,7 +94,6 @@ func (d *Device) Start() (string, error) {
 	return "tcp://" + ln.Addr().String(), nil
 }
 
-// Close stops the server.
 func (d *Device) Close() {
 	d.ln.Close()
 }
@@ -249,7 +233,6 @@ func (d *Device) serveLockdown(c net.Conn) {
 		case "GetValue":
 			dom, _ := req["Domain"].(string)
 			key, _ := req["Key"].(string)
-			// lockdownd echoes what was asked.
 			if dom != "" {
 				resp["Domain"] = dom
 			}
@@ -432,8 +415,6 @@ func (d *Device) serveService(svc string, c net.Conn) {
 	}
 }
 
-// serveAFC answers the AFC requests the client sends: read a directory,
-// stat, open, read and close.
 func (d *Device) serveAFC(c net.Conn) {
 	files := d.CrashFiles
 	handles := map[uint64][]byte{}

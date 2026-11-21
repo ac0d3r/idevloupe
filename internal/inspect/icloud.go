@@ -9,19 +9,12 @@ import (
 
 const dataSyncDomain = "com.apple.mobile.data_sync"
 
-// ICloud is what the device says it keeps in iCloud: the data classes it
-// syncs there, and the iCloud backup.
 type ICloud struct {
-	// Classes are the data classes, in the order iOS's settings list them.
-	Classes []SyncClass
-	// Backup is whether iCloud backup is on, when HasBackup; LastBackup
-	// when it last ran, zero if never or unread.
+	Classes           []SyncClass
 	Backup, HasBackup bool
 	LastBackup        time.Time
 }
 
-// On is whether the device uses iCloud at all: its backup or any data
-// class syncing with it.
 func (ic *ICloud) On() bool {
 	if ic.Backup {
 		return true
@@ -34,17 +27,14 @@ func (ic *ICloud) On() bool {
 	return false
 }
 
-// SyncClass is one data class and whether iCloud syncs it, when Known.
 type SyncClass struct {
 	Name      string
 	On, Known bool
 }
 
-// syncClasses are the data_sync keys the details show, with their names.
-// Samples, an iPhone 12 (iOS 27.2) signed in to iCloud: each class is
-// {AccountNames: [iCloud], Sources: [iCloud]}, and turning Contacts off in
-// Settings empties both lists. An iPhone X (iOS 16.7) reports the domain
-// empty. Reminders have no key.
+// Samples: a signed-in iPhone 12 (iOS 27.2) gives each class
+// {AccountNames: [iCloud], Sources: [iCloud]}, emptied when turned off; an
+// iPhone X (iOS 16.7) gives the domain empty. Reminders have no key.
 var syncClasses = []struct {
 	key  string
 	name func(locales.Messages) string
@@ -55,11 +45,8 @@ var syncClasses = []struct {
 	{"Notes", locales.Messages.ICloudNotes},
 }
 
-// cocoaEpoch is where Apple's absolute times count from.
 var cocoaEpoch = time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
 
-// parseICloud reads data_sync and the backup domain; nil when neither says
-// anything of iCloud.
 func parseICloud(m locales.Messages, raw *RawData) *ICloud {
 	v := view{raw}
 	ic := &ICloud{}
@@ -96,9 +83,7 @@ func parseICloud(m locales.Messages, raw *RawData) *ICloud {
 	return ic
 }
 
-// scrubAccounts keeps of data_sync's account names and sources only
-// whether one is iCloud: another account's name can be its owner's email
-// address, and reports are handed to the other party of a sale.
+// Another account's name can be the owner's email: keep only whether it is iCloud.
 func scrubAccounts(d map[string]any) {
 	for _, x := range d {
 		class, ok := plistx.Dict(x)

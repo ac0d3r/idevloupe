@@ -1,7 +1,3 @@
-// Package plistx holds helpers for the loosely typed values that come out of
-// property lists (map[string]any trees decoded by howett.net/plist), and the
-// 4-byte big-endian length framing that lockdown and most lockdown services
-// use on the wire.
 package plistx
 
 import (
@@ -15,12 +11,8 @@ import (
 	"howett.net/plist"
 )
 
-// MaxMessage bounds a single framed message so a corrupt length cannot make
-// us allocate gigabytes.
 const MaxMessage = 64 << 20
 
-// WriteFramed encodes v as an XML plist and writes it with a 4-byte
-// big-endian length prefix.
 func WriteFramed(w io.Writer, v any) error {
 	body, err := plist.Marshal(v, plist.XMLFormat)
 	if err != nil {
@@ -33,7 +25,6 @@ func WriteFramed(w io.Writer, v any) error {
 	return err
 }
 
-// ReadFramed reads one length-prefixed plist and decodes it into a map.
 func ReadFramed(r io.Reader) (map[string]any, error) {
 	var hdr [4]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
@@ -50,7 +41,6 @@ func ReadFramed(r io.Reader) (map[string]any, error) {
 	return Decode(body)
 }
 
-// Decode decodes a plist (XML or binary) whose root is a dictionary.
 func Decode(body []byte) (map[string]any, error) {
 	var m map[string]any
 	if _, err := plist.Unmarshal(body, &m); err != nil {
@@ -62,8 +52,7 @@ func Decode(body []byte) (map[string]any, error) {
 	return m, nil
 }
 
-// String returns v as a string. Byte slices holding text (as IORegistry's
-// device tree properties, NUL terminated) are converted too.
+// Byte slices of text (device tree properties, NUL-terminated) convert too.
 func String(v any) (string, bool) {
 	switch x := v.(type) {
 	case string:
@@ -83,8 +72,6 @@ func String(v any) (string, bool) {
 	return "", false
 }
 
-// Int returns v as an int64, accepting every numeric kind plist decoding
-// produces.
 func Int(v any) (int64, bool) {
 	switch x := v.(type) {
 	case int:
@@ -106,8 +93,8 @@ func Int(v any) (int64, bool) {
 	case uint32:
 		return int64(x), true
 	case uint64:
-		// Signed quantities (a battery's amperage) arrive as two's
-		// complement in unsigned integers.
+		// Signed quantities (a battery's amperage) arrive as two's complement in
+		// unsigned integers.
 		return int64(x), true
 	case float32:
 		return int64(x), true
@@ -117,19 +104,16 @@ func Int(v any) (int64, bool) {
 	return 0, false
 }
 
-// Bool returns v as a bool.
 func Bool(v any) (bool, bool) {
 	b, ok := v.(bool)
 	return b, ok
 }
 
-// Dict returns v as a dictionary.
 func Dict(v any) (map[string]any, bool) {
 	m, ok := v.(map[string]any)
 	return m, ok
 }
 
-// Path walks nested dictionaries: Path(m, "Diagnostics", "IORegistry").
 func Path(m map[string]any, keys ...string) (any, bool) {
 	var cur any = m
 	for _, k := range keys {

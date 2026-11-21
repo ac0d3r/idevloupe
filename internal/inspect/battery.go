@@ -8,8 +8,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
-// battery reads the battery, adds what the analytics log knows of it,
-// and checks it.
 func (a *analysis) battery() {
 	r := a.r
 	r.Battery = parseBattery(a.raw)
@@ -35,15 +33,12 @@ func (a *analysis) battery() {
 	a.batteryChecks()
 }
 
-// parseBattery reads the gas gauge: the IORegistry's battery entry, else
-// the "All" diagnostics' gas gauge, else the charge level lockdown gives.
 func parseBattery(raw *RawData) *Battery {
 	reg := raw.BatteryReg
 	b := &Battery{}
 	gauge, _ := plistx.Path(raw.DiagAll, "GasGauge")
 	gg, _ := plistx.Dict(gauge)
 	if reg == nil && gg != nil {
-		// The "All" diagnostics' gas gauge, as ipsw reads it.
 		b.Present = true
 		b.DesignCapacity, b.HasDesign = plistx.Int(gg["DesignCapacity"])
 		// iOS reports FullChargeCapacity here as a percent (100 on a real
@@ -58,7 +53,6 @@ func parseBattery(raw *RawData) *Battery {
 		return b
 	}
 	if reg == nil {
-		// The lockdown battery domain still gives the charge level.
 		if n, ok := (view{raw}).domainNum("com.apple.mobile.battery", "BatteryCurrentCapacity"); ok {
 			b.Present, b.CurrentPercent, b.HasCurrentLevel = true, n, true
 			b.IsCharging, _ = (view{raw}).domainBool("com.apple.mobile.battery", "BatteryIsCharging")
@@ -124,16 +118,11 @@ func parseBattery(raw *RawData) *Battery {
 	return b
 }
 
-// identify fills in, from the serial, the cell's maker in the language
-// lang and when it was made.
 func (b *Battery) identify(lang string, now time.Time) {
 	b.Maker, _ = Table.BatteryMaker(b.Serial, lang)
 	b.Made, _ = PartDate(b.Serial, now)
 }
 
-// Rating grades the health against the 80% Apple designs the battery to
-// keep through its rated cycles and below which it offers a service: good
-// at 80% and above, worn below. "" and Unknown when the health is unread.
 func (b *Battery) Rating(lang string) (string, Status) {
 	m := locales.In(lang)
 	switch h := b.Health(); {
@@ -146,15 +135,10 @@ func (b *Battery) Rating(lang string) (string, Status) {
 	}
 }
 
-// serviceHealth is the maximum capacity, in percent, Apple designs an
-// iPhone battery to keep through its rated cycles; below it iOS advises a
-// service (support.apple.com/HT208387).
+// Below this maximum capacity iOS advises a service (support.apple.com/HT208387).
 const serviceHealth = 80
 
-// ratedCycles is the number of full charge cycles Apple rates an iPhone's
-// battery to keep serviceHealth through: 1000 from the iPhone 15 models of
-// 2023 on, 500 before, as Apple's battery service page says. 0 for a
-// model not in the table.
+// 1000 from the iPhone 15 (2023) on, 500 before; 0 for an unknown model.
 func ratedCycles(model Model, known bool) int64 {
 	switch {
 	case !known:
@@ -165,8 +149,6 @@ func ratedCycles(model Model, known bool) int64 {
 	return 500
 }
 
-// batteryChecks checks the battery's health, cycles, origin and
-// temperature.
 func (a *analysis) batteryChecks() {
 	m, now := a.m, a.now
 	b := a.r.Battery
@@ -201,7 +183,6 @@ func (a *analysis) batteryChecks() {
 	default:
 		a.add(cat, title, m.ValuePercent(pct), Warn, m.JoinSentences(source, m.HealthBelow80()))
 	}
-	// Two readings of one gauge's count: any difference is reported.
 	if b.HasCycleCount && b.HasGaugeCycles && b.CycleCount != b.GaugeCycleCount {
 		a.add(cat, m.CheckBatteryConsistency(), m.ValueInconsistent(), Info, m.BatteryCyclesDisagree(int(b.CycleCount), int(b.GaugeCycleCount)))
 	}
@@ -211,8 +192,8 @@ func (a *analysis) batteryChecks() {
 			from = m.CyclesFromLog(b.LogDate.Format("2006-01-02"))
 		}
 		val := m.ValueCycles(int(b.CycleCount))
-		// Past the cycles Apple rates the battery for, it is known only to
-		// have outlived its rating; the health says how it wore.
+		// Past its rated cycles the battery is only known to have outlived its
+		// rating; the health says how it wore.
 		if rated := ratedCycles(a.model, a.known); rated > 0 && b.CycleCount > rated {
 			a.add(cat, m.CheckCycles(), val, Info, joinWith(m.JoinSentences, m.CyclesPastRated(int(rated)), from))
 		} else {
@@ -224,11 +205,8 @@ func (a *analysis) batteryChecks() {
 	a.batterySource(b)
 }
 
-// batterySource looks for evidence that the battery was replaced: a
-// cycle count lower than one iOS logged before, cycles only growing, or a
-// cell made after the device. Whether a battery is genuine is iOS's
-// verdict in Parts and Service History, which lockdown does not give, so
-// none is made here.
+// Genuineness is iOS's verdict (Parts and Service History), which lockdown
+// does not give, so only evidence of replacement is reported.
 func (a *analysis) batterySource(b *Battery) {
 	m := a.m
 	var ev []string

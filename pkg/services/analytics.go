@@ -13,53 +13,39 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/lockdown"
 )
 
-// Crash report services. The mover moves logs, the analytics logs among
-// them, to where crashreportcopymobile serves them over AFC, as Finder and
-// iTunes do when they sync.
+// The mover moves analytics logs to where crashreportcopymobile serves them,
+// as Finder does on sync.
 const (
 	CrashReportMover = "com.apple.crashreportmover"
 	CrashReportCopy  = "com.apple.crashreportcopymobile"
 )
 
-// AnalyticsBattery is the battery state iOS records in its daily analytics
-// logs (Settings > Privacy & Security > Analytics & Improvements >
-// Analytics Data), as "last_value_<Key>" fields.
+// Battery fields of the daily analytics logs (last_value_<Key>).
 type AnalyticsBattery struct {
 	File   string
-	Date   time.Time // the log's date, from its name or modification time
+	Date   time.Time
 	Values map[string]int64
 }
 
-// AnalyticsScan records what the search for analytics logs saw, so that a
-// report without them shows why.
 type AnalyticsScan struct {
 	MoveErr string
-	// Listing is the entries of each directory read, up to a limit.
 	Listing map[string][]string
-	// Total is the number of entries of each directory read.
-	Total map[string]int
-	// Read is the logs read, newest first.
-	Read []string
+	Total   map[string]int
+	Read    []string
 }
 
-// ErrNoAnalytics means the device holds no analytics log at all: sharing
-// iPhone analytics is off, or the device was erased or restored lately.
+// No analytics log: sharing analytics is off, or the device was recently erased.
 var ErrNoAnalytics = errors.New("the device holds no analytics logs")
 
-// ErrNoBatteryInAnalytics means analytics logs exist but none read records
-// the battery.
 var ErrNoBatteryInAnalytics = errors.New("the analytics logs hold no battery records")
 
 var (
-	lastValueRe = regexp.MustCompile(`"?last_value_([A-Za-z0-9_]+)"?\s*[:=]\s*"?(-?\d+)`)
-	// Battery-related analytics keys; others are not kept.
+	lastValueRe  = regexp.MustCompile(`"?last_value_([A-Za-z0-9_]+)"?\s*[:=]\s*"?(-?\d+)`)
 	batteryKeyRe = regexp.MustCompile(`(?i)capacity|cycle|battery|charge|fcc|qmax|health|auth|genuine|temperature|soc\b|ra\d`)
 	logDateRe    = regexp.MustCompile(`(\d{4}-\d{2}-\d{2})-(\d{6})`)
 )
 
-// ParseAnalyticsBattery extracts the battery fields of one analytics log.
-// When a key occurs several times, the last occurrence wins, as the logs
-// append newer records.
+// When a key repeats, the last occurrence wins.
 func ParseAnalyticsBattery(data []byte) map[string]int64 {
 	vals := map[string]int64{}
 	for _, m := range lastValueRe.FindAllSubmatch(data, -1) {
@@ -89,7 +75,6 @@ func logDate(name string, mtime time.Time) time.Time {
 	return mtime
 }
 
-// moveCrashReports asks the mover to move the logs and waits for its "ping".
 func moveCrashReports(l *lockdown.Client) error {
 	c, err := l.OpenService(CrashReportMover)
 	if err != nil {
@@ -107,8 +92,6 @@ func moveCrashReports(l *lockdown.Client) error {
 	return nil
 }
 
-// ReadAnalyticsBattery finds the newest analytics log that records the
-// battery and returns its battery fields.
 func ReadAnalyticsBattery(l *lockdown.Client) (*AnalyticsBattery, *AnalyticsScan, error) {
 	scan := &AnalyticsScan{Listing: map[string][]string{}, Total: map[string]int{}}
 	// Moving is best effort: logs already moved are served anyway.
@@ -158,8 +141,7 @@ func ReadAnalyticsBattery(l *lockdown.Client) (*AnalyticsBattery, *AnalyticsScan
 	}
 	sort.Slice(cands, func(i, j int) bool { return cands[i].date.After(cands[j].date) })
 
-	// Newest first; stop at the first log that records the battery. Bound
-	// the work, as logs can be large and there can be many.
+	// Bounded: logs can be many and large.
 	const maxFiles, maxFileSize = 15, 32 << 20
 	read := 0
 	for _, cd := range cands {

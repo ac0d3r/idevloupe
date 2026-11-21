@@ -12,14 +12,10 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
-// buildSections lays out the device information, with the battery b as
-// read: what the device says of itself and, after an inspection, the
-// parts' serial numbers and whether it is jailbroken.
 func buildSections(a *analysis, b *Battery) []Section {
 	m, lang, v, s := a.m, a.lang, a.v, a.r.Summary
 	var secs []Section
 	front, back := v.colors()
-	// What the device table says of the model, when there is one.
 	model, _ := Table.Model(s.ProductType)
 	processor := joinWith(func(a, b string) string { return a + " · " + b }, model.Chip.In(lang), model.Frequency)
 	screen := joinWith(func(a, b string) string { return a + " · " + b }, model.ScreenSize.In(lang), model.Resolution)
@@ -60,7 +56,6 @@ func buildSections(a *analysis, b *Battery) []Section {
 	if region != a.regionInfo {
 		region = m.ValueWithCode(region, a.regionInfo)
 	}
-	// The jailbreak check, when an inspection made it.
 	jailbreak := ""
 	for _, c := range a.r.Checks {
 		if c.Title == m.CheckJailbreak() {
@@ -135,8 +130,8 @@ func buildSections(a *analysis, b *Battery) []Section {
 		Field{m.FieldSIMStatus(), strings.TrimPrefix(v.str("SIMStatus"), "kCTSIMSupportSIMStatus")},
 		Field{m.FieldSIMTray(), strings.TrimPrefix(v.str("SIMTrayStatus"), "kCTSIMSupportSIMTray")},
 	)
-	// On connecting only the storage controller is read, which alone would
-	// make a parts section the inspection's checks do not stand behind.
+	// On connecting only the storage controller is read; a parts section from it
+	// alone would not be backed by the inspection's checks.
 	if !a.raw.inspected() {
 		return secs
 	}
@@ -156,7 +151,6 @@ func yesNo(m locales.Messages, b bool, ok bool) string {
 	return m.ValueNo()
 }
 
-// buildRaw groups every value read by its source, for the raw data tab.
 func buildRaw(lang string, raw *RawData) []RawGroup {
 	m := locales.In(lang)
 	var out []RawGroup
@@ -233,7 +227,6 @@ func buildRaw(lang string, raw *RawData) []RawGroup {
 	return out
 }
 
-// FormatValue renders a plist value on one line.
 func FormatValue(x any) string {
 	switch t := x.(type) {
 	case nil:

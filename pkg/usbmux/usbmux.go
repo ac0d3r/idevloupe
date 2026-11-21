@@ -1,9 +1,5 @@
-// Package usbmux talks to usbmuxd, the daemon that multiplexes TCP-like
-// connections to iOS devices over USB (Apple's on macOS, Apple Mobile Device
-// Service on Windows, the open source usbmuxd on Linux).
-//
-// The wire protocol (a 16-byte little-endian header followed by an XML plist)
-// follows go-ios (github.com/danielpaulus/go-ios, MIT) and libimobiledevice.
+// Package usbmux is a usbmuxd client. The wire protocol follows go-ios
+// (github.com/danielpaulus/go-ios, MIT) and libimobiledevice.
 package usbmux
 
 import (
@@ -32,21 +28,16 @@ const (
 	requestTimeout = 15 * time.Second
 )
 
-// Result codes of usbmuxd's "Result" messages.
 const (
-	resultOK         = 0
-	resultBadCommand = 1
-	resultBadDevice  = 2
-	// ResultConnRefused means the device refused the connection to a port.
+	resultOK          = 0
+	resultBadCommand  = 1
+	resultBadDevice   = 2
 	ResultConnRefused = 3
 	resultBadVersion  = 6
 )
 
-// ErrNotPaired is returned by ReadPairRecord when usbmuxd holds no pair
-// record for the device.
 var ErrNotPaired = errors.New("usbmux: no pair record for device")
 
-// ResultError is a non-zero result code from usbmuxd.
 type ResultError struct {
 	Op   string
 	Code int64
@@ -65,16 +56,12 @@ func (e *ResultError) Error() string {
 	return fmt.Sprintf("usbmux %s: %s (%d)", e.Op, name, e.Code)
 }
 
-// Device is one entry of usbmuxd's device list.
 type Device struct {
 	DeviceID       int
 	UDID           string
-	ConnectionType string // "USB" or "Network"
+	ConnectionType string
 }
 
-// Address returns the network and address of usbmuxd on this platform,
-// honoring USBMUXD_SOCKET_ADDRESS (as "unix:///path", "tcp://host:port",
-// "host:port" or a socket path).
 func Address() (network, addr string) {
 	if v := os.Getenv("USBMUXD_SOCKET_ADDRESS"); v != "" {
 		if scheme, rest, ok := strings.Cut(v, "://"); ok {
@@ -91,17 +78,13 @@ func Address() (network, addr string) {
 	return "unix", "/var/run/usbmuxd"
 }
 
-// Conn is a connection to usbmuxd.
 type Conn struct {
 	c   net.Conn
 	tag uint32
 }
 
-// ErrNoDaemon means usbmuxd could not be reached: on Windows and macOS it
-// comes with iTunes or Apple Devices, on Linux it is a package of its own.
 var ErrNoDaemon = errors.New("usbmuxd is not reachable")
 
-// Dial connects to usbmuxd.
 func Dial() (*Conn, error) {
 	network, addr := Address()
 	c, err := net.DialTimeout(network, addr, dialTimeout)
@@ -111,15 +94,12 @@ func Dial() (*Conn, error) {
 	return &Conn{c: c}, nil
 }
 
-// ProgName and BundleID name the program to usbmuxd, which logs them, and
-// lockdown sends ProgName as its label. Set them before the first
-// connection. An empty BundleID is not sent.
+// ProgName and BundleID are sent to usbmuxd; set them before the first connection.
 var (
 	ProgName = "usbmux"
 	BundleID = ""
 )
 
-// Close closes the connection.
 func (m *Conn) Close() error { return m.c.Close() }
 
 func (m *Conn) send(msg map[string]any) error {
@@ -186,8 +166,7 @@ func parseDevice(m map[string]any) Device {
 	id, _ := plistx.Int(m["DeviceID"])
 	d.DeviceID = int(id)
 	if props != nil {
-		// Newer usbmuxd versions report the UDID on its own (as ipsw reads
-		// it); SerialNumber holds it on older ones.
+		// Newer usbmuxd reports UDID; older ones put it in SerialNumber.
 		d.UDID, _ = props["UDID"].(string)
 		if d.UDID == "" {
 			d.UDID, _ = props["SerialNumber"].(string)
@@ -201,8 +180,6 @@ func parseDevice(m map[string]any) Device {
 	return d
 }
 
-// ListDevices returns the devices usbmuxd knows. A device connected both by
-// USB and over Wi-Fi is listed twice; USB entries come first.
 func (m *Conn) ListDevices() ([]Device, error) {
 	resp, err := m.request(map[string]any{"MessageType": "ListDevices"})
 	if err != nil {
@@ -231,7 +208,6 @@ func (m *Conn) ListDevices() ([]Device, error) {
 	return append(usb, other...), nil
 }
 
-// ReadBUID returns the host's system BUID, which pair records carry.
 func (m *Conn) ReadBUID() (string, error) {
 	resp, err := m.request(map[string]any{"MessageType": "ReadBUID"})
 	if err != nil {
@@ -247,7 +223,6 @@ func (m *Conn) ReadBUID() (string, error) {
 	return buid, nil
 }
 
-// PairRecord is the host's half of a trust relationship with a device.
 type PairRecord struct {
 	HostID            string
 	SystemBUID        string
@@ -260,7 +235,6 @@ type PairRecord struct {
 	WiFiMACAddress    string
 }
 
-// ReadPairRecord returns the pair record usbmuxd holds for the device.
 func (m *Conn) ReadPairRecord(udid string) (*PairRecord, error) {
 	resp, err := m.request(map[string]any{"MessageType": "ReadPairRecord", "PairRecordID": udid})
 	if err != nil {
@@ -268,7 +242,7 @@ func (m *Conn) ReadPairRecord(udid string) (*PairRecord, error) {
 	}
 	data, ok := resp["PairRecordData"].([]byte)
 	if !ok {
-		// usbmuxd answers a Result with an error number instead.
+		// On failure usbmuxd answers a Result instead.
 		return nil, ErrNotPaired
 	}
 	var rec PairRecord
@@ -281,8 +255,6 @@ func (m *Conn) ReadPairRecord(udid string) (*PairRecord, error) {
 	return &rec, nil
 }
 
-// SavePairRecord stores a pair record in usbmuxd, which then also uses it for
-// Wi-Fi connections.
 func (m *Conn) SavePairRecord(udid string, deviceID int, rec *PairRecord) error {
 	data, err := plist.Marshal(rec, plist.XMLFormat)
 	if err != nil {
@@ -300,9 +272,7 @@ func (m *Conn) SavePairRecord(udid string, deviceID int, rec *PairRecord) error 
 	return checkResult("SavePairRecord", resp)
 }
 
-// Connect asks usbmuxd to connect to a TCP port on the device. On success the
-// usbmux connection becomes a raw byte stream to the device port and is
-// returned; m must not be used afterwards.
+// Connect turns m into a raw stream to the device port; m must not be used afterwards.
 func (m *Conn) Connect(deviceID int, port uint16) (net.Conn, error) {
 	// usbmuxd expects the port in network byte order.
 	swapped := port<<8 | port>>8
@@ -320,7 +290,6 @@ func (m *Conn) Connect(deviceID int, port uint16) (net.Conn, error) {
 	return m.c, nil
 }
 
-// ConnectPort dials usbmuxd and connects to a port on the device.
 func ConnectPort(deviceID int, port uint16) (net.Conn, error) {
 	m, err := Dial()
 	if err != nil {
@@ -334,7 +303,6 @@ func ConnectPort(deviceID int, port uint16) (net.Conn, error) {
 	return c, nil
 }
 
-// ListDevices dials usbmuxd and lists its devices.
 func ListDevices() ([]Device, error) {
 	m, err := Dial()
 	if err != nil {
@@ -344,15 +312,11 @@ func ListDevices() ([]Device, error) {
 	return m.ListDevices()
 }
 
-// Event reports a device attached or detached.
 type Event struct {
 	Attached bool
 	Device   Device // for detach, only DeviceID is set
 }
 
-// Listen streams attach and detach events until ctx ends or the connection
-// fails; the channel is then closed. The devices present when it starts are
-// reported as attached first.
 func Listen(ctx context.Context) (<-chan Event, error) {
 	m, err := Dial()
 	if err != nil {
@@ -370,7 +334,6 @@ func Listen(ctx context.Context) (<-chan Event, error) {
 	ch := make(chan Event, 16)
 	done := make(chan struct{})
 	go func() {
-		// Unblock the reader when ctx ends; end with it otherwise.
 		select {
 		case <-ctx.Done():
 			m.Close()

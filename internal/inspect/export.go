@@ -8,8 +8,6 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// Text renders the report as plain text, in its language, for copying and
-// saving.
 func (r *Report) Text() string {
 	m := locales.In(r.Lang)
 	var b strings.Builder
@@ -113,9 +111,6 @@ func nonEmpty(ss ...string) []string {
 	return out
 }
 
-// JSON renders the report, including the raw values, as indented JSON. A
-// check's Status is its code ("pass", "warn"...), the same in every
-// language, and StatusText names it in the report's.
 func (r *Report) JSON() ([]byte, error) {
 	type check struct {
 		Category, Title, Value, Status, StatusText, Detail string

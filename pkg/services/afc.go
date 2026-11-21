@@ -11,9 +11,7 @@ import (
 	"time"
 )
 
-// AFC (Apple File Conduit) is the file protocol of com.apple.afc and of
-// com.apple.crashreportcopymobile. Only reading is implemented. The packet
-// layout follows go-ios (MIT) and libimobiledevice.
+// AFC packet layout follows go-ios (MIT) and libimobiledevice. Read-only.
 
 const (
 	afcMagic      = 0x4141504c36414643 // "CFA6LPAA"
@@ -21,7 +19,6 @@ const (
 	afcMaxPacket  = 64 << 20
 )
 
-// AFC operations, and the read-only open mode.
 const (
 	afcStatus     = 0x01
 	afcReadDir    = 0x03
@@ -32,28 +29,20 @@ const (
 	afcModeRdOnly = 0x01
 )
 
-// AFCError is a non-zero AFC status.
 type AFCError uint64
 
 func (e AFCError) Error() string { return fmt.Sprintf("afc status %d", uint64(e)) }
 
-// AFC is an AFC client over a service connection.
 type AFC struct {
-	c   net.Conn
-	num uint64
-	// broken is set when an exchange failed mid-way; see roundTrip.
+	c      net.Conn
+	num    uint64
 	broken bool
 }
 
-// NewAFC wraps a connection to an AFC service.
 func NewAFC(c net.Conn) *AFC { return &AFC{c: c} }
 
-// Close closes the connection.
 func (a *AFC) Close() error { return a.c.Close() }
 
-// roundTrip sends one request and reads its reply. A transport error, or a
-// reply to another packet, leaves the stream out of step, so the connection
-// is not used again.
 func (a *AFC) roundTrip(op uint64, hdr []byte) (hdrOut, payloadOut []byte, err error) {
 	if a.broken {
 		return nil, nil, errServiceBroken
@@ -66,8 +55,6 @@ func (a *AFC) roundTrip(op uint64, hdr []byte) (hdrOut, payloadOut []byte, err e
 	return hdrOut, payloadOut, err
 }
 
-// exchange sends a request, which as the client only reads is a header
-// without payload, and reads the reply.
 func (a *AFC) exchange(op uint64, hdr []byte) (hdrOut, payloadOut []byte, err error) {
 	_ = a.c.SetDeadline(time.Now().Add(30 * time.Second))
 	defer a.c.SetDeadline(time.Time{})
@@ -129,7 +116,6 @@ func cstrings(b []byte) []string {
 	return out
 }
 
-// ReadDir lists a directory, without "." and "..".
 func (a *AFC) ReadDir(path string) ([]string, error) {
 	_, payload, err := a.roundTrip(afcReadDir, append([]byte(path), 0))
 	if err != nil {
@@ -144,14 +130,12 @@ func (a *AFC) ReadDir(path string) ([]string, error) {
 	return names, nil
 }
 
-// AFCFileInfo is the part of a file's information this client reads.
 type AFCFileInfo struct {
 	Size  int64
 	MTime time.Time
 	IsDir bool
 }
 
-// Stat returns information about a path.
 func (a *AFC) Stat(path string) (AFCFileInfo, error) {
 	_, payload, err := a.roundTrip(afcFileInfo, append([]byte(path), 0))
 	if err != nil {
@@ -173,7 +157,6 @@ func (a *AFC) Stat(path string) (AFCFileInfo, error) {
 	return fi, nil
 }
 
-// ReadFile reads a whole file, up to max bytes.
 func (a *AFC) ReadFile(path string, max int64) ([]byte, error) {
 	hdr := make([]byte, 8, 9+len(path))
 	binary.LittleEndian.PutUint64(hdr, afcModeRdOnly)

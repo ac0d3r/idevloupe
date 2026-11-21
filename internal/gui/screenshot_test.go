@@ -7,9 +7,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
-// TestScreenshots renders the download page's screenshots, of the
-// fictional device of sampleRaw, in Chinese and English: the home, before
-// an inspection, and the report:
 // SHOT_DIR=docs go test -run TestScreenshots ./internal/gui
 func TestScreenshots(t *testing.T) {
 	if os.Getenv("SHOT_DIR") == "" {

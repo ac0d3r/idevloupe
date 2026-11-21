@@ -79,7 +79,6 @@ func TestPairAndInspect(t *testing.T) {
 	if _, err := device.Open(dev); !errors.Is(err, device.ErrNotTrusted) {
 		t.Fatalf("open before pairing: %v", err)
 	}
-	// The trust dialog waits twice, then the user taps Trust.
 	var pairing lockdown.Pairing
 	for i := 0; ; i++ {
 		err := device.Pair(dev, &pairing)
@@ -90,7 +89,6 @@ func TestPairAndInspect(t *testing.T) {
 			t.Fatalf("pair: %v", err)
 		}
 	}
-	// Every poll offers the same record; keys are made once.
 	if ids := fd.PairHostIDs; len(ids) != 3 || ids[0] != ids[1] || ids[1] != ids[2] {
 		t.Errorf("pair requests carried host IDs %v, want one ID three times", ids)
 	}
@@ -98,8 +96,6 @@ func TestPairAndInspect(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open after pairing: %v", err)
 	}
-	// The overview reads lockdown, the battery gauge and the storage
-	// controller, and nothing that only an inspection needs.
 	info, err := inspect.CollectInfo(inspect.Reuse(l, func() (*lockdown.Client, error) { return device.Open(dev) }))
 	if err != nil {
 		t.Fatal(err)
@@ -137,15 +133,12 @@ func TestPairAndInspect(t *testing.T) {
 	for _, c := range r.Checks {
 		got[c.Title] = c
 	}
-	// The live gauge's MaximumCapacityPercent wins over the log.
 	if c := got["电池健康"]; c.Value != "96%" || c.Status != inspect.Pass {
 		t.Errorf("battery %+v", c)
 	}
-	// The newest analytics log is used; the jetsam report is not a log.
 	if b := r.Battery; b.LogHealth != 89 || b.LogCycles != 402 || !strings.Contains(b.LogFile, "log-aggregated-2026-11-03") {
 		t.Errorf("analytics: health %d cycles %d file %q", b.LogHealth, b.LogCycles, b.LogFile)
 	}
-	// 402 cycles logged, 120 now: the battery was changed after the log.
 	if c := got["电池来源"]; c.Status != inspect.Warn || !strings.Contains(c.Detail, "402") {
 		t.Errorf("battery source %+v", c)
 	}
@@ -161,7 +154,6 @@ func TestPairAndInspect(t *testing.T) {
 	if c := got["远程管理 (MDM)"]; c.Status != inspect.Warn || !strings.Contains(c.Value, "Acme") {
 		t.Errorf("mdm %+v", c)
 	}
-	// ReleaseType is left out of the root dump and read on its own.
 	if c := got["系统类型"]; c.Status != inspect.Fail {
 		t.Errorf("release type %+v", c)
 	}
@@ -195,15 +187,14 @@ func TestListen(t *testing.T) {
 	}
 }
 
-// A reply that arrives late must not be taken as the answer to the next
-// request: on an iPhone 16 a slow disk_usage reply shifted every reply after
-// it, so starting afc2 got another service's reply and the report claimed a
-// jailbreak. The client must notice, drop the connection and start over.
+// Regression: on an iPhone 16 a late disk_usage reply shifted every reply
+// after it, so starting afc2 got another service's reply and the report
+// claimed a jailbreak.
 func TestLateReplyDoesNotShiftAnswers(t *testing.T) {
 	d := fake(t, true)
 	d.LateReplyDomain = "com.apple.disk_usage"
 	d.EscrowLocked = false
-	d.Apps = d.Apps[:2] // no jailbreak app
+	d.Apps = d.Apps[:2]
 	d.PendingPolls = 0
 	devs, _ := usbmux.ListDevices()
 	l, err := device.Open(devs[0])
@@ -252,10 +243,10 @@ func TestProbeIORegistry(t *testing.T) {
 	}
 	sum := probe.Summary(rep, 100)
 	for _, want := range []string{
-		"plane=IODeviceTree", "Success", // a query that answered
-		"Failure", // ones the device does not know
+		"plane=IODeviceTree", "Success",
+		"Failure",
 		"[plane=IODeviceTree] /device-tree/chosen/mlb-serial-number = F3X80241VTJJ3QLA",
-		"class=AppleSmartBattery ", // absent from the fake, listed anyway
+		"class=AppleSmartBattery ",
 	} {
 		if !strings.Contains(sum, want) {
 			t.Errorf("summary lacks %q:\n%s", want, sum)
@@ -266,8 +257,8 @@ func TestProbeIORegistry(t *testing.T) {
 	}
 }
 
-// iPhone 16: right after an IORegistry probe the device refused the
-// diagnostics connection, and the report lost the battery gauge.
+// Regression: on an iPhone 16 diagnostics_relay was refused right after an
+// IORegistry probe, and the report lost the battery gauge.
 func TestDiagnosticsRefusedThenAccepted(t *testing.T) {
 	d := fake(t, true)
 	d.EscrowLocked = false

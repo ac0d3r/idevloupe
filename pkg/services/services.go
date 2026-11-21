@@ -1,11 +1,3 @@
-// Package services reads lockdown services of a device: diagnostics_relay
-// (IORegistry, the "All" diagnostics, MobileGestalt), installation_proxy
-// (installed apps), MCInstall (profiles, cloud configuration), and over AFC
-// the analytics logs that crashreportcopymobile serves. ServiceAvailable
-// tells whether a service is registered at all.
-//
-// The plist services exchange 4-byte length-prefixed plists; AFC has its
-// own framing (afc.go).
 package services
 
 import (
@@ -19,7 +11,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
-// Service names.
 const (
 	Diagnostics       = "com.apple.mobile.diagnostics_relay"
 	DiagnosticsLegacy = "com.apple.iosdiagnostics.relay"
@@ -41,17 +32,13 @@ func callTimeout(c net.Conn, req map[string]any, timeout time.Duration) (map[str
 	return plistx.ReadFramed(c)
 }
 
-// DiagnosticsClient is a diagnostics_relay connection.
 type DiagnosticsClient struct {
-	c net.Conn
-	// broken is set when an exchange failed mid-way: a late reply could
-	// answer the next request, so the connection is not used again.
+	c      net.Conn
 	broken bool
 }
 
-// OpenDiagnostics starts diagnostics_relay. The device refuses the
-// connection for a moment after another client used the service, as right
-// after an IORegistry probe, so a refusal is retried.
+// The device briefly refuses diagnostics_relay after another client used it,
+// so a refusal is retried.
 func OpenDiagnostics(l *lockdown.Client) (*DiagnosticsClient, error) {
 	var c net.Conn
 	var err error
@@ -75,7 +62,6 @@ func OpenDiagnostics(l *lockdown.Client) (*DiagnosticsClient, error) {
 	return &DiagnosticsClient{c: c}, nil
 }
 
-// Close says goodbye and closes the connection.
 func (d *DiagnosticsClient) Close() error {
 	if !d.broken {
 		_, _ = call(d.c, map[string]any{"Request": "Goodbye"})
@@ -108,8 +94,6 @@ func (d *DiagnosticsClient) requestTimeout(req map[string]any, timeout time.Dura
 	return diag, nil
 }
 
-// IORegistry queries one IORegistry entry by class or name (either may be
-// empty) and returns its properties.
 func (d *DiagnosticsClient) IORegistry(plane, name, class string) (map[string]any, error) {
 	req := map[string]any{"Request": "IORegistry"}
 	if plane != "" {
@@ -132,8 +116,6 @@ func (d *DiagnosticsClient) IORegistry(plane, name, class string) (map[string]an
 	return reg, nil
 }
 
-// Query sends one diagnostics request and returns the whole response,
-// whatever its status, for probing what the device answers.
 func (d *DiagnosticsClient) Query(req map[string]any) (map[string]any, error) {
 	if d.broken {
 		return nil, errServiceBroken
@@ -145,17 +127,14 @@ func (d *DiagnosticsClient) Query(req map[string]any) (map[string]any, error) {
 	return resp, err
 }
 
-// All runs the "All" diagnostics request, whose GasGauge, NAND and WiFi
-// sections come from the device's own diagnostics (as ipsw reads them).
 func (d *DiagnosticsClient) All() (map[string]any, error) {
 	return d.request(map[string]any{"Request": "All"})
 }
 
-// ErrGestaltDeprecated means the device no longer answers MobileGestalt
-// queries over diagnostics_relay (iOS 17.4 and later).
+// ErrGestaltDeprecated: iOS 17.4 and later no longer answer MobileGestalt
+// over diagnostics_relay.
 var ErrGestaltDeprecated = errors.New("MobileGestalt queries are disabled on this iOS version")
 
-// MobileGestalt reads MobileGestalt keys.
 func (d *DiagnosticsClient) MobileGestalt(keys ...string) (map[string]any, error) {
 	diag, err := d.request(map[string]any{"Request": "MobileGestalt", "MobileGestaltKeys": keys})
 	if err != nil {
@@ -172,18 +151,15 @@ func (d *DiagnosticsClient) MobileGestalt(keys ...string) (map[string]any, error
 	return mg, nil
 }
 
-// App is an installed application.
 type App struct {
 	BundleID string
 	Name     string
 	Version  string
-	Type     string // "User", "System", "Internal", ...
-	// DiskUsage is the bytes the app takes, its bundle and its data
-	// (StaticDiskUsage + DynamicDiskUsage); 0 when iOS does not say.
+	Type     string
+	// StaticDiskUsage + DynamicDiskUsage; 0 when iOS does not say.
 	DiskUsage int64
 }
 
-// ListApps lists installed applications of every type.
 func ListApps(l *lockdown.Client) ([]App, error) {
 	c, err := l.OpenService(InstallationProxy)
 	if err != nil {
@@ -239,28 +215,20 @@ func ListApps(l *lockdown.Client) ([]App, error) {
 	}
 }
 
-// Profile is an installed configuration profile.
 type Profile struct {
-	Identifier   string
-	DisplayName  string
-	Organization string
-	IsMDM        bool
-	// RemovalDisallowed means the user cannot delete the profile, as
-	// management profiles are installed.
+	Identifier        string
+	DisplayName       string
+	Organization      string
+	IsMDM             bool
 	RemovalDisallowed bool
 }
 
-// MCInfo is what MCInstall reports.
 type MCInfo struct {
-	Profiles []Profile
-	// Cloud is the cloud (DEP / Automated Device Enrollment) configuration,
-	// nil when the device returns none.
-	Cloud map[string]any
-	// RawProfiles is the GetProfileList response, for the raw data view.
+	Profiles    []Profile
+	Cloud       map[string]any
 	RawProfiles map[string]any
 }
 
-// ReadMC reads installed profiles and the cloud configuration.
 func ReadMC(l *lockdown.Client) (*MCInfo, error) {
 	c, err := l.OpenService(MCInstall)
 	if err != nil {
@@ -306,8 +274,7 @@ func ReadMC(l *lockdown.Client) (*MCInfo, error) {
 	return info, nil
 }
 
-// ServiceAvailable reports whether lockdownd starts the named service. It is
-// used for com.apple.afc2, which only jailbroken devices register.
+// com.apple.afc2 is registered only on jailbroken devices.
 func ServiceAvailable(l *lockdown.Client, name string) (bool, error) {
 	info, err := l.StartService(name)
 	if err != nil {

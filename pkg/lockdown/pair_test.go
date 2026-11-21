@@ -12,8 +12,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
-// The device verifies that the host certificate chains to the root it was
-// given in the pair request; check that, and a TLS session both ways.
 func TestPairCerts(t *testing.T) {
 	devKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	pub := pem.EncodeToMemory(&pem.Block{Type: "RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(&devKey.PublicKey)})
@@ -41,7 +39,6 @@ func TestPairCerts(t *testing.T) {
 		t.Error("device cert does not carry the device key")
 	}
 
-	// Device side: its key with the device cert, requiring the host cert.
 	devTLS := tls.Certificate{Certificate: [][]byte{dev.Raw}, PrivateKey: devKey}
 	a, b := net.Pipe()
 	done := make(chan error, 1)

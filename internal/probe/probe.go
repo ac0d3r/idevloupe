@@ -1,6 +1,3 @@
-// Package probe asks a device for more than the inspection reads, to find
-// where it keeps information, such as the serial numbers of its parts,
-// before a check relies on it.
 package probe
 
 import (
@@ -19,7 +16,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/services"
 )
 
-// Query is one IORegistry lookup of diagnostics_relay.
 type Query struct {
 	Plane, Name, Class string
 }
@@ -48,10 +44,6 @@ func (q Query) request() map[string]any {
 	return req
 }
 
-// Queries are the lookups tried: whole planes, device tree nodes where
-// factory configuration may sit, and the drivers of parts that are paired
-// to the device (cameras, touch, display, Face ID, storage, baseband) in
-// the names they have had across generations. Absent ones answer empty.
 var Queries = func() []Query {
 	qs := []Query{
 		{Plane: "IODeviceTree"}, {Plane: "IOService"},
@@ -75,15 +67,9 @@ var Queries = func() []Query {
 	return qs
 }()
 
-// Keys are MobileGestalt names that may hold the factory serial numbers
-// of parts, the factory configuration, and records of the battery, its
-// authentication and storage. They are taken from the names a closed tool
-// that compares factory and current part values asks for; which of them a
-// device answers, and with what, is what the probe is for.
+// Names a closed tool that compares factory and current part values asks for.
 var Keys = []string{
-	// Factory configuration.
 	"SysCfg", "SysCfgData", "SysCfgDict",
-	// Parts' serial numbers.
 	"BatterySerialNumber", "BatterySerialNumberRAW", "BatterySerialNumberMD",
 	"PanelSerialNumber", "RawPanelSerialNumber", "CoverglassSerialNumber",
 	"RearFacingCameraModuleSerialNumber", "FrontFacingCameraModuleSerialNumber", "BackSuperWideCameraSNUM",
@@ -91,26 +77,21 @@ var Keys = []string{
 	"MesaSerialNumber", "JasperSNUM", "LynxSerialNumber", "NovaSerialNum", "LatticeSerialNumber",
 	"AmbientLightSensorSerialNumber", "WirelessBoardSerialNumber", "WirelessBoardSnum", "LunaFlexSerialNumber",
 	"BasebandBoardSnum", "InterfaceModuleSerialNumber",
-	// The battery.
 	"BatterySerialChanged", "BatterySerialChangedHistory", "BatterySerialNumberChanged",
 	"BatteryAuth", "DeviceSupportsBatteryModuleAuthentication", "BatteryCellDisconnectCount",
 	"BatteryShutdownReason", "CycleCountLastQmax", "LifeTimeQmaxUpdateCounter",
-	// Pairing, biometrics, storage, the secure enclave.
 	"FDRSealingStatus", "FDRCalibration", "FDRReportError",
 	"TouchIDHealthy", "MultiSensorOK",
 	"NANDType", "DiskVendor", "DiskType", "NANDWriteCount", "NANDPowerOnTime", "NandControllerUID",
 	"EffectiveProductionStatusSEP", "EffectiveSecurityModeSEP",
 }
 
-// KeyResult is what one source answered for one key.
 type KeyResult struct {
 	Source, Key string
-	Status      string // "ok", "missing", or the error
+	Status      string
 	Value       any
 }
 
-// probeKeys asks lockdown for each of Keys, then MobileGestalt for all of
-// them at once. A source that fails as a whole is reported once, for "*".
 func probeKeys(l *lockdown.Client, diag *services.DiagnosticsClient) []KeyResult {
 	var out []KeyResult
 	for _, k := range Keys {
@@ -141,22 +122,19 @@ func probeKeys(l *lockdown.Client, diag *services.DiagnosticsClient) []KeyResult
 	return out
 }
 
-// Result is the answer to one query.
 type Result struct {
 	Query    Query
-	Status   string // the response's Status, or the error
-	Props    int    // properties of the entry returned
+	Status   string
+	Props    int
 	Response map[string]any
 }
 
-// Report is what Probe found.
 type Report struct {
 	Keys    []KeyResult
 	Queries []Result
 }
 
-// Probe asks for Keys, then runs every query, and writes the answers to
-// path as a binary plist: {"keys/<source>": {key: value}, query: response}.
+// Output plist: {"keys/<source>": {key: value}, query: response}.
 func Probe(l *lockdown.Client, path string) (*Report, error) {
 	diag, err := services.OpenDiagnostics(l)
 	if err != nil {
@@ -204,26 +182,18 @@ func Probe(l *lockdown.Client, path string) (*Report, error) {
 	return rep, os.WriteFile(path, data, 0o644)
 }
 
-// interestingKey matches property names that name serial numbers, the
-// factory configuration (syscfg) and its four-letter keys of parts, and
-// parts of interest.
 var interestingKey = regexp.MustCompile(`(?i)serial|sn$|^sn|syscfg|^(fcms|bcms|mtsn|batt|bmac|wmac|nvsn|nsrn|lcm#|cmms|dclr|clhs|vbst|nvms)$|pearl|camera.*(module|sn)|multitouch|display.*(id|sn)|panel|auth|fdr|qmax|changed`)
 
-// Hit is a property found by Find.
 type Hit struct {
 	Path, Value string
 }
 
-// Find walks a response and returns the properties whose names look like
-// serial numbers or factory configuration, by the path of entry names that
-// leads to them.
 func Find(tree any) []Hit {
 	var hits []Hit
 	var walk func(path string, v any)
 	walk = func(path string, v any) {
 		switch t := v.(type) {
 		case map[string]any:
-			// An IORegistry entry: name the path after it.
 			if name, ok := t["IORegistryEntryName"].(string); ok {
 				path += "/" + name
 			}
@@ -256,9 +226,6 @@ func Find(tree any) []Hit {
 	return hits
 }
 
-// Summary lists what each source answered for the keys, each query's
-// outcome, then the serial-like properties the answered ones hold, values
-// cut to width.
 func Summary(rep *Report, width int) string {
 	var b strings.Builder
 	cut := func(v string) string {

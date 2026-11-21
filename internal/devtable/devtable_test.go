@@ -2,7 +2,6 @@ package devtable
 
 import "testing"
 
-// A nil table finds nothing, so that the program runs without one.
 func TestNil(t *testing.T) {
 	var tb *Table
 	if _, ok := tb.BackColor("iPhone13,2", "1", "en"); ok {
@@ -16,7 +15,6 @@ func TestNil(t *testing.T) {
 	}
 }
 
-// The built-in data knows the sample devices.
 func TestBuiltin(t *testing.T) {
 	tb := Builtin()
 	if m, ok := tb.Model("iPhone10,1"); !ok || m.Cores != "6" {

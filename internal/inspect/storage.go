@@ -9,34 +9,21 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
-// Storage is how the storage is used and what the storage controller says
-// of itself. Byte counts are 0 when not read.
 type Storage struct {
-	Total, Free int64
-	// System is the system volume; Apps the user apps, bundle and data,
-	// known once an inspection listed them (HasApps); Photos the photo
-	// library as disk_usage counts it.
+	Total, Free          int64
 	System, Apps, Photos int64
 	HasApps              bool
-	// Info is the controller's identity: maker, NAND, model, firmware.
-	// Limits are its transfer limits, as the NVMe driver reports them.
-	Info, Limits []Field
+	Info, Limits         []Field
 }
 
-// Other is what no category claims: the used space beyond the system, the
-// apps and the photos.
 func (s *Storage) Other() int64 {
 	return max(s.Total-s.Free-s.System-s.Apps-s.Photos, 0)
 }
 
-// cellTypes names NAND by the bits it keeps in a cell (cell-type).
 var cellTypes = map[int64]string{1: "SLC", 2: "MLC", 3: "TLC", 4: "QLC"}
 
-// parseStorage reads the storage from disk_usage, the apps and the storage
-// controller's node (AppleANS2NVMeController on an iPhone X, iOS 16:
-// vendor-name and the NAND's description under Controller
-// Characteristics, the transfer limits at the top). nil when nothing is
-// known of it.
+// AppleANS2NVMeController on an iPhone X (iOS 16): vendor-name and the NAND
+// under Controller Characteristics, transfer limits at the top.
 func parseStorage(m locales.Messages, raw *RawData) *Storage {
 	v := view{raw}
 	s := &Storage{}

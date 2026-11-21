@@ -9,17 +9,11 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// The report table's fixed columns: the check's name and its result. The
-// factory and read values share the rest.
 const (
 	itemColumn   = 140
 	resultColumn = 84
 )
 
-// reportView is the inspection report on one page, made to be read and
-// shared as one screenshot: the verdict and the unit's key facts on the
-// left; on the right what needs attention, then every check, its factory
-// value beside the value read where the factory recorded one.
 func (a *App) reportView(c *ui.Context, d *devState) {
 	r := d.reportIn(c.Locale())
 	m := locales.In(r.Lang)
@@ -44,7 +38,6 @@ func (a *App) reportView(c *ui.Context, d *devState) {
 	})
 }
 
-// reportBar names the unit and holds the report's actions.
 func (a *App) reportBar(c *ui.Context, d *devState, r *inspect.Report) {
 	m := locales.In(r.Lang)
 	ui.Row(c).Padding(12, 28).Gap(8).Children(func() {
@@ -77,8 +70,6 @@ func (a *App) reportBar(c *ui.Context, d *devState, r *inspect.Report) {
 	})
 }
 
-// masker hides the values that name the unit when the person asks to, as
-// for a screenshot to share; it returns its argument otherwise.
 func (a *App) masker(r *inspect.Report) func(string) string {
 	if !a.hideIDs {
 		return func(s string) string { return s }
@@ -91,9 +82,8 @@ func (a *App) masker(r *inspect.Report) func(string) string {
 	return rep.Replace
 }
 
-// maskID keeps enough of an identifier to tell it from another: a network
-// address's octets but the fourth, the first and last three characters of
-// any other.
+// Keeps enough to tell IDs apart: a network address but its fourth octet,
+// else the first and last three characters.
 func maskID(id string) string {
 	if parts := strings.Split(id, ":"); len(parts) == 6 {
 		parts[3] = "**"
@@ -105,7 +95,6 @@ func maskID(id string) string {
 	return id[:3] + "***" + id[len(id)-3:]
 }
 
-// verdictCard is the inspection's conclusion and its tally.
 func verdictCard(c *ui.Context, r *inspect.Report) {
 	t := c.Theme()
 	m := locales.In(r.Lang)
@@ -133,8 +122,6 @@ func verdictCard(c *ui.Context, r *inspect.Report) {
 	})
 }
 
-// reportFacts lists what a buyer asks of the unit first, from the summary
-// and the checks.
 func reportFacts(c *ui.Context, r *inspect.Report, mask func(string) string) {
 	t := c.Theme()
 	m := locales.In(r.Lang)
@@ -172,8 +159,6 @@ func reportFacts(c *ui.Context, r *inspect.Report, mask func(string) string) {
 	})
 }
 
-// reportBanner says what needs attention, worst first, and when the
-// inspection ran.
 func reportBanner(c *ui.Context, r *inspect.Report) {
 	t := c.Theme()
 	m := locales.In(r.Lang)
@@ -204,9 +189,6 @@ func reportBanner(c *ui.Context, r *inspect.Report) {
 	})
 }
 
-// checksTable lists every check by category: its name, the factory value
-// and the value read, and its result. A check that is not a pass says why
-// under its row; a pass says it on hover.
 func checksTable(c *ui.Context, r *inspect.Report, mask func(string) string) {
 	t := c.Theme()
 	m := locales.In(r.Lang)
@@ -237,7 +219,6 @@ func checksTable(c *ui.Context, r *inspect.Report, mask func(string) string) {
 	})
 }
 
-// checkLine is one row of the checks table, banded when striped.
 func checkLine(c *ui.Context, m locales.Messages, ch inspect.Check, striped bool, mask func(string) string) {
 	t := c.Theme()
 	row := ui.Column(c).Padding(8, 12).Gap(4).Radius(6)
@@ -271,8 +252,6 @@ func checkLine(c *ui.Context, m locales.Messages, ch inspect.Check, striped bool
 	})
 }
 
-// readingCell is a factory or read value, with the date its serial
-// carries muted under it.
 func readingCell(c *ui.Context, rd inspect.Reading, mask func(string) string) {
 	ui.Column(c).Grow(1).Basis(0).MinWidth(0).Gap(2).Children(func() {
 		if rd.Value == "" {
@@ -286,7 +265,6 @@ func readingCell(c *ui.Context, rd inspect.Reading, mask func(string) string) {
 	})
 }
 
-// resultCell is a check's status, as an icon and its name in its color.
 func resultCell(c *ui.Context, st inspect.Status) {
 	t := c.Theme()
 	col := statusColor(t, st)
@@ -296,7 +274,6 @@ func resultCell(c *ui.Context, st inspect.Status) {
 	})
 }
 
-// manualCard lists what software cannot verify, to check by hand.
 func manualCard(c *ui.Context, m locales.Messages, manual []string) {
 	if len(manual) == 0 {
 		return
@@ -317,7 +294,6 @@ func manualCard(c *ui.Context, m locales.Messages, manual []string) {
 	})
 }
 
-// errorsCard lists the steps of the collection that failed.
 func errorsCard(c *ui.Context, m locales.Messages, errs []string) {
 	if len(errs) == 0 {
 		return

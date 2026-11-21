@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-// block builds a syscfg block of short entries and long ones, laid out as
-// an iPhone 8's: the long values at the end of the block.
 func block(short map[string]string, long map[string]string) []byte {
 	const size = 512
 	b := make([]byte, size)
@@ -61,12 +59,12 @@ func TestParseRejects(t *testing.T) {
 		t.Errorf("garbage: %v", err)
 	}
 	b := block(nil, map[string]string{"Batt": "FG99425S3TCZWQLAH"})
-	binary.LittleEndian.PutUint32(b[headerSize+12:], 1<<30) // the value's offset
+	binary.LittleEndian.PutUint32(b[headerSize+12:], 1<<30)
 	if _, err := Parse(b); err == nil {
 		t.Error("an entry pointing outside the block parsed")
 	}
 	b = block(nil, nil)
-	binary.LittleEndian.PutUint32(b[20:], 1000) // more entries than fit
+	binary.LittleEndian.PutUint32(b[20:], 1000)
 	if _, err := Parse(b); err == nil {
 		t.Error("an entry count beyond the block parsed")
 	}

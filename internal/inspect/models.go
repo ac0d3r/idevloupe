@@ -8,14 +8,11 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// Model is what an identifier such as "iPhone16,1" is.
 type Model struct {
 	Name string
-	Year int // year of release
+	Year int
 }
 
-// models maps ProductType to the marketing name and release year. Unknown
-// identifiers fall back to MobileGestalt's description or the raw value.
 var models = map[string]Model{
 	"iPhone8,1":  {"iPhone 6s", 2015},
 	"iPhone8,2":  {"iPhone 6s Plus", 2015},
@@ -66,9 +63,6 @@ var models = map[string]Model{
 	"iPhone18,2": {"iPhone 17 Pro Max", 2025},
 }
 
-// HasFaceID reports whether a model has Face ID: every iPhone from the
-// iPhone X on, except the iPhone SE (2nd and 3rd generation), which have
-// Touch ID. Unknown identifiers report false.
 func HasFaceID(productType string) bool {
 	m, ok := models[productType]
 	if !ok {
@@ -81,9 +75,6 @@ func HasFaceID(productType string) bool {
 	return m.Year >= 2018 || productType == "iPhone10,3" || productType == "iPhone10,6"
 }
 
-// HasTouchID reports whether a model has Touch ID: the iPhone 6s to the
-// iPhone 8 Plus and the iPhone SE of every generation. Unknown identifiers
-// report false.
 func HasTouchID(productType string) bool {
 	switch productType {
 	case "iPhone8,1", "iPhone8,2", "iPhone8,4", "iPhone9,1", "iPhone9,2", "iPhone9,3", "iPhone9,4",
@@ -93,15 +84,12 @@ func HasTouchID(productType string) bool {
 	return false
 }
 
-// localNames are the names of models that differ between languages.
 var localNames = map[string]func(locales.Messages) string{
 	"iPhone8,4":  locales.Messages.ModelSE1,
 	"iPhone12,8": locales.Messages.ModelSE2,
 	"iPhone14,6": locales.Messages.ModelSE3,
 }
 
-// LookupModel returns the model of a ProductType, named in the language
-// lang.
 func LookupModel(productType, lang string) (Model, bool) {
 	m, ok := models[productType]
 	if name, local := localNames[productType]; local {
@@ -110,9 +98,7 @@ func LookupModel(productType, lang string) (Model, bool) {
 	return m, ok
 }
 
-// regions maps the region part of a part number ("CH" of "MQ8X3CH/A") to
-// where the device was sold. Only codes whose meaning is well established
-// are listed; others are shown raw.
+// Only well-established codes; others are shown raw.
 var regions = map[string]func(locales.Messages) string{
 	"CH": locales.Messages.RegionCH,
 	"ZP": locales.Messages.RegionZP,
@@ -149,8 +135,6 @@ var regions = map[string]func(locales.Messages) string{
 	"KS": locales.Messages.RegionKS,
 }
 
-// RegionName describes a RegionInfo value such as "CH/A" in the language
-// lang.
 func RegionName(regionInfo, lang string) (string, bool) {
 	code, _, _ := strings.Cut(strings.TrimSpace(regionInfo), "/")
 	name, ok := regions[strings.ToUpper(code)]
@@ -160,7 +144,6 @@ func RegionName(regionInfo, lang string) (string, bool) {
 	return name(locales.In(lang)), true
 }
 
-// UnitKind is what the first letter of a part number says about the unit.
 type UnitKind struct {
 	Letter string
 	Name   string
@@ -168,8 +151,6 @@ type UnitKind struct {
 	Detail string
 }
 
-// UnitKindOf decodes the first character of a part number (ModelNumber),
-// describing it in the language lang.
 func UnitKindOf(modelNumber, lang string) UnitKind {
 	m := locales.In(lang)
 	if modelNumber == "" {
@@ -188,18 +169,16 @@ func UnitKindOf(modelNumber, lang string) UnitKind {
 	case "3":
 		return UnitKind{l, m.UnitDemo(), Fail, m.UnitDemoDetail()}
 	}
-	// A letter not listed is only unknown, no sign of a problem.
+	// An unlisted letter is unknown, not a problem.
 	return UnitKind{l, m.UnitOther(), Info, m.UnitOtherDetail(l)}
 }
 
-// SerialDate is a manufacture date decoded from a legacy 12-character serial.
 type SerialDate struct {
 	Year      int
-	Week      int // 1..53
+	Week      int
 	Ambiguous bool
 }
 
-// Text says the week in the language lang.
 func (d SerialDate) Text(lang string) string {
 	m := locales.In(lang)
 	if d.Ambiguous {
@@ -213,10 +192,8 @@ const (
 	serialWeekCodes = "123456789CDFGHJKLMNPQRTVWXY"
 )
 
-// DecodeSerial decodes the manufacture week of the 12-character serials
-// Apple used until 2021. It returns false for randomized serials (10
-// characters, from 2021 on) and anything it cannot decode. releaseYear, when
-// known, settles which decade the year letter means.
+// Legacy 12-character serials (until 2021) only; randomized ones return
+// false. releaseYear settles the decade.
 func DecodeSerial(serial string, releaseYear int, now time.Time) (SerialDate, bool) {
 	serial = strings.ToUpper(strings.TrimSpace(serial))
 	if len(serial) != 12 {
@@ -251,7 +228,6 @@ func DecodeSerial(serial string, releaseYear int, now time.Time) (SerialDate, bo
 	return SerialDate{Year: cands[0], Week: week, Ambiguous: releaseYear == 0 && len(cands) > 1}, true
 }
 
-// LuhnValid checks the check digit of an IMEI.
 func LuhnValid(s string) bool {
 	if len(s) < 2 {
 		return false
@@ -276,7 +252,6 @@ func LuhnValid(s string) bool {
 	return sum%10 == 0
 }
 
-// NominalCapacity rounds a disk size in bytes up to the marketed capacity.
 func NominalCapacity(bytes int64) string {
 	gb := float64(bytes) / 1e9
 	for _, n := range []int{8, 16, 32, 64, 128, 256, 512, 1024, 2048} {
@@ -290,8 +265,6 @@ func NominalCapacity(bytes int64) string {
 	return fmt.Sprintf("%.0f GB", gb)
 }
 
-// jailbreakApps are bundle identifiers of package managers, jailbreak
-// apps and tools that only install on modified systems.
 var jailbreakApps = map[string]string{
 	"com.saurik.Cydia":         "Cydia",
 	"org.coolstar.SileoStore":  "Sileo",

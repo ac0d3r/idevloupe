@@ -51,8 +51,6 @@ func sampleRaw() *inspect.RawData {
 	return raw
 }
 
-// iphoneXRaw is a real iPhone X whose screen was
-// replaced, Face ID broken, battery original but worn.
 func iphoneXRaw() *inspect.RawData {
 	f := false
 	raw := &inspect.RawData{
@@ -91,7 +89,6 @@ func iphoneXRaw() *inspect.RawData {
 	return raw
 }
 
-// The checks of Face ID, the parts and the battery reach the window.
 func TestPartsAndBatteryInUI(t *testing.T) {
 	a := testApp()
 	d := &devState{dev: usbmux.Device{DeviceID: 3, UDID: "x", ConnectionType: "USB"}, phase: phaseDone, raw: iphoneXRaw(), time: testTime}
@@ -103,7 +100,6 @@ func TestPartsAndBatteryInUI(t *testing.T) {
 			t.Errorf("report lacks %q", w)
 		}
 	}
-	// Scroll to the parts and the manual checks, for the screenshot.
 	tt.Wheel(700, 500, 0, -3000)
 	tt.Frame()
 	if dir := os.Getenv("SHOT_DIR"); dir != "" {
@@ -118,7 +114,6 @@ func TestPartsAndBatteryInUI(t *testing.T) {
 	}
 }
 
-// iPhone 8: Touch ID, self test OK.
 func TestTouchIDInUI(t *testing.T) {
 	f := false
 	raw := &inspect.RawData{
@@ -152,7 +147,6 @@ func TestTouchIDInUI(t *testing.T) {
 	if strings.Contains(texts, "面容 ID") {
 		t.Error("report shows Face ID on a Touch ID model")
 	}
-	// Hidden for a screenshot, the serial keeps its ends.
 	a.hideIDs = true
 	texts = strings.Join(shot(t, a, "8-report-hidden", false).Texts(), "\n")
 	if strings.Contains(texts, "FFNZM42CJC6C") || !strings.Contains(texts, "FFN***C6C") {
@@ -160,11 +154,8 @@ func TestTouchIDInUI(t *testing.T) {
 	}
 }
 
-// testTime is when the tests' inspections ran.
 var testTime = time.Date(2026, 11, 5, 12, 0, 0, 0, time.Local)
 
-// shot draws the window in Chinese, which the tests' texts are in, and
-// saves it to SHOT_DIR when set.
 func shot(t *testing.T, a *App, name string, dark bool) *ui.Tester {
 	return shotIn(t, a, name, dark, "zh-Hans")
 }
@@ -217,8 +208,6 @@ func TestViews(t *testing.T) {
 	shot(t, a, "pairing", false)
 }
 
-// On connecting, the window shows what the device says about itself and
-// judges nothing until asked to inspect it.
 func TestOverview(t *testing.T) {
 	a := testApp()
 	d := &devState{dev: usbmux.Device{DeviceID: 1, UDID: "u", ConnectionType: "USB"}, phase: phaseReady, info: sampleRaw(), infoTime: testTime}
@@ -240,8 +229,6 @@ func TestOverview(t *testing.T) {
 	for _, lang := range []string{"en", "de"} {
 		shotIn(t, a, "overview-"+lang, false, lang)
 	}
-	// Inspecting starts from the button. The device is not real: what the
-	// worker finds is dropped.
 	t.Setenv("USBMUXD_SOCKET_ADDRESS", "tcp://127.0.0.1:1")
 	a.update = func(func()) {}
 	a.detailsOpen = false
@@ -254,8 +241,6 @@ func TestOverview(t *testing.T) {
 	}
 }
 
-// The window says everything in its language, the report included, made
-// again from the raw data when the language changes.
 func TestLanguagesInUI(t *testing.T) {
 	a := testApp()
 	d := &devState{dev: usbmux.Device{DeviceID: 3, UDID: "x", ConnectionType: "USB"}, phase: phaseDone, raw: iphoneXRaw(), time: testTime}
@@ -286,7 +271,6 @@ func TestLanguagesInUI(t *testing.T) {
 	shotIn(t, a, "de-empty", false, "de")
 }
 
-// The language menu sets the app's language.
 func TestLanguagePicker(t *testing.T) {
 	a := testApp()
 	var got string
@@ -307,8 +291,6 @@ func TestLanguagePicker(t *testing.T) {
 	}
 }
 
-// After an inspection, the home sums it up by category, and the details
-// open over it.
 func TestHomeInspected(t *testing.T) {
 	a := testApp()
 	d := &devState{dev: usbmux.Device{DeviceID: 3, UDID: "x", ConnectionType: "USB"}, phase: phaseReady, raw: iphoneXRaw(), time: testTime}

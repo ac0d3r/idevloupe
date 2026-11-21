@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-// isoDate returns the day of an ISO week, Monday 1.
 func isoDate(year, week, day int) time.Time {
 	// ISO week 1 is the week with January 4th in it.
 	jan4 := time.Date(year, 1, 4, 0, 0, 0, 0, time.UTC)
@@ -14,9 +13,6 @@ func isoDate(year, week, day int) time.Time {
 	return monday.AddDate(0, 0, (week-1)*7+day-1)
 }
 
-// deviceMade returns when the device was made: the last day of the week
-// its legacy serial number tells. A randomized serial tells no date, and
-// the logic board's is the board's, not the device's: then false.
 func (a *analysis) deviceMade() (time.Time, bool) {
 	if d := a.mfg; d != nil && !d.Ambiguous {
 		return isoDate(d.Year, d.Week, 7), true
@@ -24,14 +20,11 @@ func (a *analysis) deviceMade() (time.Time, bool) {
 	return time.Time{}, false
 }
 
-// newerPart is a part made after the device.
 type newerPart struct {
 	name, serial string
 	made         time.Time
 }
 
-// partsNewer returns, of the parts whose serial numbers are given by name,
-// those made after the device's week, and how many were dated.
 func (a *analysis) partsNewer(serials map[string]string) (newer []newerPart, dated int) {
 	device, ok := a.deviceMade()
 	if !ok {
@@ -51,11 +44,8 @@ func (a *analysis) partsNewer(serials map[string]string) (newer []newerPart, dat
 	return newer, dated
 }
 
-// partDates checks that no part was made after the device, which a part
-// fitted at the factory cannot be. It needs no factory record, so it holds
-// on every iOS version; it cannot find a part taken from an older device.
-// Sample: an iPhone 12 (iOS 27) made in October 2021 whose battery serial
-// B0554… dates it to October 2025. The battery is weighed by batterySource.
+// A part fitted at the factory cannot be newer than the device. Sample: an
+// iPhone 12 made in October 2021 with a battery dated October 2025.
 func (a *analysis) partDates() {
 	m, raw := a.m, a.raw
 	device, ok := a.deviceMade()

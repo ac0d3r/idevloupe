@@ -8,7 +8,7 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// TestIcon renders the app icon: ICON_OUT=resources/icon.png go test -run TestIcon ./internal/gui
+// ICON_OUT=resources/icon.png go test -run TestIcon ./internal/gui
 func TestIcon(t *testing.T) {
 	out := os.Getenv("ICON_OUT")
 	if out == "" {

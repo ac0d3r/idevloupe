@@ -10,7 +10,6 @@ import (
 	"github.com/ac0d3r/idevloupe/internal/locales"
 )
 
-// languages are the languages the window offers, each named in itself.
 var languages = []string{"zh-Hans", "en", "de"}
 
 var monoFont = func() string {
@@ -53,7 +52,6 @@ func statusIcon(s inspect.Status) *ui.SVG {
 	return icHelp
 }
 
-// sidebarBg is a tone apart from the window background.
 func sidebarBg(t *ui.Theme) ui.Color { return t.Background.Mix(t.Text, 0.035) }
 
 func card(c *ui.Context) ui.Element {
@@ -66,7 +64,6 @@ func muted(c *ui.Context, s string) ui.Element {
 	return ui.Text(c, s).FontSize(12).TextColor(c.Theme().TextMuted)
 }
 
-// View builds the window.
 func (a *App) View(c *ui.Context) {
 	t := *c.Theme()
 	t.Radius = 7
@@ -75,8 +72,6 @@ func (a *App) View(c *ui.Context) {
 		c.Toast(a.toast)
 		a.toast = ""
 	}
-	// Overviews and reports follow the language: one made in another is
-	// made again.
 	for _, d := range a.devices {
 		d.overviewIn(c.Locale())
 		d.reportIn(c.Locale())
@@ -124,8 +119,6 @@ func (a *App) sidebar(c *ui.Context) {
 	})
 }
 
-// languagePicker chooses the app's language, which the app keeps for the
-// next launches.
 func (a *App) languagePicker(c *ui.Context) {
 	lang := c.Locale()
 	names := make([]string, len(languages))
@@ -228,8 +221,6 @@ func (a *App) mainPane(c *ui.Context) {
 				ui.Text(c, inspect.ErrorText(lang, d.err)).TextColor(c.Theme().TextMuted).TextAlign(ui.Center).Selectable().MaxWidth(520).Wrap()
 			}
 			if ui.PrimaryButton(c, m.Retry()).Margin(6, 0, 0, 0).Clicked() {
-				// An inspection that failed is tried again; a connection,
-				// made again.
 				if d.info != nil {
 					a.inspectDevice(d)
 				} else {
@@ -275,7 +266,6 @@ func (a *App) emptyState(c *ui.Context) {
 	})
 }
 
-// sectionsGrid lays out the device information, two sections a row.
 func sectionsGrid(c *ui.Context, secs []inspect.Section, columns int) {
 	t := c.Theme()
 	ui.Grid(c).Columns(columns).Gap(16).AlignItems(ui.Start).Children(func() {

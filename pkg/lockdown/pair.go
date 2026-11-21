@@ -18,9 +18,8 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/usbmux"
 )
 
-// Pairing is one attempt to pair, kept across the calls of Pair made while
-// the device's alert waits, so that every call offers the same record and
-// the keys are generated once. The zero value is ready to use.
+// Pairing keeps one record and key set across the Pair calls made while the
+// trust alert waits. The zero value is ready to use.
 type Pairing struct {
 	devicePub []byte
 	buid      string
@@ -28,12 +27,8 @@ type Pairing struct {
 	certs     *pairCerts
 }
 
-// Pair asks the device to trust this computer. The device shows its
-// "Trust This Computer?" alert; until the user answers, Pair returns
-// ErrPairingPending and should be called again with the same p. On success
-// the record is saved in usbmuxd, as iTunes and Finder do, and returned.
-//
-// The client must be connected without a session.
+// Pair returns ErrPairingPending until the user answers the trust alert; call
+// it again with the same p. The client must be connected without a session.
 func (l *Client) Pair(p *Pairing) (*usbmux.PairRecord, error) {
 	pubV, err := l.GetValue("", "DevicePublicKey")
 	if err != nil {
@@ -186,8 +181,6 @@ func makePairCerts(devicePubPEM []byte) (*pairCerts, error) {
 	}, nil
 }
 
-// parseRSAPublicKey accepts PKCS#1 (what devices send, "RSA PUBLIC KEY") and
-// PKIX encodings.
 func parseRSAPublicKey(der []byte) (*rsa.PublicKey, error) {
 	if k, err := x509.ParsePKCS1PublicKey(der); err == nil {
 		return k, nil

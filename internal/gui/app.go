@@ -1,4 +1,3 @@
-// Package gui is the desktop interface, drawn with MyGo's native UI.
 package gui
 
 import (
@@ -26,45 +25,36 @@ type phase int
 const (
 	phaseConnecting phase = iota
 	phasePairing
-	phaseReady // the overview is shown
+	phaseReady
 	phaseInspecting
-	phaseDone // the report is shown
+	phaseDone
 	phaseError
 )
 
-// devState is one connected device as the window shows it. Only the main
-// thread touches it; workers change it through App.update.
+// Only the main thread touches devState; workers change it through App.update.
 type devState struct {
-	dev   usbmux.Device
-	basic device.Basic
-	phase phase
-	// step says what the inspection is doing, in a language.
-	step func(lang string) string
-	err  error
-	// info is what was read on connecting; overview is made from it in the
-	// window's language, and made again when that changes.
+	dev      usbmux.Device
+	basic    device.Basic
+	phase    phase
+	step     func(lang string) string
+	err      error
 	info     *inspect.RawData
 	infoTime time.Time
 	overview *inspect.Overview
-	// raw is what the inspection read, the report likewise made from it.
-	raw    *inspect.RawData
-	time   time.Time
-	report *inspect.Report
-	cancel context.CancelFunc
+	raw      *inspect.RawData
+	time     time.Time
+	report   *inspect.Report
+	cancel   context.CancelFunc
 }
 
-// stepOf says msg in the language asked.
 func stepOf(msg func(locales.Messages) string) func(string) string {
 	return func(lang string) string { return msg(locales.In(lang)) }
 }
 
-// errorStep says err in the language asked.
 func errorStep(err error) func(string) string {
 	return func(lang string) string { return inspect.ErrorText(lang, err) }
 }
 
-// reportIn returns the report in lang, making it from the raw data when
-// there is none in that language yet.
 func (d *devState) reportIn(lang string) *inspect.Report {
 	if d.raw == nil {
 		return d.report
@@ -78,8 +68,6 @@ func (d *devState) reportIn(lang string) *inspect.Report {
 	return d.report
 }
 
-// overviewIn returns the overview in lang, made from what was read on
-// connecting, or else from the inspection's data.
 func (d *devState) overviewIn(lang string) *inspect.Overview {
 	raw, at := d.info, d.infoTime
 	if d.raw != nil {
@@ -120,11 +108,9 @@ func (d *devState) subtitle(lang string) string {
 	return d.basic.ProductType
 }
 
-// App is the window's state.
 type App struct {
 	win *mygo.Window
 
-	// update runs fn on the main thread and redraws; tests replace it.
 	update func(fn func())
 
 	devices  []*devState
@@ -132,23 +118,15 @@ type App struct {
 	muxErr   error
 	toast    string
 
-	// hideIDs is whether the report hides the serials and addresses that
-	// name the unit, for a screenshot to share.
-	hideIDs bool
-	// detailsOpen is whether the overview's device details are shown.
+	hideIDs     bool
 	detailsOpen bool
-	// batteryOpen is whether the overview's battery details are shown.
 	batteryOpen bool
-	// storageOpen is whether the overview's storage details are shown.
 	storageOpen bool
-	// icloudOpen is whether the overview's iCloud details are shown.
-	icloudOpen bool
+	icloudOpen  bool
 
-	// setLocale changes the app's language; tests replace it.
 	setLocale func(tag string)
 }
 
-// New makes the state; Start begins watching for devices.
 func New() *App {
 	a := &App{setLocale: mygo.App.SetLocale}
 	a.update = func(fn func()) {
@@ -161,7 +139,6 @@ func New() *App {
 	return a
 }
 
-// Run opens the window and runs the app.
 func Run() error {
 	a := New()
 	mygo.App.WhenReady(func() {
@@ -203,8 +180,6 @@ func (a *App) current() *devState {
 	return nil
 }
 
-// watch follows usbmuxd's attach and detach events, reconnecting if
-// usbmuxd goes away.
 func (a *App) watch() {
 	for {
 		events, err := usbmux.Listen(context.Background())
@@ -217,8 +192,8 @@ func (a *App) watch() {
 		for ev := range events {
 			a.update(func() { a.handle(ev) })
 		}
-		// The listener ended: usbmuxd restarted. Forget the devices; the
-		// new listener reports those still attached.
+		// The listener ended: usbmuxd restarted. The new listener reports the devices
+		// still attached.
 		a.update(func() {
 			for _, d := range a.devices {
 				if d.cancel != nil {
@@ -259,8 +234,6 @@ func (a *App) handle(ev usbmux.Event) {
 	a.start(d)
 }
 
-// start connects to d in the background, pairing if need be, and reads
-// what its overview shows.
 func (a *App) start(d *devState) {
 	d.info, d.overview, d.raw, d.report = nil, nil, nil, nil
 	d.phase, d.step, d.err = phaseConnecting, stepOf(locales.Messages.StepConnecting), nil
@@ -268,16 +241,12 @@ func (a *App) start(d *devState) {
 	go a.connect(ctx, set, d, d.dev)
 }
 
-// inspectDevice runs an inspection of d in the background.
 func (a *App) inspectDevice(d *devState) {
 	d.phase, d.step, d.err = phaseInspecting, stepOf(locales.Messages.StepInspecting), nil
 	_, set := a.run(d)
 	go a.inspect(set, d, d.dev)
 }
 
-// run cancels what runs for d and returns the context of the work that
-// replaces it, and its setter, which changes d on the main thread while
-// the work is current.
 func (a *App) run(d *devState) (context.Context, func(fn func())) {
 	if d.cancel != nil {
 		d.cancel()
@@ -296,9 +265,8 @@ func (a *App) run(d *devState) (context.Context, func(fn func())) {
 	}
 }
 
-// connect runs on its own goroutine: it reads nothing of d, which the
-// main thread owns, and changes it through set. dev is d's device as the
-// work began.
+// connect runs on its own goroutine: it must not read d, which the main
+// thread owns, and changes it through set.
 func (a *App) connect(ctx context.Context, set func(func()), d *devState, dev usbmux.Device) {
 	fail := func(err error) {
 		set(func() { d.phase, d.err = phaseError, err })
@@ -319,7 +287,6 @@ func (a *App) connect(ctx context.Context, set func(func()), d *devState, dev us
 			fail(err)
 			return
 		}
-		// Ask for trust, then keep asking while the alert is up.
 		set(func() { d.phase, d.step = phasePairing, errorStep(lockdown.ErrPairingPending) })
 		var pairing lockdown.Pairing
 		for {
@@ -342,7 +309,6 @@ func (a *App) connect(ctx context.Context, set func(func()), d *devState, dev us
 			case <-time.After(1500 * time.Millisecond):
 			}
 		}
-		// Paired: open the session on the next turn of the loop.
 	}
 
 	set(func() { d.phase, d.step = phaseConnecting, stepOf(locales.Messages.StepDeviceInfo) })
@@ -358,7 +324,6 @@ func (a *App) connect(ctx context.Context, set func(func()), d *devState, dev us
 	})
 }
 
-// inspect runs on its own goroutine, as connect does.
 func (a *App) inspect(set func(func()), d *devState, dev usbmux.Device) {
 	l, err := device.Open(dev)
 	if err != nil {
@@ -388,8 +353,6 @@ func (a *App) copyReport(r *inspect.Report) {
 	a.toast = m.ToastCopied()
 }
 
-// exporting is held while the save dialog is open, so that a second
-// click opens no second dialog.
 var exporting sync.Mutex
 
 func (a *App) exportReport(r *inspect.Report) {

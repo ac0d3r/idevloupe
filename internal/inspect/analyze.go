@@ -12,9 +12,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/plistx"
 )
 
-// Analyze turns raw data into a report in the language lang, a tag of
-// locales.Catalog's languages. It is pure, so tests feed it recorded data,
-// and the window makes the report again when the language changes.
 func Analyze(raw *RawData, now time.Time, lang string) *Report {
 	a := newAnalysis(raw, now, lang)
 	a.summary()
@@ -36,8 +33,6 @@ func Analyze(raw *RawData, now time.Time, lang string) *Report {
 	return r
 }
 
-// analysis is one run of Analyze: the data, the language, the report it
-// makes, and the values that several checks share.
 type analysis struct {
 	raw  *RawData
 	v    view
@@ -48,12 +43,11 @@ type analysis struct {
 
 	productType string
 	model       Model
-	known       bool // productType is in the model table
+	known       bool
 	modelNumber string
 	regionInfo  string
 	telephony   bool
-	// mfg is the week of manufacture a legacy serial number tells, if any.
-	mfg *SerialDate
+	mfg         *SerialDate
 }
 
 func newAnalysis(raw *RawData, now time.Time, lang string) *analysis {
@@ -76,12 +70,10 @@ func newAnalysis(raw *RawData, now time.Time, lang string) *analysis {
 	return a
 }
 
-// add records a check.
 func (a *analysis) add(cat, title, value string, st Status, detail string) {
 	a.r.Checks = append(a.r.Checks, Check{Category: cat, Title: title, Value: value, Status: st, Detail: detail})
 }
 
-// summary fills the report's header.
 func (a *analysis) summary() {
 	v, r := a.v, a.r
 	marketing := a.model.Name
@@ -123,7 +115,6 @@ func (a *analysis) summary() {
 
 var betaBuild = regexp.MustCompile(`^\d+[A-Z]\d+[a-z]$`)
 
-// basics checks what the unit is: model, kind, region, chip, system.
 func (a *analysis) basics() {
 	m, v := a.m, a.v
 	marketing := a.r.Summary.Marketing
@@ -152,8 +143,7 @@ func (a *analysis) basics() {
 		a.add(basic, m.CheckRegion(), a.regionInfo, Info, m.RegionNotInTable())
 	}
 
-	// software_behavior's ChinaBrick is set on units made for mainland
-	// China (WLAN wording, dual physical SIM), independently of RegionInfo.
+	// ChinaBrick is set on units made for mainland China, independently of RegionInfo.
 	if cb, ok := v.domainBool("com.apple.mobile.software_behavior", "ChinaBrick"); ok && a.regionInfo != "" {
 		isCH := strings.HasPrefix(strings.ToUpper(a.regionInfo), "CH/")
 		if cb == isCH {
@@ -188,7 +178,7 @@ func (a *analysis) basics() {
 	default:
 		a.add(basic, m.CheckSystemVersion(), fmt.Sprintf("iOS %s (%s)", ver, build), Pass, "")
 	}
-	// Retail builds carry no ReleaseType; internal and seed builds do.
+	// Retail builds carry no ReleaseType.
 	switch rt := v.str("ReleaseType"); rt {
 	case "":
 	case "Internal", "NonUI":
@@ -206,8 +196,6 @@ func (a *analysis) basics() {
 	}
 }
 
-// identity checks the serial number, the IMEI and that the sources of
-// the identifiers agree.
 func (a *analysis) identity() {
 	m, v := a.m, a.v
 	serial := a.r.Summary.Serial
@@ -235,12 +223,9 @@ func (a *analysis) identity() {
 		a.add(ident, m.CheckSerial(), serial, Warn, m.SerialOddLength(len(serial)))
 	}
 
-	// Cross-check values iOS reports through independent paths. Lockdown
-	// and MobileGestalt both read the factory syscfg, the device tree holds
-	// what iBoot passed to the kernel.
+	// Cross-check identifiers reported through independent paths: lockdown and
+	// MobileGestalt read syscfg, the device tree holds what iBoot passed.
 	type src struct{ name, val string }
-	// consistency compares the sources, nil when fewer than two say; id:
-	// the values name the unit.
 	consistency := func(title string, id bool, sources []src) *Check {
 		var have []src
 		for _, s := range sources {
@@ -266,8 +251,6 @@ func (a *analysis) identity() {
 		if !same {
 			ch.Value, ch.Status, ch.Detail = m.ValueInconsistent(), Fail, m.JoinSentences(values, m.SourcesDisagree())
 		}
-		// What lockdown says, against the factory record when read: with no
-		// record the row still shows the value, not only that it agrees.
 		if have[0].name == "lockdown" {
 			ch.Read = Reading{Value: have[0].val, ID: id}
 			if factory := sources[len(sources)-1]; factory.name == "SysCfg" && factory.val != "" {
@@ -282,8 +265,6 @@ func (a *analysis) identity() {
 		}
 	}
 	deviceTree := m.SourceDeviceTree()
-	// The serial's sources agreeing is part of the serial's own check: one
-	// row, the factory record's serial beside lockdown's.
 	if ch := consistency(m.CheckSerial(), true, []src{
 		{"lockdown", serial},
 		{deviceTree, v.platformStr("IOPlatformSerialNumber", "serial-number")},
@@ -297,8 +278,7 @@ func (a *analysis) identity() {
 			sc.Value, sc.Status = ch.Value, ch.Status
 		}
 	}
-	// A part number is model and region; a source missing either has no
-	// complete value to compare.
+	// A part number is model + region; a source missing either is skipped.
 	partNumber := func(number, region string) string {
 		if number == "" || region == "" {
 			return ""
@@ -340,8 +320,6 @@ func (a *analysis) identity() {
 	}
 }
 
-// security checks the locks and the management that bind the unit to an
-// account or an organization, and the signs of a modified system.
 func (a *analysis) security() {
 	a.activation()
 	a.findMy()
@@ -351,7 +329,6 @@ func (a *analysis) security() {
 	a.systemFlags()
 }
 
-// activation checks the activation state.
 func (a *analysis) activation() {
 	m, v := a.m, a.v
 	sec := m.CategorySecurity()
@@ -369,7 +346,6 @@ func (a *analysis) activation() {
 	}
 }
 
-// findMy checks Activation Lock.
 func (a *analysis) findMy() {
 	m := a.m
 	sec := m.CategorySecurity()
@@ -385,15 +361,12 @@ func (a *analysis) findMy() {
 	}
 }
 
-// findMyState reads whether Find My is on, from its lockdown domain or
-// else NVRAM, and where NVRAM was the source, says so in detail.
 func (a *analysis) findMyState() (on, ok bool, detail string) {
 	m, v := a.m, a.v
 	fmOn, fmOK := v.domainBool("com.apple.fmip", "IsAssociated")
 	fmDetail := ""
 	if !fmOK {
-		// The Find My daemon mirrors its state into NVRAM, which lockdown
-		// returns with the root values.
+		// Find My mirrors its state into NVRAM, returned with the root values.
 		if nv := v.nvram(); nv != nil {
 			if st, ok := plistx.String(nv["fm-activation-locked"]); ok && st != "" {
 				fmOn, fmOK = strings.EqualFold(st, "YES"), true
@@ -407,7 +380,6 @@ func (a *analysis) findMyState() (on, ok bool, detail string) {
 	return fmOn, fmOK, fmDetail
 }
 
-// supervision checks whether the unit is supervised.
 func (a *analysis) supervision() {
 	m, v := a.m, a.v
 	sec := m.CategorySecurity()
@@ -428,8 +400,6 @@ func (a *analysis) supervision() {
 	}
 }
 
-// management checks enrollment in Apple Business Manager, MDM and the
-// configuration profiles.
 func (a *analysis) management() {
 	m, r := a.m, a.r
 	sec := m.CategorySecurity()
@@ -460,8 +430,7 @@ func (a *analysis) management() {
 	for _, p := range mc.Profiles {
 		pe := ProfileEntry{Identifier: p.Identifier, Name: p.DisplayName, Organization: p.Organization, MDM: p.IsMDM}
 		r.Profiles = append(r.Profiles, pe)
-		// Only a profile that says it is MDM's is taken for it; one the
-		// user may not remove is listed with the others.
+		// Only a profile marked as MDM's counts as MDM.
 		if p.IsMDM {
 			mdm = append(mdm, pe)
 		}
@@ -497,7 +466,6 @@ func (a *analysis) management() {
 	}
 }
 
-// jailbreak looks for jailbreak apps and the afc2 service.
 func (a *analysis) jailbreak() {
 	m, r := a.m, a.r
 	sec := m.CategorySecurity()
@@ -532,7 +500,6 @@ func (a *analysis) jailbreak() {
 	}
 }
 
-// systemFlags reports settings a retail unit in use does not have.
 func (a *analysis) systemFlags() {
 	m, v := a.m, a.v
 	sec := m.CategorySecurity()
@@ -549,7 +516,6 @@ func (a *analysis) systemFlags() {
 	}
 }
 
-// cellular checks the baseband and the SIM of a unit that has them.
 func (a *analysis) cellular() {
 	if !a.telephony {
 		return
@@ -578,7 +544,6 @@ func (a *analysis) cellular() {
 	}
 }
 
-// other reports what fits no category: an unfinished setup.
 func (a *analysis) other() {
 	m, v := a.m, a.v
 	if b, ok := v.domainBool("com.apple.PurpleBuddy", "SetupDone"); ok && !b {
@@ -586,8 +551,6 @@ func (a *analysis) other() {
 	}
 }
 
-// manualChecks lists what software cannot verify, naming the model's own
-// biometric sensor.
 func manualChecks(m locales.Messages, productType string) []string {
 	bio := m.BioFaceOrTouch()
 	switch {

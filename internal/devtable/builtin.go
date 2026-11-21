@@ -1,13 +1,8 @@
 package devtable
 
-// The table built in: what the program reads of 3uTools' device table
-// (devices_table.txt), version 2026.10.23.01, for iPhone, iPad and iPod
-// touch, and nothing else of it. Facts of Apple's devices: colors by model
-// and color code, release dates, screens, chips, and battery makers by
-// serial prefix.
+// From 3uTools' devices_table.txt, version 2026.10.23.01.
 
-// builtinColors are the colors by ProductType, in the table's order: the
-// first that matches a code names it.
+// In the table's order: the first that matches a code names it.
 var builtinColors = map[string][]color{
 	"iPad1,1": {
 		{back: "silver", front: "black", backName: Text{"银色", "Silver"}, frontName: Text{"黑色", "Black"}},
@@ -967,7 +962,6 @@ var builtinColors = map[string][]color{
 	},
 }
 
-// builtinModels are the models by ProductType.
 var builtinModels = map[string]Model{
 	"iPad1,1":    {ReleaseDate: Text{"2010年1月27日", "1/27/2010"}, ScreenSize: Text{"9.7 英寸", "9.7 inches"}, Chip: Text{"A4 单核", "A4 Single"}, Cores: "1", Frequency: "1GHz", Resolution: "1024 x 768"},
 	"iPad11,1":   {ReleaseDate: Text{"2019年3月18日", "3/18/2019"}, ScreenSize: Text{"7.9 英寸", "7.9 inches"}, Chip: Text{"A12 六核", "A12 Hexa"}, Cores: "6", Frequency: "2.5GHz", Resolution: "2048 x 1536"},
@@ -1150,8 +1144,6 @@ var builtinModels = map[string]Model{
 	"iPod9,1":    {ReleaseDate: Text{"2019年5月28日", "5/28/2019"}, ScreenSize: Text{"4.0 英寸", "4.0 inches"}, Chip: Text{"A10 四核", "A10 Quad"}, Cores: "4", Frequency: "2.3GHz", Resolution: "640 x 1136"},
 }
 
-// builtinBatteries are the battery makers by the serial's first two
-// characters.
 var builtinBatteries = map[string]Text{
 	"AE": {"东莞新能源", "ATL"},
 	"AF": {"东莞新能源", "ATL"},

@@ -9,9 +9,6 @@ import (
 	"github.com/ac0d3r/idevloupe/pkg/services"
 )
 
-// addresses compares each network address lockdown gives with the factory
-// record's: a difference means another logic board or radio, or an address
-// written over.
 func (a *analysis) addresses() {
 	m, v := a.m, a.v
 	cat := m.CategoryIdentity()
@@ -33,21 +30,16 @@ func (a *analysis) addresses() {
 	}
 }
 
-// factory compares the serial numbers of the parts the factory
-// configuration records with those the parts report now. Samples: an
-// iPhone 8 (iOS 16) whose front camera, display panel and touch glass differ
-// from the record; an iPhone X (iOS 16) whose record all matches although
-// its screen was replaced, the original's serial most likely written onto
-// the new one. So a match is consistency, not proof that a part is
-// original, and a mismatch is a replacement, not proof that the new part is
-// not genuine.
+// Samples: an iPhone 8 (iOS 16) whose front camera, panel and glass differ
+// from the record; an iPhone X (iOS 16) matching despite a replaced screen.
+// A match is consistency, not proof of an original part; a mismatch is a
+// replacement, not proof of a non-genuine one.
 func (a *analysis) factory() {
 	m, raw := a.m, a.raw
 	cat := m.CategoryParts()
 	if raw.SysCfg == nil {
-		// iOS 17.4 and later give no MobileGestalt: the record is not to be
-		// had, which the manual checks' parts history covers. Unknown is for
-		// a record that should have been read and was not.
+		// iOS 17.4+ gives no MobileGestalt, so no record; Unknown is only for a
+		// record that should have been read and was not.
 		switch {
 		case raw.SysCfgErr != nil:
 			a.add(cat, m.CheckFactoryRecord(), "", Unknown, m.WithNote(m.FactoryUnread(), raw.SysCfgErr.Error()))
@@ -74,10 +66,8 @@ func (a *analysis) factory() {
 	}
 	for _, p := range []struct {
 		name, tag, current string
-		// screen: the record is the panel's or the glass's, several serials
-		// joined with '+' of which the first is the part's own, and a match
-		// is weak, the original serial being often written onto a new screen
-		// (the iPhone X sample).
+		// The screen's record joins serials with '+', the first its own; a match is
+		// weak, as the original serial is often written onto a new screen.
 		screen bool
 	}{
 		{m.PartBattery(), "Batt", battery, false},
@@ -96,9 +86,8 @@ func (a *analysis) factory() {
 		}
 		a.factoryCheck(cat, p.name, factory, current, true, p.screen)
 	}
-	// The Touch ID sensor's record is 4 bytes of header, then the sensor's
-	// 16-byte serial number with each 32-bit word byte-swapped: an iPhone 8's
-	// 6c101702 29858060 … is the sensor's 0217106c 60808529 ….
+	// The Touch ID record is a 4-byte header, then the 16-byte serial with each
+	// 32-bit word byte-swapped: 6c101702 29858060 … is 0217106c 60808529 ….
 	if rec := raw.SysCfg["NSrN"]; len(rec) == 20 {
 		sn := make([]byte, 16)
 		for i := 0; i < 16; i += 4 {
@@ -109,9 +98,6 @@ func (a *analysis) factory() {
 	}
 }
 
-// factoryCheck adds the comparison of one part's factory serial with its
-// current one. dated tells serials that carry a date of manufacture; screen,
-// a part whose match is only worth knowing, not a pass.
 func (a *analysis) factoryCheck(cat, part, factory, current string, dated, screen bool) {
 	m := a.m
 	title := m.CheckPartFactory(part)
@@ -145,12 +131,9 @@ func (a *analysis) factoryCheck(cat, part, factory, current string, dated, scree
 	a.r.Checks = append(a.r.Checks, ch)
 }
 
-// PartDate reads the date of manufacture a part's serial number carries
-// after its three-character supplier code: the year's last digit, the ISO
-// week and the weekday, Monday 1. An iPhone 8's front camera F0W94170…
-// was made on 2019-10-13 (2019, week 41, day 7), and so its other parts. The decade is the latest that is not in the future
-// at now. Serials of other forms, such as the Touch ID sensor's hex, are not
-// dated.
+// PartDate: after a 3-character supplier code, the year's last digit, the
+// ISO week and the weekday (Monday 1); F0W94170… is 2019-10-13. The decade
+// is the latest not in the future at now.
 func PartDate(serial string, now time.Time) (time.Time, bool) {
 	if len(serial) < 12 || serial[0] < 'A' || serial[0] > 'Z' {
 		return time.Time{}, false
