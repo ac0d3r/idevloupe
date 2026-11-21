@@ -56,7 +56,6 @@
 @layer base {
   html { scroll-behavior: smooth; }
   body { @apply bg-page text-ink font-sans antialiased leading-relaxed; }
-  /* Elements that arrive through the translations' innerHTML. */
   code { @apply font-mono text-[0.9em] bg-accent-soft px-1.5 py-px rounded; }
   b { @apply font-semibold text-ink; }
 }
@@ -90,7 +89,7 @@
   <div class="mx-auto max-w-[1080px] px-5 pt-12 pb-10 text-center sm:pt-18">
     <img class="mx-auto size-24" src="icon.png" alt="iDevLoupe">
     <h1 class="mt-4.5 mb-3.5 text-[clamp(32px,5vw,48px)] leading-tight font-bold tracking-tight" data-t="heroTitle">iPhone 设备管理工具</h1>
-    <p class="mx-auto mb-7 max-w-160 text-lg text-muted" data-t="heroLead">用 Go 与 MyGo 写成的原生桌面应用。目前提供验机：用数据线连上 iPhone，读取它自己报告的硬件、系统与安全信息，只凭证据逐项给出结论。</p>
+    <p class="mx-auto mb-7 max-w-160 text-lg text-muted" data-t="heroLead">用 Go 与 MyGo 写成的原生桌面应用。目前提供验机：数据线连上 iPhone，读取它报告的硬件、系统与安全信息，凭证据逐项给出结论。</p>
     <div class="flex flex-wrap justify-center gap-3">
       <a class="gradient-accent inline-flex items-center gap-2 rounded-[10px] px-5 py-3 text-[15px] font-semibold text-on-accent hover:brightness-106" id="primary" href="#download">
         <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -106,20 +105,20 @@
   <section id="features" class="border-y border-line bg-soft py-12 sm:py-16">
     <div class="mx-auto max-w-[1080px] px-5">
       <h2 class="mb-2 text-[28px] font-bold tracking-tight" data-t="featuresTitle">功能</h2>
-      <p class="mb-8 text-muted" data-t="featuresSub">该查的都查，查不到的直说。每项附上依据，读不到的标为「未知」。</p>
+      <p class="mb-8 text-muted" data-t="featuresSub">该查的都查，每项附依据，读不到的标为「未知」。</p>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4 [&_h3]:mb-1.5 [&_h3]:font-bold [&_p]:text-sm [&_p]:text-muted [&_.ico]:mb-3 [&_.ico]:grid [&_.ico]:size-9 [&_.ico]:place-items-center [&_.ico]:rounded-[9px] [&_.ico]:bg-accent-soft [&_.ico]:text-accent [&_svg]:size-5">
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
-          <h3 data-t="f1t">是它说的那台吗</h3><p data-t="f1d">型号、销售地区、机器类型，序列号与 IMEI 格式，不同来源的序列号与型号是否一致。</p></div>
+          <h3 data-t="f1t">是它说的那台吗</h3><p data-t="f1d">型号、销售地区、机器类型，序列号与 IMEI 格式，各来源的序列号与型号是否一致。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
           <h3 data-t="f2t">还有谁能锁住它</h3><p data-t="f2d">查找我的 iPhone（激活锁）、监管模式、设备注册与 MDM、描述文件、激活状态。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M6 10v4"/><path d="M10 10v4"/></svg></div>
-          <h3 data-t="f3t">电池，实话实说</h3><p data-t="f3d">健康度、循环次数、内阻指标；循环次数低于历史记录或电芯晚于整机生产时，提示更换过。</p></div>
+          <h3 data-t="f3t">电池，实话实说</h3><p data-t="f3d">健康度、循环次数、内阻；循环次数低于历史记录或电芯晚于整机生产，即提示更换。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg></div>
-          <h3 data-t="f4t">部件，对照出厂</h3><p data-t="f4d">部件序列号与出厂记录逐一对比，部件生产日期是否晚于整机，面容 ID 自检与 Touch ID 传感器状态。</p></div>
+          <h3 data-t="f4t">部件，对照出厂</h3><p data-t="f4d">部件序列号对照出厂记录、生产日期是否晚于整机，面容 ID 自检与 Touch ID 传感器状态。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></div>
           <h3 data-t="f5t">系统没被动过吗</h3><p data-t="f5d">常见越狱应用与 afc2 服务、启动参数、工程机芯片、内部版 / 测试版系统、基带与 SIM 状态。</p></div>
         <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
-          <h3 data-t="f6t">只留在你的电脑上</h3><p data-t="f6d">不联网、不上传，手机号与 SIM 卡号不进入报告。报告可复制或导出为文本 / JSON。</p></div>
+          <h3 data-t="f6t">只留在你的电脑上</h3><p data-t="f6d">不联网、不上传，手机号与 SIM 卡号不进报告。报告可复制或导出为文本 / JSON。</p></div>
       </div>
       <div class="mx-auto mt-11 max-w-250 overflow-hidden rounded-[14px] border border-line bg-card shadow-shot"><img class="block h-auto w-full" id="shot" src="screenshot-zh.png" width="2360" height="1560" alt="iDevLoupe 的验机报告界面" data-t-alt="shotAlt"></div>
     </div>
@@ -129,7 +128,6 @@
     <div class="mx-auto max-w-[1080px] px-5">
       <h2 class="mb-2 text-[28px] font-bold tracking-tight" data-t="downloadTitle">下载</h2>
       <p class="mb-8 text-muted" data-t="downloadSub">最新版本，来自 GitHub Releases。</p>
-      <!-- The script adds .recommended to the visitor's card. -->
       <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4 [&>.card]:flex [&>.card]:flex-col [&>.card]:gap-3 [&_.recommended]:border-accent [&_.recommended]:ring-3 [&_.recommended]:ring-accent-soft [&_h3]:text-lg [&_h3]:font-bold [&_.badge]:hidden [&_.badge]:rounded-full [&_.badge]:bg-accent-soft [&_.badge]:px-2 [&_.badge]:py-0.5 [&_.badge]:text-xs [&_.badge]:font-semibold [&_.badge]:text-accent [&_.recommended_.badge]:inline-block [&_.files]:flex [&_.files]:flex-col [&_.files]:gap-2 [&_.files_a]:flex [&_.files_a]:items-center [&_.files_a]:justify-between [&_.files_a]:gap-3 [&_.files_a]:rounded-lg [&_.files_a]:border [&_.files_a]:border-line [&_.files_a]:px-3 [&_.files_a]:py-2.5 [&_.files_a]:text-sm [&_.files_a]:text-ink [&_.files_a:hover]:border-accent [&_.files_a>span:last-child]:font-mono [&_.files_a>span:last-child]:text-xs [&_.files_a>span:last-child]:text-muted [&_.req]:text-[13px] [&_.req]:text-muted">
         <div class="card" data-os="mac">
           <div class="flex items-center gap-2.5"><h3>macOS</h3><span class="badge" data-t="recommended">推荐</span></div>
@@ -144,7 +142,7 @@
             <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-windows-amd64.exe"><span>x64</span><span>.exe</span></a>
             <a href="https://github.com/ac0d3r/idevloupe/releases/latest/download/idevloupe-windows-arm64.exe"><span>ARM64</span><span>.exe</span></a>
           </div>
-          <p class="req" data-t="winReq">需先安装 <b>Apple 设备</b>（Microsoft Store）或 <b>iTunes</b>，以提供 iPhone 驱动。</p>
+          <p class="req" data-t="winReq">需先安装 <b>Apple 设备</b>（Microsoft Store）或 <b>iTunes</b> 提供驱动。</p>
         </div>
         <div class="card" data-os="linux">
           <div class="flex items-center gap-2.5"><h3>Linux</h3><span class="badge" data-t="recommended">推荐</span></div>
@@ -166,9 +164,9 @@
       <h2 class="mb-2 text-[28px] font-bold tracking-tight" data-t="howTitle">怎么用</h2>
       <p class="mb-8 text-muted" data-t="howSub">无需登录，无需在手机上装任何东西。</p>
       <ol class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4 [&>li]:card [&>li]:relative [&>li]:pl-16 [&>li]:text-sm [&>li]:text-muted [&_b]:mb-1 [&_b]:block [&_b]:text-[15px] [&_i]:gradient-accent [&_i]:absolute [&_i]:top-4.5 [&_i]:left-5 [&_i]:grid [&_i]:size-7.5 [&_i]:place-items-center [&_i]:rounded-full [&_i]:font-bold [&_i]:not-italic [&_i]:text-on-accent">
-        <li><i aria-hidden="true">1</i><b data-t="s1t">用数据线连接电脑</b><span data-t="s1d">打开 iDevLoupe，用 USB 线连接 iPhone，设备会自动出现在左侧。</span></li>
+        <li><i aria-hidden="true">1</i><b data-t="s1t">用数据线连接电脑</b><span data-t="s1d">打开 iDevLoupe，用 USB 线连接 iPhone，设备会出现在左侧。</span></li>
         <li><i aria-hidden="true">2</i><b data-t="s2t">解锁并点「信任」</b><span data-t="s2d">首次连接时，在 iPhone 上选择「信任此电脑」并输入锁屏密码。</span></li>
-        <li><i aria-hidden="true">3</i><b data-t="s3t">查看报告</b><span data-t="s3d">需要关注的项排在最前面。报告末尾的「需人工核对」清单请在手机上逐项确认。</span></li>
+        <li><i aria-hidden="true">3</i><b data-t="s3t">查看报告</b><span data-t="s3d">需关注的项排在最前；末尾的「需人工核对」清单请在手机上逐项确认。</span></li>
       </ol>
     </div>
   </section>
@@ -176,10 +174,10 @@
   <section class="py-12 sm:py-16">
     <div class="mx-auto max-w-[1080px] px-5 [&_details]:mb-2.5 [&_details]:rounded-[10px] [&_details]:border [&_details]:border-line [&_details]:bg-card [&_details]:px-4.5 [&_details]:py-3.5 [&_summary]:cursor-pointer [&_summary]:font-semibold [&_details_p]:mt-2.5 [&_details_p]:text-sm [&_details_p]:text-muted">
       <h2 class="mb-8 text-[28px] font-bold tracking-tight" data-t="faqTitle">常见问题</h2>
-      <details><summary data-t="q1">macOS 阻止打开 iDevLoupe？</summary><p data-t="a1">应用未经 Apple 公证，首次打开会被拦截。任选一种放行：在「系统设置 › 隐私与安全性」中点「仍要打开」；或在终端执行 <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code>。</p></details>
-      <details><summary data-t="q2">Windows 弹出 SmartScreen 警告？</summary><p data-t="a2">程序未经代码签名，SmartScreen 会拦截首次运行：点「更多信息」→「仍要运行」。如果找不到设备，请确认已安装「Apple 设备」或 iTunes，并在 iPhone 上解锁后点「信任」。</p></details>
-      <details><summary data-t="q3">能判断屏幕、电池是否原装吗？</summary><p data-t="a3">不能确定。部件与出厂记录不符、或生产日期晚于整机时，报告会标出更换；但 iOS 自己对部件是否原装的判断无法通过数据线读取，请到「设置 > 通用 > 关于本机 > 部件与维修历史」查看。</p></details>
-      <details><summary data-t="q4">会上传我的数据吗？</summary><p data-t="a4">不会。所有检测在你的电脑上完成，程序不联网。手机号、ICCID、IMSI 读到后立即丢弃，不会出现在报告里。</p></details>
+      <details><summary data-t="q1">macOS 阻止打开 iDevLoupe？</summary><p data-t="a1">应用未经 Apple 公证，首次打开会被拦截。在「系统设置 › 隐私与安全性」中点「仍要打开」，或在终端执行 <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code>。</p></details>
+      <details><summary data-t="q2">Windows 弹出 SmartScreen 警告？</summary><p data-t="a2">程序未签名，SmartScreen 会拦截首次运行：点「更多信息」→「仍要运行」。找不到设备时，确认已装「Apple 设备」或 iTunes，并在 iPhone 解锁后点「信任」。</p></details>
+      <details><summary data-t="q3">能判断屏幕、电池是否原装吗？</summary><p data-t="a3">不能确定。部件与出厂记录不符或生产日期晚于整机时，报告会标为更换；但 iOS 对部件是否原装的判断读不到，请在「设置 > 通用 > 关于本机 > 部件与维修历史」查看。</p></details>
+      <details><summary data-t="q4">会上传我的数据吗？</summary><p data-t="a4">不会。检测全在本机完成，程序不联网。手机号、ICCID、IMSI 读到即丢弃，不进报告。</p></details>
     </div>
   </section>
 </main>
@@ -199,54 +197,54 @@
       title: "iDevLoupe · iPhone management",
       navFeatures: "Features", navDownload: "Download",
       heroTitle: "iPhone management on your desktop",
-      heroLead: "A native desktop iPhone manager written in Go with MyGo. Today it inspects: connect an iPhone by cable, and it reads the hardware, system and security information the phone reports about itself and judges it item by item, on evidence alone.",
+      heroLead: "A native desktop iPhone manager written in Go with MyGo. For now it inspects: connect an iPhone by cable and it judges the hardware, system and security information the phone reports, item by item and on evidence alone.",
       downloadFree: "Free download", allPlatforms: "All platforms", viewSource: "View source",
-      heroNote: "Free and open source (GPL-3.0) · macOS, Windows and Linux · Runs on your computer; nothing is uploaded",
+      heroNote: "Free and open source (GPL-3.0) · macOS, Windows and Linux · Runs locally; nothing is uploaded",
       homeAlt: "The device home of iDevLoupe", shotAlt: "The inspection report of iDevLoupe",
-      featuresTitle: "Features", featuresSub: "What a buyer should check, and plain about what it cannot. Each item shows what it rests on; what cannot be read is marked Unknown.",
-      f1t: "Is it what it says", f1d: "Model, sales region, unit type, the format of the serial number and IMEI, and whether the sources agree on serial and model.",
+      featuresTitle: "Features", featuresSub: "What a buyer should check. Each item shows its evidence; what cannot be read is marked Unknown.",
+      f1t: "Is it what it says", f1d: "Model, sales region, unit type, serial number and IMEI format, and whether the sources agree on serial and model.",
       f2t: "Who else can lock it", f2d: "Find My iPhone (Activation Lock), supervision, device enrollment and MDM, configuration profiles, activation.",
-      f3t: "The battery, honestly", f3d: "Health, cycle count and a resistance metric; a cycle count below one logged before, or a cell made after the device, is flagged as a replacement.",
-      f4t: "Parts, as they left the factory", f4d: "The parts' serial numbers against the factory record, whether a part was made after the device, Face ID's self test and the Touch ID sensor.",
+      f3t: "The battery, honestly", f3d: "Health, cycle count and a resistance metric; fewer cycles than logged before, or a cell made after the device, flags a replacement.",
+      f4t: "Parts, as they left the factory", f4d: "Part serial numbers against the factory record, parts made after the device, Face ID's self test and the Touch ID sensor.",
       f5t: "A system left alone", f5d: "Common jailbreak apps and the afc2 service, boot arguments, engineering chips, internal or beta builds, baseband and SIM.",
-      f6t: "Kept on your computer", f6d: "No network, no upload; the phone number and SIM numbers never reach the report. Copy it or export it as text or JSON.",
+      f6t: "Kept on your computer", f6d: "No network, no upload; the phone number and SIM numbers never reach the report. Copy or export it as text or JSON.",
       downloadTitle: "Download", downloadSub: "The latest release, from GitHub Releases.", recommended: "For you",
       macUniversal: "Apple silicon and Intel",
       macReq: "<b>macOS</b> comes with usbmuxd; nothing else to install.",
-      winReq: "Install <b>Apple Devices</b> (Microsoft Store) or <b>iTunes</b> first, for the iPhone driver.",
+      winReq: "Install <b>Apple Devices</b> (Microsoft Store) or <b>iTunes</b> first for the iPhone driver.",
       linuxReq: "Needs <b>usbmuxd</b>: <code>sudo apt install usbmuxd</code> (the .deb installs it).",
       moreText: "Checksums and earlier versions:", allReleases: "All releases",
       license: "GPL-3.0 License", sourceCode: "Source code",
       disclaimer: "iDevLoupe is not affiliated with or endorsed by Apple Inc. iPhone is a trademark of Apple Inc. Results are for reference only.",
       howTitle: "How to use it", howSub: "No account, nothing to install on the phone.",
-      s1t: "Connect it with a cable", s1d: "Open iDevLoupe and connect the iPhone by USB; it shows up on the left.",
+      s1t: "Connect it with a cable", s1d: "Open iDevLoupe and connect the iPhone by USB; it appears on the left.",
       s2t: "Unlock it and tap “Trust”", s2d: "The first time, choose “Trust This Computer” on the iPhone and enter its passcode.",
-      s3t: "Read the report", s3d: "The items that need attention come first. Go through the report's “Check by hand” list on the phone.",
+      s3t: "Read the report", s3d: "Items needing attention come first. Go through the “Check by hand” list on the phone.",
       faqTitle: "FAQ",
-      q1: "macOS blocks iDevLoupe from opening?", a1: "The app is not notarized by Apple, so macOS blocks it the first time. Either click Open Anyway in System Settings › Privacy &amp; Security, or run <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code> in Terminal.",
-      q2: "Windows shows a SmartScreen warning?", a2: "The app is not code-signed, so SmartScreen blocks the first run: click More info → Run anyway. If no device shows up, make sure Apple Devices or iTunes is installed, then unlock the iPhone and tap Trust.",
-      q3: "Can it tell whether the screen or battery is genuine?", a3: "Not for certain. A part unlike the factory record, or made after the device, is flagged as replaced; but iOS's own verdict on its parts cannot be read over the cable: see Settings > General > About > Parts and Service History.",
-      q4: "Does it upload my data?", a4: "No. Everything runs on your computer, and the app does not go online. The phone number, ICCID and IMSI are dropped as soon as they are read and never appear in a report."
+      q1: "macOS blocks iDevLoupe from opening?", a1: "The app is not notarized, so macOS blocks its first launch. Click Open Anyway in System Settings › Privacy &amp; Security, or run <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code> in Terminal.",
+      q2: "Windows shows a SmartScreen warning?", a2: "The app is not code-signed, so SmartScreen blocks its first run: click More info → Run anyway. If no device appears, check that Apple Devices or iTunes is installed, then unlock the iPhone and tap Trust.",
+      q3: "Can it tell whether the screen or battery is genuine?", a3: "Not for certain. A part that differs from the factory record or was made after the device is flagged as replaced, but iOS's own verdict cannot be read over the cable: see Settings > General > About > Parts and Service History.",
+      q4: "Does it upload my data?", a4: "No. Everything runs on your computer, offline. The phone number, ICCID and IMSI are dropped as soon as they are read and never appear in a report."
     },
     de: {
       title: "iDevLoupe · iPhone-Verwaltung",
       navFeatures: "Funktionen", navDownload: "Download",
       heroTitle: "iPhone-Verwaltung am Desktop",
-      heroLead: "Eine native iPhone-Verwaltung für den Desktop, geschrieben in Go mit MyGo. Derzeit prüft sie: iPhone per Kabel anschließen, und sie liest die Hardware-, System- und Sicherheitsinformationen, die das Telefon über sich meldet, und urteilt Punkt für Punkt, nur mit Belegen.",
+      heroLead: "Eine native iPhone-Verwaltung für den Desktop, geschrieben in Go mit MyGo. Derzeit prüft sie: iPhone per Kabel anschließen, und sie bewertet die Hardware-, System- und Sicherheitsinformationen, die das Telefon meldet, Punkt für Punkt und nur anhand von Belegen.",
       downloadFree: "Kostenlos laden", allPlatforms: "Alle Plattformen", viewSource: "Quellcode ansehen",
-      heroNote: "Kostenlos und Open Source (GPL-3.0) · macOS, Windows und Linux · Läuft auf deinem Computer; nichts wird hochgeladen",
+      heroNote: "Kostenlos und Open Source (GPL-3.0) · macOS, Windows und Linux · Läuft lokal; nichts wird hochgeladen",
       homeAlt: "Die Geräteübersicht von iDevLoupe", shotAlt: "Der Prüfbericht von iDevLoupe",
-      featuresTitle: "Funktionen", featuresSub: "Was ein Käufer prüfen sollte, und offen darüber, was nicht geht. Jeder Punkt zeigt, worauf er beruht; was sich nicht lesen lässt, heißt „Unbekannt“.",
+      featuresTitle: "Funktionen", featuresSub: "Was ein Käufer prüfen sollte. Jeder Punkt zeigt seine Belege; was sich nicht lesen lässt, heißt „Unbekannt“.",
       f1t: "Ist es, was es vorgibt", f1d: "Modell, Verkaufsregion, Gerätetyp, Format von Seriennummer und IMEI, und ob die Quellen bei Seriennummer und Modell übereinstimmen.",
       f2t: "Wer es sonst sperren kann", f2d: "„Mein iPhone suchen“ (Aktivierungssperre), Betreuung, Geräteregistrierung und MDM, Konfigurationsprofile, Aktivierung.",
-      f3t: "Die Batterie, ehrlich", f3d: "Zustand, Ladezyklen und ein Innenwiderstandswert; weniger Zyklen als früher protokolliert oder eine Zelle, die nach dem Gerät gefertigt wurde, gelten als Tausch.",
-      f4t: "Bauteile, wie ab Werk", f4d: "Seriennummern der Bauteile im Abgleich mit dem Werksdatensatz, ob ein Bauteil nach dem Gerät gefertigt wurde, Selbsttest von Face ID und Touch ID-Sensor.",
+      f3t: "Die Batterie, ehrlich", f3d: "Zustand, Ladezyklen und Innenwiderstand; weniger Zyklen als früher protokolliert oder eine nach dem Gerät gefertigte Zelle gelten als Tausch.",
+      f4t: "Bauteile, wie ab Werk", f4d: "Seriennummern der Bauteile gegen den Werksdatensatz, nach dem Gerät gefertigte Bauteile, Face ID-Selbsttest und Touch ID-Sensor.",
       f5t: "Ein unverändertes System", f5d: "Gängige Jailbreak-Apps und der afc2-Dienst, Boot-Argumente, Entwicklungschips, interne oder Beta-Systeme, Basisband und SIM.",
-      f6t: "Bleibt auf deinem Computer", f6d: "Kein Netz, kein Upload; Telefonnummer und SIM-Nummern landen nie im Bericht. Kopieren oder als Text / JSON exportieren.",
+      f6t: "Bleibt auf deinem Computer", f6d: "Kein Netz, kein Upload; Telefonnummer und SIM-Nummern landen nie im Bericht. Als Text oder JSON kopieren oder exportieren.",
       downloadTitle: "Download", downloadSub: "Die neueste Version, aus GitHub Releases.", recommended: "Für dich",
       macUniversal: "Apple Silicon und Intel",
       macReq: "<b>macOS</b> bringt usbmuxd mit; sonst ist nichts zu installieren.",
-      winReq: "Zuerst <b>Apple-Geräte</b> (Microsoft Store) oder <b>iTunes</b> installieren, für den iPhone-Treiber.",
+      winReq: "Zuerst <b>Apple-Geräte</b> (Microsoft Store) oder <b>iTunes</b> für den iPhone-Treiber installieren.",
       linuxReq: "Benötigt <b>usbmuxd</b>: <code>sudo apt install usbmuxd</code> (das .deb installiert es mit).",
       moreText: "Prüfsummen und ältere Versionen:", allReleases: "Alle Versionen",
       license: "GPL-3.0-Lizenz", sourceCode: "Quellcode",
@@ -254,12 +252,12 @@
       howTitle: "So geht’s", howSub: "Kein Konto, nichts auf dem iPhone zu installieren.",
       s1t: "Per Kabel verbinden", s1d: "iDevLoupe öffnen und das iPhone per USB anschließen; es erscheint links.",
       s2t: "Entsperren und „Vertrauen“ tippen", s2d: "Beim ersten Mal auf dem iPhone „Diesem Computer vertrauen“ wählen und den Code eingeben.",
-      s3t: "Bericht lesen", s3d: "Die Punkte, die Aufmerksamkeit brauchen, stehen oben. Die Liste „Manuell prüfen“ im Bericht am Gerät durchgehen.",
+      s3t: "Bericht lesen", s3d: "Punkte, die Aufmerksamkeit brauchen, stehen oben. Die Liste „Manuell prüfen“ am Gerät durchgehen.",
       faqTitle: "Häufige Fragen",
-      q1: "macOS verhindert das Öffnen von iDevLoupe?", a1: "Die App ist nicht von Apple beglaubigt, daher blockiert macOS den ersten Start. Entweder unter „Systemeinstellungen › Datenschutz &amp; Sicherheit“ auf „Dennoch öffnen“ klicken oder im Terminal <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code> ausführen.",
-      q2: "Windows zeigt eine SmartScreen-Warnung?", a2: "Die App ist nicht codesigniert, daher blockiert SmartScreen den ersten Start: „Weitere Informationen“ → „Trotzdem ausführen“. Erscheint kein Gerät, prüfen, ob Apple-Geräte oder iTunes installiert ist, dann das iPhone entsperren und auf „Vertrauen“ tippen.",
-      q3: "Erkennt es, ob Display oder Batterie original sind?", a3: "Nicht sicher. Ein Bauteil, das vom Werksdatensatz abweicht oder nach dem Gerät gefertigt wurde, wird als getauscht markiert; das Urteil von iOS über seine Bauteile lässt sich über das Kabel aber nicht lesen: siehe Einstellungen > Allgemein > Info > Teile- und Reparaturverlauf.",
-      q4: "Werden meine Daten hochgeladen?", a4: "Nein. Alles läuft auf deinem Computer, und die App geht nicht online. Telefonnummer, ICCID und IMSI werden sofort nach dem Lesen verworfen und stehen nie im Bericht."
+      q1: "macOS verhindert das Öffnen von iDevLoupe?", a1: "Die App ist nicht von Apple beglaubigt, daher blockiert macOS den ersten Start. Unter „Systemeinstellungen › Datenschutz &amp; Sicherheit“ auf „Dennoch öffnen“ klicken oder im Terminal <code>xattr -dr com.apple.quarantine /Applications/iDevLoupe.app</code> ausführen.",
+      q2: "Windows zeigt eine SmartScreen-Warnung?", a2: "Die App ist nicht codesigniert, daher blockiert SmartScreen den ersten Start: „Weitere Informationen“ → „Trotzdem ausführen“. Erscheint kein Gerät: prüfen, ob Apple-Geräte oder iTunes installiert ist, iPhone entsperren und „Vertrauen“ tippen.",
+      q3: "Erkennt es, ob Display oder Batterie original sind?", a3: "Nicht sicher. Ein Bauteil, das vom Werksdatensatz abweicht oder nach dem Gerät gefertigt wurde, gilt als getauscht; das Urteil von iOS selbst lässt sich über das Kabel nicht lesen: siehe Einstellungen > Allgemein > Info > Teile- und Reparaturverlauf.",
+      q4: "Werden meine Daten hochgeladen?", a4: "Nein. Alles läuft lokal, die App geht nicht online. Telefonnummer, ICCID und IMSI werden sofort nach dem Lesen verworfen und stehen nie im Bericht."
     }
   };
   var zh = {};
@@ -283,8 +281,6 @@
     markPlatform();
   }
 
-  // The visitor's system: its card is marked, and the main button
-  // downloads its package.
   function markPlatform() {
     var ua = navigator.userAgent;
     var os = /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? "mac" : /Windows/.test(ua) ? "win" : /Linux/.test(ua) && !/Android/.test(ua) ? "linux" : "";
