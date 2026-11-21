@@ -64,8 +64,8 @@ func (l *Client) Close() error {
 
 func (l *Client) Device() usbmux.Device { return l.dev }
 
-// ErrBroken: a failed exchange may leave a late reply in the stream, so the
-// connection must be replaced.
+// ErrBroken means a failed exchange may have left a late reply in the
+// stream, so the connection must be replaced.
 var ErrBroken = errors.New("lockdown: connection unusable after an earlier error")
 
 func (l *Client) call(req map[string]any) (map[string]any, error) {
@@ -244,7 +244,8 @@ func (l *Client) OpenService(name string) (net.Conn, error) {
 	return l.DialService(info)
 }
 
-// The device certificate is self-issued by pairing; there is no CA to verify it against.
+// ClientTLS skips verification: the device certificate is self-issued by
+// pairing, so there is no CA to verify it against.
 func ClientTLS(c net.Conn, rec *usbmux.PairRecord) (*tls.Conn, error) {
 	cert, err := tls.X509KeyPair(rec.HostCertificate, rec.HostPrivateKey)
 	if err != nil {

@@ -37,8 +37,8 @@ type DiagnosticsClient struct {
 	broken bool
 }
 
-// The device briefly refuses diagnostics_relay after another client used it,
-// so a refusal is retried.
+// OpenDiagnostics retries a refusal: the device briefly refuses
+// diagnostics_relay after another client used it.
 func OpenDiagnostics(l *lockdown.Client) (*DiagnosticsClient, error) {
 	var c net.Conn
 	var err error
@@ -131,7 +131,7 @@ func (d *DiagnosticsClient) All() (map[string]any, error) {
 	return d.request(map[string]any{"Request": "All"})
 }
 
-// ErrGestaltDeprecated: iOS 17.4 and later no longer answer MobileGestalt
+// ErrGestaltDeprecated means iOS 17.4 and later no longer answer MobileGestalt
 // over diagnostics_relay.
 var ErrGestaltDeprecated = errors.New("MobileGestalt queries are disabled on this iOS version")
 
@@ -274,7 +274,8 @@ func ReadMC(l *lockdown.Client) (*MCInfo, error) {
 	return info, nil
 }
 
-// com.apple.afc2 is registered only on jailbroken devices.
+// ServiceAvailable is used for com.apple.afc2, registered only on jailbroken
+// devices.
 func ServiceAvailable(l *lockdown.Client, name string) (bool, error) {
 	info, err := l.StartService(name)
 	if err != nil {

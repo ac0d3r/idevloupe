@@ -192,8 +192,8 @@ const (
 	serialWeekCodes = "123456789CDFGHJKLMNPQRTVWXY"
 )
 
-// Legacy 12-character serials (until 2021) only; randomized ones return
-// false. releaseYear settles the decade.
+// DecodeSerial decodes legacy 12-character serials (until 2021) only;
+// randomized ones return false. releaseYear settles the decade.
 func DecodeSerial(serial string, releaseYear int, now time.Time) (SerialDate, bool) {
 	serial = strings.ToUpper(strings.TrimSpace(serial))
 	if len(serial) != 12 {

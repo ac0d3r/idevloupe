@@ -131,9 +131,9 @@ func (a *analysis) factoryCheck(cat, part, factory, current string, dated, scree
 	a.r.Checks = append(a.r.Checks, ch)
 }
 
-// PartDate: after a 3-character supplier code, the year's last digit, the
-// ISO week and the weekday (Monday 1); F0W94170… is 2019-10-13. The decade
-// is the latest not in the future at now.
+// PartDate reads the date after a 3-character supplier code: the year's last
+// digit, the ISO week and the weekday (Monday 1); F0W94170… is 2019-10-13.
+// The decade is the latest not in the future at now.
 func PartDate(serial string, now time.Time) (time.Time, bool) {
 	if len(serial) < 12 || serial[0] < 'A' || serial[0] > 'Z' {
 		return time.Time{}, false

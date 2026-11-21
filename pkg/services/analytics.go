@@ -20,7 +20,8 @@ const (
 	CrashReportCopy  = "com.apple.crashreportcopymobile"
 )
 
-// Battery fields of the daily analytics logs (last_value_<Key>).
+// AnalyticsBattery is the battery fields of the daily analytics logs
+// (last_value_<Key>).
 type AnalyticsBattery struct {
 	File   string
 	Date   time.Time
@@ -34,7 +35,8 @@ type AnalyticsScan struct {
 	Read    []string
 }
 
-// No analytics log: sharing analytics is off, or the device was recently erased.
+// ErrNoAnalytics means sharing analytics is off, or the device was recently
+// erased.
 var ErrNoAnalytics = errors.New("the device holds no analytics logs")
 
 var ErrNoBatteryInAnalytics = errors.New("the analytics logs hold no battery records")
@@ -45,7 +47,7 @@ var (
 	logDateRe    = regexp.MustCompile(`(\d{4}-\d{2}-\d{2})-(\d{6})`)
 )
 
-// When a key repeats, the last occurrence wins.
+// ParseAnalyticsBattery keeps the last occurrence of a repeated key.
 func ParseAnalyticsBattery(data []byte) map[string]int64 {
 	vals := map[string]int64{}
 	for _, m := range lastValueRe.FindAllSubmatch(data, -1) {

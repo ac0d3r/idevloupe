@@ -52,7 +52,8 @@ func Decode(body []byte) (map[string]any, error) {
 	return m, nil
 }
 
-// Byte slices of text (device tree properties, NUL-terminated) convert too.
+// String also converts byte slices of text (device tree properties,
+// NUL-terminated).
 func String(v any) (string, bool) {
 	switch x := v.(type) {
 	case string:

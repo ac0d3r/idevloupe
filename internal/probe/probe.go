@@ -67,7 +67,8 @@ var Queries = func() []Query {
 	return qs
 }()
 
-// Names a closed tool that compares factory and current part values asks for.
+// Keys are the names a closed tool that compares factory and current part
+// values asks for.
 var Keys = []string{
 	"SysCfg", "SysCfgData", "SysCfgDict",
 	"BatterySerialNumber", "BatterySerialNumberRAW", "BatterySerialNumberMD",
@@ -134,7 +135,7 @@ type Report struct {
 	Queries []Result
 }
 
-// Output plist: {"keys/<source>": {key: value}, query: response}.
+// Probe writes a plist: {"keys/<source>": {key: value}, query: response}.
 func Probe(l *lockdown.Client, path string) (*Report, error) {
 	diag, err := services.OpenDiagnostics(l)
 	if err != nil {
