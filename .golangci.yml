@@ -4,7 +4,6 @@ run:
   timeout: 5m
 
 linters:
-  # standard: errcheck, govet, ineffassign, staticcheck, unused.
   default: standard
   enable:
     - bodyclose
@@ -19,12 +18,10 @@ linters:
     - usestdlibvars
   settings:
     errcheck:
-      # Clearing a deadline after an exchange: a connection that fails it
-      # fails the next read or write, which is checked.
+      # A failed SetDeadline fails the next read or write, which is checked.
       exclude-functions:
         - (net.Conn).SetDeadline
     staticcheck:
-      # ST1000/ST1003: package comments and initialisms (UDID, IMEI) as written.
       checks: ["all", "-ST1000", "-ST1003"]
     gocritic:
       disabled-checks:

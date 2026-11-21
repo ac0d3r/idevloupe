@@ -1,14 +1,10 @@
 name: Build
 
-# Packages every platform on macOS, the one runner that makes all of them
-# (the .dmg needs hdiutil). Pushes to main keep the packages as artifacts;
-# a tag vX.Y.Z publishes a release of version X.Y.Z.
+# macOS builds every platform (the .dmg needs hdiutil). Tag vX.Y.Z releases.
 on:
   push:
     branches: [main]
     tags: ["v*"]
-    # Docs alone change no package. Tags are not filtered by paths, so a
-    # release always builds.
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -29,8 +25,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      # The tag is the version: mygo build reads it from mygo.json, whose
-      # version is only that of builds from main.
       - name: Version from the tag
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -43,8 +37,7 @@ jobs:
           mv mygo.json.new mygo.json
           echo "version $version"
       - run: make dist
-      # Names without the version, so that the download page links to
-      # releases/latest/download/<name> once for every release.
+      # Unversioned names: the download page links releases/latest/download/<name>.
       - name: Collect packages
         run: |
           mkdir dist

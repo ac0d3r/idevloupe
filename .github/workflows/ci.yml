@@ -1,7 +1,5 @@
 name: CI
 
-# Changes only to the docs (the download page, its screenshots and the
-# Markdown) build nothing, so they run no CI.
 on:
   push:
     branches: [main]
